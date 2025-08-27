@@ -19,11 +19,15 @@ export default function TabTwoScreen() {
           name="chevron.left.forwardslash.chevron.right"
           style={styles.headerImage}
         />
-      }>
+      }
+    >
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Explore</ThemedText>
       </ThemedView>
-      <ThemedText>This apppppppppppppppppppppppppppppppppppppppppppppppppppp includes example code to help you get started.</ThemedText>
+      <ThemedText>
+        This apppppppppppppppppppppppppppppppppppppppppppppppppppp includes example code to help you
+        get started.
+      </ThemedText>
       <Collapsible title="File-based routing">
         <ThemedText>
           This app has two screens:{' '}
