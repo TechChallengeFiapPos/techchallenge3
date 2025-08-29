@@ -1,14 +1,23 @@
-import { View } from 'react-native';
-
-import { Button, Text } from 'react-native-paper';
+import { Ionicons } from '@expo/vector-icons';
+import { ThemedText } from '@src/components/ThemedText';
+import { ThemedButton } from 'components/ThemedButton';
+import { ThemedView } from 'components/ThemedView';
 
 export default function HomeScreen() {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text variant="titleLarge">Olá, mundo!</Text>
-      <Button mode="contained" onPress={() => console.log('Botão clicado')}>
+    <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ThemedText>Olá, mundo!</ThemedText>
+      <ThemedButton title="clique aqui" type="default" onPress={() => console.log('Botão clicado')}>
         Clique aqui
-      </Button>
-    </View>
-)}
-
+      </ThemedButton>
+      <ThemedButton
+        title="Entrar"
+        type="defaultSemiBold"
+        onPress={() => console.log('Pressed')}
+        icon={<Ionicons name="log-in-outline" size={20} />}
+        iconPosition="left"
+        outline
+      />
+    </ThemedView>
+  );
+}
