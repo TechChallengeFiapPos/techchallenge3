@@ -42,8 +42,8 @@ export function ThemedButton({
 }: ThemedButtonProps) {
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'primary');
   const textColor = useThemeColor({}, 'text');
-  const linkColor = useThemeColor({}, 'tint');
-  const borderColor = useThemeColor({}, 'tint');
+  const linkColor = useThemeColor({}, 'secondary');
+  const borderColor = useThemeColor({}, 'primary');
 
   const isLink = type === 'link';
 
@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 30,
     textDecorationLine: 'underline',
+    color: '#007AFF',
   },
   row: {
     flexDirection: 'row',

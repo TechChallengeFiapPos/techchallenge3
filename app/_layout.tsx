@@ -7,26 +7,37 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@hooks/useColorScheme';
 
+function MainLayout() {
+  const colorScheme = useColorScheme();
+  return (
+    <>
+      <PaperProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="auto" />
+      </PaperProvider>
+    </>
+  );
+}
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
+    'Poppins-SemiBold': require('../assets/fonts/Poppins-SemiBold.ttf'),
+    'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
+    'Poppins-Regular': require('../assets/fonts/Poppins-Regular.ttf'),
+    'Poppins-Light': require('../assets/fonts/Poppins-Light.ttf'),
+    'Poppins-Thin': require('../assets/fonts/Poppins-Thin.ttf'),
   });
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
+  if (!loaded) return null;
 
   return (
     <PaperProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
-      {/* // <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}> */}
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-      {/* </ThemeProvider> */}
+        <MainLayout />
     </PaperProvider>
   );
 }

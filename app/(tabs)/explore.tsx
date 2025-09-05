@@ -38,7 +38,7 @@ export default function TabTwoScreen() {
           sets up the tab navigator.
         </ThemedText>
         <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
+          <ThemedText type="link">wLearn more</ThemedText>
         </ExternalLink>
       </Collapsible>
       <Collapsible title="Android, iOS, and web support">
@@ -61,7 +61,7 @@ export default function TabTwoScreen() {
       <Collapsible title="Custom fonts">
         <ThemedText>
           Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
+          <ThemedText style={{ fontFamily: 'Poppins' }}>
             custom fonts such as this one.
           </ThemedText>
         </ThemedText>
