@@ -8,30 +8,24 @@ import { FieldValues } from 'react-hook-form';
 import { StyleSheet } from 'react-native';
 import { TouchableRipple } from 'react-native-paper';
 
-export type ThemedProps =  {
+export type ThemedProps = {
   lightColor?: string;
   darkColor?: string;
 };
 
-
 export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps) {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
 
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const link = useThemeColor({}, 'secondary');
 
   const handleSubmit = (data: FieldValues) => {
     if (isLogin) {
-      // Lógica de login
       console.log('Login:', {
         email: data.email,
         password: data.senha,
       });
     } else {
-      // Lógica de registro
       console.log('Registro:', {
         nome: data.nome,
         email: data.email,
@@ -39,16 +33,29 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
       });
     }
   };
+
   return (
-    <ThemedView style={styles.container}>
-      <ThemedCard align='center' style={styles.card}>
-        <ThemedText style={styles.title} type="title">
-          {isLogin ? 'Entre' : 'Se Cadastre'}
-        </ThemedText>
+    <ThemedView style={[styles.container, { backgroundColor }]}>
+      <ThemedText style={styles.welcome} colorName='onSurfaceVariant' type="title">
+        Bem-vindo
+      </ThemedText>
+
+      <ThemedCard style={styles.card}>
         <LoginRegisterForm type={isLogin ? 'login' : 'register'} onSubmit={handleSubmit} />
+
+        {/* Esqueci minha senha */}
+        {isLogin && (
+          <TouchableRipple onPress={() => console.log('Esqueci minha senha')}>
+            <ThemedText style={styles.forgotText} type="link">
+              Esqueceu a senha?
+            </ThemedText>
+          </TouchableRipple>
+        )}
+
+        {/* Alternar Login/Registro */}
         <TouchableRipple onPress={() => setIsLogin(!isLogin)}>
-          <ThemedText style={styles.switchText} type="link">
-            {isLogin ? 'Ainda não possui conta? Registre-se' : 'Já possui conta? Login'}
+          <ThemedText style={[styles.switchText, { color: link }]} type="link">
+            {isLogin ? 'Ainda não possui conta? Registre-se' : 'Já possui conta? Entre'}
           </ThemedText>
         </TouchableRipple>
       </ThemedCard>
@@ -59,29 +66,42 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    padding: 20,
-    width: '100%',
-  },
-  title: {
+    justifyContent: 'flex-start',
+    alignItems: 'center',
     alignSelf: 'center',
   },
-  button: {
-    padding: 15,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    textAlign: 'center',
+  welcome: {
+    fontSize: 28,
     fontWeight: 'bold',
-  },
-  switchText: {
-    textAlign: 'center',
+    marginTop: 120,
+    marginBottom: 60,
   },
   card: {
-    height: '80%',
-    justifyContent:'center',
-  }
+    flex: 1,
+    width: '95%',
+    minHeight: '100%',
+    borderTopLeftRadius: 80,
+    borderTopRightRadius: 80,
+    padding: 25,
+    justifyContent: 'flex-start',
+  },
+  forgotText: {
+    marginTop: 10,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  switchText: {
+    marginTop: 20,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  footer: {
+    marginTop: 30,
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 12,
+    marginBottom: 10,
+    color: '#aaa',
+  },
 });
-

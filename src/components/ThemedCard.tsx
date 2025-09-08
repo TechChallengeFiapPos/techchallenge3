@@ -1,3 +1,4 @@
+import { Colors } from '@constants/Colors';
 import React, { ReactNode } from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
 import { Card, useTheme } from 'react-native-paper';
@@ -6,9 +7,10 @@ interface ThemedCardProps {
   children?: ReactNode;
   align?: 'center' | 'left' | 'right';
   style?: ViewStyle;
+  colorName?: keyof typeof Colors.light;
 }
 
-export const ThemedCard: React.FC<ThemedCardProps> = ({ children, align = 'center', style }) => {
+export const ThemedCard: React.FC<ThemedCardProps> = ({ children, align = 'center', style, colorName }) => {
   const theme = useTheme();
 
   const alignment: ViewStyle['alignItems'] =
@@ -19,8 +21,8 @@ export const ThemedCard: React.FC<ThemedCardProps> = ({ children, align = 'cente
       style={[
         styles.card,
         {
-        //   backgroundColor: theme.colors.surface,
-          borderRadius: theme.roundness * 18,
+          borderRadius: theme.roundness * 20,
+          backgroundColor: colorName ? Colors.light[colorName] : theme.colors.surface,
         },
         style,
       ]}
@@ -36,6 +38,6 @@ export const ThemedCard: React.FC<ThemedCardProps> = ({ children, align = 'cente
 const styles = StyleSheet.create({
   card: {
     marginVertical: 12,
-    padding: 16,
+    padding: 32,
   },
 });

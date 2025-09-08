@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   default: {
     paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 6,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
