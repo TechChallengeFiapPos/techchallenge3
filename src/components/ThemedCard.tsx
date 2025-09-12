@@ -38,6 +38,5 @@ export const ThemedCard: React.FC<ThemedCardProps> = ({ children, align = 'cente
 const styles = StyleSheet.create({
   card: {
     marginVertical: 12,
-    padding: 32,
   },
 });

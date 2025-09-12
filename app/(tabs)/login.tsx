@@ -36,29 +36,30 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
 
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
-      <ThemedText style={styles.welcome} colorName='onSurfaceVariant' type="title">
+      <ThemedText style={styles.welcome} colorName="onSurfaceVariant" type="title">
         Bem-vindo
       </ThemedText>
 
-      <ThemedCard style={styles.card}>
-        <LoginRegisterForm type={isLogin ? 'login' : 'register'} onSubmit={handleSubmit} />
+      <ThemedView style={styles.cardWrapper}>
+        <ThemedCard style={styles.card}>
+          <LoginRegisterForm type={isLogin ? 'login' : 'register'} onSubmit={handleSubmit} />
+          {/* Esqueci minha senha */}
+          {isLogin && (
+            <TouchableRipple onPress={() => console.log('Esqueci minha senha')}>
+              <ThemedText style={styles.forgotText} type="link">
+                Esqueceu a senha?
+              </ThemedText>
+            </TouchableRipple>
+          )}
 
-        {/* Esqueci minha senha */}
-        {isLogin && (
-          <TouchableRipple onPress={() => console.log('Esqueci minha senha')}>
-            <ThemedText style={styles.forgotText} type="link">
-              Esqueceu a senha?
+          {/* Alternar Login/Registro */}
+          <TouchableRipple onPress={() => setIsLogin(!isLogin)}>
+            <ThemedText style={[styles.switchText, { color: link }]} type="link">
+              {isLogin ? 'Ainda não possui conta? Registre-se' : 'Já possui conta? Entre'}
             </ThemedText>
           </TouchableRipple>
-        )}
-
-        {/* Alternar Login/Registro */}
-        <TouchableRipple onPress={() => setIsLogin(!isLogin)}>
-          <ThemedText style={[styles.switchText, { color: link }]} type="link">
-            {isLogin ? 'Ainda não possui conta? Registre-se' : 'Já possui conta? Entre'}
-          </ThemedText>
-        </TouchableRipple>
-      </ThemedCard>
+        </ThemedCard>
+      </ThemedView>
     </ThemedView>
   );
 }
@@ -67,14 +68,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'flex-start',
-    alignItems: 'center',
-    alignSelf: 'center',
   },
   welcome: {
+    alignItems: 'center',
+    alignSelf: 'center',
     fontSize: 28,
     fontWeight: 'bold',
     marginTop: 120,
     marginBottom: 60,
+  },
+  cardWrapper: {
+    alignItems: 'center',
+    alignSelf: 'center',
+    width: '100%',
   },
   card: {
     flex: 1,
