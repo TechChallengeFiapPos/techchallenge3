@@ -57,7 +57,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
               <Icon
                 source={iconName} 
                 size={26}
-                color={isFocused ? themeColors.background : themeColors.onSurfaceVariant}
+                color={isFocused ? themeColors.onBackground : themeColors.onSurfaceVariant}
               />
             </View>
           </Pressable>
