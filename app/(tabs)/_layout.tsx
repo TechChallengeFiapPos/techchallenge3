@@ -76,8 +76,8 @@ export default function TabLayout() {
       tabBar={(props) => <CustomTabBar {...props} />}
     >
       <Tabs.Screen name="index" options={{ title: 'Início' }} />
-      <Tabs.Screen name="login" options={{ title: 'Transactions' }} />
       <Tabs.Screen name="explore" options={{ title: 'Layers' }} />
+      <Tabs.Screen name="login" options={{ title: 'Transactions' }} />
     </Tabs>
   );
 }
