@@ -10,7 +10,12 @@ interface ThemedCardProps {
   colorName?: keyof typeof Colors.light;
 }
 
-export const ThemedCard: React.FC<ThemedCardProps> = ({ children, align = 'center', style, colorName }) => {
+export const ThemedCard: React.FC<ThemedCardProps> = ({
+  children,
+  align = 'center',
+  style,
+  colorName,
+}) => {
   const theme = useTheme();
 
   const alignment: ViewStyle['alignItems'] =
@@ -28,9 +33,7 @@ export const ThemedCard: React.FC<ThemedCardProps> = ({ children, align = 'cente
       ]}
       elevation={2}
     >
-      <View style={{ alignItems: alignment, alignContent: alignment }}>
-        {children}
-      </View>
+      <View style={{ alignItems: alignment, alignContent: alignment }}>{children}</View>
     </Card>
   );
 };

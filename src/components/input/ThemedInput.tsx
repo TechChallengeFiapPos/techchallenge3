@@ -30,9 +30,7 @@ export const ThemedInput = <T extends string = string>({
   mode = 'outlined',
   icon,
 }: ThemedInputProps<T>) => {
-  const [internalValue, setInternalValue] = useState<T>(
-    () => value ?? ('' as T),
-  );
+  const [internalValue, setInternalValue] = useState<T>(() => value ?? ('' as T));
 
   const theme = useTheme();
 

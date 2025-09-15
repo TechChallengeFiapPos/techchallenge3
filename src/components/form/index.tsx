@@ -1,10 +1,9 @@
 import React from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 
-
 import { ThemedButton } from 'components/ThemedButton';
 import { StyleSheet, View } from 'react-native';
-import InputController from '../input/InputController';
+import { InputController } from '../input/InputController';
 
 export type FormField = {
   name: string;
@@ -30,8 +29,8 @@ const registerFields: FormField[] = [
   { name: 'senha', label: 'Senha', placeholder: 'Digite sua senha', secureTextEntry: true },
 ];
 
-export default function LoginRegisterForm({ type = 'login', onSubmit }: Props) {
-  const { control, handleSubmit } = useForm(); 
+export function LoginRegisterForm({ type = 'login', onSubmit }: Props) {
+  const { control, handleSubmit } = useForm();
   const fieldsToRender = type === 'login' ? loginFields : registerFields;
 
   return (
@@ -63,4 +62,4 @@ const styles = StyleSheet.create({
     paddingTop: 18,
     paddingBottom: 18,
   },
-})
+});
