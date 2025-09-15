@@ -1,6 +1,6 @@
 import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
-import LoginRegisterForm from '@src/components/form';
+import { LoginRegisterForm } from '@src/components/form';
 import { ThemedCard } from '@src/components/ThemedCard';
 import { ThemedText } from '@src/components/ThemedText';
 import React, { useState } from 'react';

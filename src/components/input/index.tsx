@@ -1,2 +1,2 @@
-export * from './InputController'
-export * from './ThemedInput'
+export * from './InputController';
+export * from './ThemedInput';

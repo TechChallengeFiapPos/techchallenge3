@@ -37,7 +37,7 @@ export default function RootLayout() {
 
   return (
     <PaperProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
-        <MainLayout />
+      <MainLayout />
     </PaperProvider>
   );
 }

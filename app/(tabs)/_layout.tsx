@@ -7,11 +7,10 @@ import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 
-
 const ICONS: Record<string, string> = {
-  index: 'chart-line',                 
-  explore: 'credit-card-multiple', 
-  login: 'account',            
+  index: 'chart-line',
+  explore: 'credit-card-multiple',
+  login: 'account',
 };
 
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
@@ -55,7 +54,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
               ]}
             >
               <Icon
-                source={iconName} 
+                source={iconName}
                 size={26}
                 color={isFocused ? themeColors.onBackground : themeColors.onSurfaceVariant}
               />
