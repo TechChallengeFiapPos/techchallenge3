@@ -1,24 +1,23 @@
 import { darkTheme, lightTheme } from '@config/theme';
 import { useFonts } from 'expo-font';
+import { useKeepAwake } from 'expo-keep-awake';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Provider as PaperProvider } from 'react-native-paper';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@hooks/useColorScheme';
+import { AuthProvider, useAuth } from '@src/context/AuthContext';
+import { Text, View } from 'react-native';
 
-function MainLayout() {
-  const colorScheme = useColorScheme();
+function DebugAuth() {
+  const { user, profile, loading } = useAuth();
+  if (loading) return <Text>Carregando...</Text>;
   return (
-    <>
-      <PaperProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </PaperProvider>
-    </>
+    <View style={{ padding: 16 }}>
+      <Text>Usuário: {user?.email || 'Nenhum'}</Text>
+      <Text>Nome: {profile?.name || 'Nenhum'}</Text>
+    </View>
   );
 }
 
@@ -33,11 +32,20 @@ export default function RootLayout() {
     'Poppins-Thin': require('../assets/fonts/Poppins-Thin.ttf'),
   });
 
+  useKeepAwake(); // mantém a tela acordada
+
   if (!loaded) return null;
 
   return (
-    <PaperProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
-      <MainLayout />
-    </PaperProvider>
+    <AuthProvider>
+      <PaperProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
+        <DebugAuth />
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="auto" />
+      </PaperProvider>
+    </AuthProvider>
   );
 }
