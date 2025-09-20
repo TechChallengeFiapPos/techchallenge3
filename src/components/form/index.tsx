@@ -15,6 +15,7 @@ export type FormField = {
 interface Props {
   type?: 'login' | 'register';
   onSubmit: (data: FieldValues) => void;
+  disabled?: boolean;
 }
 
 // Campos do formulário
@@ -29,7 +30,7 @@ const registerFields: FormField[] = [
   { name: 'senha', label: 'Senha', placeholder: 'Digite sua senha', secureTextEntry: true },
 ];
 
-export function LoginRegisterForm({ type = 'login', onSubmit }: Props) {
+export function LoginRegisterForm({ type = 'login', onSubmit, disabled }: Props) {
   const { control, handleSubmit } = useForm();
   const fieldsToRender = type === 'login' ? loginFields : registerFields;
 
@@ -49,6 +50,7 @@ export function LoginRegisterForm({ type = 'login', onSubmit }: Props) {
       <ThemedButton
         title="Enviar"
         onPress={handleSubmit(onSubmit)}
+        disabled={disabled}
         type="defaultSemiBold"
         buttonStyle={{ marginTop: 24 }}
       />
