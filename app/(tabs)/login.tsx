@@ -5,6 +5,7 @@ import { LoginRegisterForm } from '@src/components/form';
 import { ThemedCard } from '@src/components/ThemedCard';
 import { ThemedText } from '@src/components/ThemedText';
 import { useAuth } from '@src/context/AuthContext';
+import { ThemedButton } from 'components/ThemedButton';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
@@ -21,7 +22,7 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const link = useThemeColor({}, 'secondary');
@@ -68,13 +69,6 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
             disabled={loading}
           />
 
-          {/* Spinner de carregamento */}
-          {loading && (
-            <View style={styles.spinner}>
-              <ActivityIndicator size="large" color={link} />
-            </View>
-          )}
-
           {/* Mensagem de erro ou sucesso */}
           {message && (
             <ThemedText
@@ -103,10 +97,21 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
           </TouchableRipple>
 
           {/* Usuário atual */}
-          <ThemedText style={styles.currentUser} type="default">
-            Usuário atual: {user?.email || 'Nenhum'}
-          </ThemedText>
+          <>
+            <ThemedText>Olá, {user?.email}</ThemedText>
+            <ThemedButton type="default" onPress={logout} title="sair" />
+          </>
         </ThemedCard>
+
+        {/* Overlay de carregamento */}
+        {loading && (
+          <View style={styles.overlay}>
+            <ActivityIndicator size="large" color={link} />
+            <ThemedText style={styles.loadingText} type="body">
+              Processando...
+            </ThemedText>
+          </View>
+        )}
       </ThemedView>
     </ThemedView>
   );
@@ -128,6 +133,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'center',
     width: '100%',
+    position: 'relative',
   },
   card: {
     flex: 1,
@@ -137,11 +143,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 80,
     padding: 25,
     justifyContent: 'flex-start',
-  },
-  spinner: {
-    marginTop: 15,
-    marginBottom: 10,
-    alignItems: 'center',
   },
   forgotText: {
     marginTop: 10,
@@ -159,8 +160,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   currentUser: {
-    marginTop: 30,
+    marginTop: 20,
     fontSize: 12,
+    textAlign: 'center',
+    color: '#777',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderTopLeftRadius: 80,
+    borderTopRightRadius: 80,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
     textAlign: 'center',
   },
 });
