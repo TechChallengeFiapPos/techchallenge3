@@ -12,6 +12,8 @@ export const Colors = {
     onSurfaceVariant: lightTheme.colors.onSurfaceVariant,
     outline: lightTheme.colors.outline,
     icon: lightTheme.colors.inversePrimary,
+    error: lightTheme.colors.error,
+    onError: lightTheme.colors.onError,
   },
   dark: {
     text: darkTheme.colors.onBackground,
@@ -24,5 +26,7 @@ export const Colors = {
     onSurfaceVariant: darkTheme.colors.onSurfaceVariant,
     outline: darkTheme.colors.outline,
     icon: darkTheme.colors.inversePrimary,
+    error: darkTheme.colors.error,
+    onError: darkTheme.colors.onError,
   },
 };
