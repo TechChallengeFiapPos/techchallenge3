@@ -2,7 +2,6 @@ import { ThemedView } from '@components/ThemedView';
 import { Colors } from '@constants/Colors';
 import { useColorScheme } from '@hooks/useColorScheme';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { useAuth } from '@src/context/AuthContext'; // 👈 pega usuário logado
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -11,7 +10,6 @@ import { Icon } from 'react-native-paper';
 const ICONS: Record<string, string> = {
   index: 'chart-line',
   explore: 'credit-card-multiple',
-  login: 'account',
 };
 
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
@@ -68,21 +66,6 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
 }
 
 export default function TabLayout() {
-  const { user, loading } = useAuth();
-
-  // Enquanto checa login, não renderiza nada
-  if (loading) return null;
-
-  // Usuário não logado → só login/registro e sem tab bar
-  if (!user) {
-    return (
-      <Tabs screenOptions={{ headerShown: false, tabBarStyle: { display: 'none' } }}>
-        <Tabs.Screen name="login" options={{ title: 'Login / Registro' }} />
-      </Tabs>
-    );
-  }
-
-  // Usuário logado → mostra menu com abas
   return (
     <Tabs
       screenOptions={{
@@ -92,7 +75,7 @@ export default function TabLayout() {
     >
       <Tabs.Screen name="index" options={{ title: 'Início' }} />
       <Tabs.Screen name="explore" options={{ title: 'Layers' }} />
-      {/* aqui você pode adicionar mais rotas internas */}
+      {/* adicionar mais rotas internas */}
     </Tabs>
   );
 }
@@ -121,7 +104,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 90,
-    overflow: 'hidden', // necessário para ripple circular
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },

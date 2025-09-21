@@ -77,6 +77,7 @@ export const ThemedInput = <T extends string = string>({
         roundness: 50,
         colors: {
           ...theme.colors,
+          background: backgroundColor, // fix global: evita fundo amarelo do autofill
           onSurfaceVariant: labelColor, // aplica cor à label
         },
       }}

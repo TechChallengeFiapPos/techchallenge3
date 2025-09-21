@@ -1,47 +1,51 @@
 import { Colors } from '@constants/Colors';
 import { useThemeColor } from '@hooks/useThemeColor';
-import React from 'react';
-import { StyleProp, Text, TextProps, TextStyle } from 'react-native';
+import { Text, type TextProps } from 'react-native';
 import { useTheme } from 'react-native-paper';
 
+export type ThemeColorName = keyof typeof Colors.light;
+
+export type TextType =
+  | 'default'
+  | 'displayLarge'
+  | 'displayMedium'
+  | 'displaySmall'
+  | 'headlineLarge'
+  | 'headlineMedium'
+  | 'headlineSmall'
+  | 'titleLarge'
+  | 'titleMedium'
+  | 'titleSmall'
+  | 'bodyLarge'
+  | 'bodyMedium'
+  | 'bodySmall'
+  | 'labelLarge'
+  | 'labelMedium'
+  | 'labelSmall';
+
 export type ThemedTextProps = TextProps & {
+  colorName?: ThemeColorName;
+  textType?: TextType;
   lightColor?: string;
   darkColor?: string;
-  colorName?: keyof typeof Colors.light;
-  type?: 'default' | 'defaultSemiBold' | 'title' | 'subtitle' | 'link';
-  style?: StyleProp<TextStyle>;
 };
 
 export function ThemedText({
   style,
+  colorName,
+  textType = 'default',
   lightColor,
   darkColor,
-  colorName = 'text',
-  type = 'default',
   ...rest
 }: ThemedTextProps) {
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, colorName);
   const theme = useTheme();
 
-  const secondaryColor = useThemeColor({}, 'secondary');
+  const themeColor = useThemeColor({}, colorName || 'text');
+  const fallbackColor = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
-  const typeToFontKey = {
-    default: 'bodyLarge',
-    defaultSemiBold: 'bodyLarge',
-    title: 'headlineLarge',
-    subtitle: 'titleLarge',
-    link: 'labelLarge',
-  } as const;
+  const color = colorName ? themeColor : fallbackColor;
 
-  const fontKey = typeToFontKey[type] || 'bodyLarge';
-  const fontStyle = theme.fonts[fontKey];
+  const textStyle = textType === 'default' ? theme.fonts.bodyMedium : theme.fonts[textType];
 
-  const overrideWeight: StyleProp<TextStyle> =
-    type === 'defaultSemiBold'
-      ? { fontWeight: '600' }
-      : type === 'link'
-        ? { color: secondaryColor }
-        : {};
-
-  return <Text style={[{ color }, fontStyle, overrideWeight, style]} {...rest} />;
+  return <Text style={[textStyle, { color }, style]} {...rest} />;
 }

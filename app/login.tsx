@@ -4,8 +4,6 @@ import { useThemeColor } from '@hooks/useThemeColor';
 import { LoginRegisterForm } from '@src/components/form';
 import { ThemedCard } from '@src/components/ThemedCard';
 import { ThemedText } from '@src/components/ThemedText';
-import { useAuth } from '@src/context/AuthContext';
-import { ThemedButton } from 'components/ThemedButton';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
@@ -18,11 +16,44 @@ export type ThemedProps = {
   darkColor?: string;
 };
 
+type FieldErrors = Record<string, string>;
+
+function validateFormFields(
+  email: string,
+  password: string,
+  name?: string,
+  confirmPassword?: string,
+): FieldErrors {
+  const errors: FieldErrors = {};
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email) errors.email = 'Email é obrigatório.';
+  else if (!emailRegex.test(email)) errors.email = 'Email inválido.';
+
+  if (!password) errors.senha = 'Senha é obrigatória.';
+  else {
+    if (password.length < 8) errors.senha = 'Senha precisa ter no mínimo 8 caracteres.';
+    else if (!/[A-Z]/.test(password))
+      errors.senha = 'Senha precisa ter pelo menos uma letra maiúscula.';
+    else if (!/[a-z]/.test(password))
+      errors.senha = 'Senha precisa ter pelo menos uma letra minúscula.';
+    else if (!/[0-9]/.test(password)) errors.senha = 'Senha precisa ter pelo menos um número.';
+    else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password))
+      errors.senha = 'Senha precisa ter pelo menos um símbolo.';
+  }
+
+  if (name !== undefined && !name.trim()) errors.nome = 'Nome é obrigatório.';
+  if (confirmPassword !== undefined && password !== confirmPassword)
+    errors.confirmPassword = 'As senhas não coincidem.';
+
+  return errors;
+}
+
 export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const { user, logout } = useAuth();
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const link = useThemeColor({}, 'secondary');
@@ -30,10 +61,25 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
   const handleSubmit = async (data: FieldValues) => {
     setLoading(true);
     setMessage(null);
+    setFieldErrors({});
 
     const email = data.email;
     const password = data.senha;
     const name = data.nome;
+    const confirmPassword = data.confirmPassword;
+
+    const errors = validateFormFields(
+      email,
+      password,
+      isLogin ? undefined : name,
+      isLogin ? undefined : confirmPassword,
+    );
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setLoading(false);
+      return;
+    }
 
     try {
       if (isLogin) {
@@ -57,7 +103,7 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
 
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
-      <ThemedText style={styles.welcome} colorName="onSurfaceVariant" type="title">
+      <ThemedText style={styles.welcome} colorName="onSurfaceVariant" textType="titleMedium">
         Bem-vindo
       </ThemedText>
 
@@ -67,47 +113,41 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
             type={isLogin ? 'login' : 'register'}
             onSubmit={handleSubmit}
             disabled={loading}
+            errors={fieldErrors} // passa os erros para o formulário
           />
 
-          {/* Mensagem de erro ou sucesso */}
           {message && (
             <ThemedText
               style={styles.message}
-              type="caption"
-              colorName={message.startsWith('❌') ? 'error' : 'primary'}
+              textType={message.startsWith('❌') ? 'default' : 'default'}
             >
               {message}
             </ThemedText>
           )}
 
-          {/* Esqueci minha senha */}
           {isLogin && (
             <TouchableRipple onPress={() => console.log('Esqueci minha senha')} disabled={loading}>
-              <ThemedText style={styles.forgotText} type="link">
+              <ThemedText style={styles.forgotText} textType="bodyMedium" colorName="secondary">
                 Esqueceu a senha?
               </ThemedText>
             </TouchableRipple>
           )}
 
-          {/* Alternar Login/Registro */}
           <TouchableRipple onPress={() => setIsLogin(!isLogin)} disabled={loading}>
-            <ThemedText style={[styles.switchText, { color: link }]} type="link">
+            <ThemedText
+              style={[styles.switchText, { color: link }]}
+              textType="bodyMedium"
+              colorName="secondary"
+            >
               {isLogin ? 'Ainda não possui conta? Registre-se' : 'Já possui conta? Entre'}
             </ThemedText>
           </TouchableRipple>
-
-          {/* Usuário atual */}
-          <>
-            <ThemedText>Olá, {user?.email}</ThemedText>
-            <ThemedButton type="default" onPress={logout} title="sair" />
-          </>
         </ThemedCard>
 
-        {/* Overlay de carregamento */}
         {loading && (
           <View style={styles.overlay}>
             <ActivityIndicator size="large" color={link} />
-            <ThemedText style={styles.loadingText} type="body">
+            <ThemedText style={styles.loadingText} textType="default">
               Processando...
             </ThemedText>
           </View>
@@ -118,10 +158,7 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-start',
-  },
+  container: { flex: 1, justifyContent: 'flex-start' },
   welcome: {
     alignSelf: 'center',
     fontSize: 28,
@@ -129,12 +166,7 @@ const styles = StyleSheet.create({
     marginTop: 120,
     marginBottom: 60,
   },
-  cardWrapper: {
-    alignItems: 'center',
-    alignSelf: 'center',
-    width: '100%',
-    position: 'relative',
-  },
+  cardWrapper: { alignItems: 'center', alignSelf: 'center', width: '100%', position: 'relative' },
   card: {
     flex: 1,
     width: '100%',
@@ -144,27 +176,9 @@ const styles = StyleSheet.create({
     padding: 25,
     justifyContent: 'flex-start',
   },
-  forgotText: {
-    marginTop: 10,
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  switchText: {
-    marginTop: 20,
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  message: {
-    marginTop: 10,
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  currentUser: {
-    marginTop: 20,
-    fontSize: 12,
-    textAlign: 'center',
-    color: '#777',
-  },
+  forgotText: { marginTop: 10, fontSize: 14, textAlign: 'center' },
+  switchText: { marginTop: 20, fontSize: 14, textAlign: 'center' },
+  message: { marginTop: 10, fontSize: 14, textAlign: 'center' },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.3)',
@@ -173,9 +187,5 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 80,
     borderTopRightRadius: 80,
   },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    textAlign: 'center',
-  },
+  loadingText: { marginTop: 10, fontSize: 16, textAlign: 'center' },
 });
