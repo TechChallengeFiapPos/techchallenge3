@@ -10,6 +10,8 @@ export type FormField = {
   label: string;
   placeholder?: string;
   secureTextEntry?: boolean;
+  required?: boolean;
+  rules?: object;
 };
 
 interface Props {
@@ -21,29 +23,39 @@ interface Props {
 
 // Campos do formulário
 const loginFields: FormField[] = [
-  { name: 'email', label: 'Seu Email', placeholder: 'Digite seu e-mail' },
-  { name: 'senha', label: 'Sua Senha', placeholder: 'Digite sua senha', secureTextEntry: true },
+  { name: 'email', label: 'Seu Email', placeholder: 'Digite seu e-mail', required: true },
+  {
+    name: 'senha',
+    label: 'Sua Senha',
+    placeholder: 'Digite sua senha',
+    required: true,
+    secureTextEntry: true,
+  },
 ];
 
 const registerFields: FormField[] = [
-  { name: 'nome', label: 'Seu Nome', placeholder: 'Digite seu nome' },
-  { name: 'email', label: 'Seu email', placeholder: 'Digite seu e-mail' },
+  { name: 'nome', label: 'Seu Nome', placeholder: 'Digite seu nome', required: true },
+  { name: 'email', label: 'Seu email', placeholder: 'Digite seu e-mail', required: true },
   {
     name: 'senha',
     label: 'Sua melhor senha',
     placeholder: 'Digite sua senha',
     secureTextEntry: true,
+    required: true,
   },
   {
     name: 'confirmPassword',
     label: 'Confirme sua senha',
     placeholder: 'Repita a senha',
     secureTextEntry: true,
+    required: true,
   },
 ];
 
 export function LoginRegisterForm({ type = 'login', onSubmit, disabled, errors }: Props) {
-  const { control, handleSubmit } = useForm();
+  const { control, handleSubmit } = useForm({
+    mode: 'onBlur',
+  });
   const fieldsToRender = type === 'login' ? loginFields : registerFields;
 
   return (
@@ -56,6 +68,7 @@ export function LoginRegisterForm({ type = 'login', onSubmit, disabled, errors }
             label={field.label}
             placeholder={field.placeholder}
             secureTextEntry={field.secureTextEntry}
+            rules={{ required: `${field.label} é obrigatório` }}
           />
           {errors?.[field.name] && (
             <ThemedText textType="default" colorName="error" style={{ marginTop: 4, fontSize: 12 }}>
