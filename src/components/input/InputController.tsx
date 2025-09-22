@@ -11,6 +11,7 @@ interface InputControllerProps<TFieldValues extends FieldValues> {
   placeholder?: string;
   secureTextEntry?: boolean;
   icon?: React.ReactNode; // Se quiser permitir ícones manuais para campos não-senha
+  rules?: object;
 }
 
 export function InputController<TFieldValues extends FieldValues>({
@@ -20,6 +21,7 @@ export function InputController<TFieldValues extends FieldValues>({
   defaultValue = '',
   placeholder,
   secureTextEntry,
+  rules,
 }: InputControllerProps<TFieldValues>) {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
@@ -37,6 +39,7 @@ export function InputController<TFieldValues extends FieldValues>({
 
   return (
     <Controller
+      rules={rules}
       control={control}
       name={name}
       defaultValue={defaultValue}
