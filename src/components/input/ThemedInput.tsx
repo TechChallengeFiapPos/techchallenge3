@@ -15,6 +15,18 @@ interface ThemedInputProps<T = string> {
   darkColor?: string;
   mode?: 'outlined' | 'flat';
   icon?: React.ReactNode;
+  keyboardType?: 'default' | 'numeric' | 'email-address' | 'phone-pad' | 'number-pad';
+  maxLength?: number;
+  autoComplete?:
+    | 'off'
+    | 'cc-number'
+    | 'cc-exp'
+    | 'cc-csc'
+    | 'name'
+    | 'email'
+    | 'tel'
+    | 'street-address'
+    | 'postal-code';
 }
 
 export const ThemedInput = <T extends string = string>({
@@ -29,25 +41,46 @@ export const ThemedInput = <T extends string = string>({
   darkColor,
   mode = 'outlined',
   icon,
+  keyboardType = 'default',
+  maxLength,
+  autoComplete = 'off',
 }: ThemedInputProps<T>) => {
   const [internalValue, setInternalValue] = useState<T>(() => value ?? ('' as T));
 
   const theme = useTheme();
 
-  // Cores baseadas no tema
-  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'surface'); // verde claro no seu lightTheme
+  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'surface');
   const textColor = useThemeColor({}, 'onSurface'); // texto dentro do campo
   const primaryColor = useThemeColor({}, 'primary'); // cor de foco/borda ativa
-  const borderColor = useThemeColor({}, 'outline'); // borda padrão (se tiver)
+  const borderColor = useThemeColor({}, 'outline'); // borda padrão
   const labelColor = useThemeColor({}, 'onSurfaceVariant'); // cor da label
 
   const currentValue = value !== undefined ? value : internalValue;
 
   const handleChange = (text: string) => {
+    const processedText = applyFormatting(text, autoComplete);
+
     if (onChange) {
-      onChange(text as T);
+      onChange(processedText as T);
     } else {
-      setInternalValue(text as T);
+      setInternalValue(processedText as T);
+    }
+  };
+
+  const applyFormatting = (text: string, type?: string): string => {
+    switch (type) {
+      case 'cc-number':
+        const numbers = text.replace(/\D/g, '').substring(0, 16);
+        return numbers.replace(/(\d{4})(?=\d)/g, '$1 ');
+
+      case 'cc-exp':
+        const nums = text.replace(/\D/g, '');
+        return nums.length >= 2
+          ? nums.substring(0, 2) + (nums.length > 2 ? '/' + nums.substring(2, 4) : '')
+          : nums;
+
+      default:
+        return text;
     }
   };
 
@@ -67,6 +100,9 @@ export const ThemedInput = <T extends string = string>({
       outlineColor={borderColor}
       textColor={textColor}
       right={icon}
+      keyboardType={keyboardType}
+      maxLength={maxLength}
+      autoComplete={autoComplete}
       style={[
         styles.input,
         {
@@ -77,7 +113,7 @@ export const ThemedInput = <T extends string = string>({
         roundness: 50,
         colors: {
           ...theme.colors,
-          background: backgroundColor, // fix global: evita fundo amarelo do autofill
+          background: backgroundColor, // fix global: ERA PRA EVITAR fundo amarelo do autofill :(
           onSurfaceVariant: labelColor, // aplica cor à label
         },
       }}
@@ -89,7 +125,7 @@ export const ThemedInput = <T extends string = string>({
 const styles = StyleSheet.create({
   input: {
     marginVertical: 8,
-    borderRadius: 999, // formato pill
+    borderRadius: 999,
     paddingHorizontal: 12,
   },
 });

@@ -1,7 +1,7 @@
 import { ThemedView } from '@components/ThemedView';
 import { auth, db } from '@config/firebaseConfig';
 import { useThemeColor } from '@hooks/useThemeColor';
-import { LoginRegisterForm } from '@src/components/form';
+import { LoginRegisterUserForm } from '@src/components/forms';
 import { ThemedCard } from '@src/components/ThemedCard';
 import { ThemedText } from '@src/components/ThemedText';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
@@ -109,7 +109,7 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
 
       <ThemedView style={styles.cardWrapper}>
         <ThemedCard style={styles.card}>
-          <LoginRegisterForm
+          <LoginRegisterUserForm
             type={isLogin ? 'login' : 'register'}
             onSubmit={handleSubmit}
             disabled={loading}
