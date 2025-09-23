@@ -9,7 +9,8 @@ import { Icon } from 'react-native-paper';
 
 const ICONS: Record<string, string> = {
   index: 'chart-line',
-  explore: 'credit-card-multiple',
+  cards: 'credit-card-multiple',
+  transactions: 'bank-transfer-in',
 };
 
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
@@ -74,7 +75,8 @@ export default function TabLayout() {
       tabBar={(props) => <CustomTabBar {...props} />}
     >
       <Tabs.Screen name="index" options={{ title: 'Início' }} />
-      <Tabs.Screen name="explore" options={{ title: 'Layers' }} />
+      <Tabs.Screen name="transactions" options={{ title: 'Transações' }} />
+      <Tabs.Screen name="cards" options={{ title: 'Cartões' }} />
       {/* adicionar mais rotas internas */}
     </Tabs>
   );

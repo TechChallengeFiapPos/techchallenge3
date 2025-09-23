@@ -10,8 +10,20 @@ interface InputControllerProps<TFieldValues extends FieldValues> {
   defaultValue?: any;
   placeholder?: string;
   secureTextEntry?: boolean;
-  icon?: React.ReactNode; // Se quiser permitir ícones manuais para campos não-senha
+  icon?: React.ReactNode;
   rules?: object;
+  keyboardType?: 'default' | 'numeric' | 'email-address' | 'phone-pad' | 'number-pad';
+  maxLength?: number;
+  autoComplete?:
+    | 'off'
+    | 'cc-number'
+    | 'cc-exp'
+    | 'cc-csc'
+    | 'name'
+    | 'email'
+    | 'tel'
+    | 'street-address'
+    | 'postal-code';
 }
 
 export function InputController<TFieldValues extends FieldValues>({
@@ -22,6 +34,9 @@ export function InputController<TFieldValues extends FieldValues>({
   placeholder,
   secureTextEntry,
   rules,
+  keyboardType = 'default',
+  maxLength,
+  autoComplete,
 }: InputControllerProps<TFieldValues>) {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
@@ -29,7 +44,6 @@ export function InputController<TFieldValues extends FieldValues>({
     setPasswordVisible((prev) => !prev);
   };
 
-  // Se for campo de senha, definimos o ícone dinamicamente
   const passwordIcon = secureTextEntry ? (
     <TextInput.Icon
       icon={isPasswordVisible ? 'eye-off' : 'eye'}
@@ -49,9 +63,12 @@ export function InputController<TFieldValues extends FieldValues>({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          secureTextEntry={secureTextEntry && !isPasswordVisible} // ← oculta ou mostra
+          secureTextEntry={secureTextEntry && !isPasswordVisible}
           error={false}
           icon={passwordIcon}
+          keyboardType={keyboardType}
+          maxLength={maxLength}
+          autoComplete={autoComplete}
         />
       )}
     />
