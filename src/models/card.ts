@@ -2,13 +2,13 @@
 export type CardData = {
   userId: string;
   number: string;
-  function: string[];
+  functions: string[];
   category: string;
 };
 
 export type CardFormData = {
   number: string;
-  function: string[];
+  functions: string[];
   category: string;
   expiryDate?: string;
 };

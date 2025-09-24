@@ -1,45 +1,60 @@
-import { Control, Controller, FieldValues, Path } from 'react-hook-form';
+// SelectController atualizado
+import React from 'react';
+import { Controller, ControllerProps, FieldPath, FieldValues } from 'react-hook-form';
 import { ThemedSelect } from './ThemedSelect';
 
-export type SelectOption = {
+export interface SelectOption {
   label: string;
   value: string;
-};
-
-interface SelectControllerProps<TFieldValues extends FieldValues> {
-  control: Control<TFieldValues>;
-  name: Path<TFieldValues>;
-  label: string;
-  options: SelectOption[];
-  placeholder?: string;
-  multiple?: boolean;
-  rules?: object;
 }
 
-export function SelectController<TFieldValues extends FieldValues>({
-  control,
+interface SelectControllerProps<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+> extends Omit<ControllerProps<TFieldValues, TName>, 'render'> {
+  label: string;
+  placeholder: string;
+  options: SelectOption[];
+  multiple: boolean;
+  lightColor?: string;
+  darkColor?: string;
+  mode?: 'outlined' | 'flat';
+}
+
+export function SelectController<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>({
   name,
-  label,
-  options,
-  placeholder = 'Selecione...',
-  multiple = false,
+  control,
   rules,
-}: SelectControllerProps<TFieldValues>) {
+  label,
+  placeholder,
+  options,
+  multiple,
+  lightColor,
+  darkColor,
+  mode = 'outlined',
+  ...props
+}: SelectControllerProps<TFieldValues, TName>) {
   return (
     <Controller
-      rules={rules}
-      control={control}
       name={name}
-      render={({ field: { onChange, value }, fieldState: { error } }) => (
+      control={control}
+      rules={rules}
+      {...props}
+      render={({ field, fieldState }) => (
         <ThemedSelect
           label={label}
-          value={value}
-          onChange={onChange}
+          value={field.value || (multiple ? [] : '')}
+          onChange={field.onChange}
           options={options}
           placeholder={placeholder}
           multiple={multiple}
-          error={!!error}
-          errorMessage={error?.message}
+          error={!!fieldState.error}
+          lightColor={lightColor}
+          darkColor={darkColor}
+          mode={mode}
         />
       )}
     />

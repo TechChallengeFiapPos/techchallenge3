@@ -153,6 +153,7 @@ export const darkTheme: MD3Theme = {
     surface: '#093030',
     onSurface: '#d7ffe2', // Light Green
     onSurfaceVariant: '#f1fff3', // Honeydew
+    error: '#ea5b2bff',
   },
   fonts: fontConfig,
 };
