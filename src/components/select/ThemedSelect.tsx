@@ -2,7 +2,6 @@ import { useThemeColor } from '@hooks/useThemeColor';
 import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Chip, Menu, TextInput, useTheme } from 'react-native-paper';
-import { ThemedText } from '../ThemedText';
 import { SelectOption } from './SelectController';
 
 interface ThemedSelectProps {
@@ -12,11 +11,10 @@ interface ThemedSelectProps {
   options: SelectOption[];
   placeholder: string;
   multiple: boolean;
-  error: boolean;
-  errorMessage?: string;
   lightColor?: string;
   darkColor?: string;
   mode?: 'outlined' | 'flat';
+  error?: boolean;
 }
 
 export function ThemedSelect({
@@ -26,16 +24,13 @@ export function ThemedSelect({
   options,
   placeholder,
   multiple,
-  error,
-  errorMessage,
   lightColor,
   darkColor,
   mode = 'outlined',
+  error,
 }: ThemedSelectProps) {
   const [visible, setVisible] = useState(false);
   const theme = useTheme();
-
-  // Cores baseadas no tema (igual ao ThemedInput)
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'surface');
   const textColor = useThemeColor({}, 'onSurface');
   const primaryColor = useThemeColor({}, 'primary');
@@ -43,7 +38,6 @@ export function ThemedSelect({
   const labelColor = useThemeColor({}, 'onSurfaceVariant');
   const surfaceColor = useThemeColor({}, 'surface');
 
-  // ===== HANDLERS SIMPLIFICADOS =====
   const handleSingleSelect = (optionValue: string) => {
     onChange(optionValue);
     setVisible(false);
@@ -53,10 +47,8 @@ export function ThemedSelect({
     const currentValues = Array.isArray(value) ? value : [];
 
     if (currentValues.includes(optionValue)) {
-      // Remove se já selecionado
       onChange(currentValues.filter((v) => v !== optionValue));
     } else {
-      // Adiciona se não selecionado
       onChange([...currentValues, optionValue]);
     }
   };
@@ -69,7 +61,6 @@ export function ThemedSelect({
     }
   };
 
-  // ===== HELPERS SIMPLIFICADOS =====
   const isSelected = (optionValue: string): boolean => {
     if (multiple) {
       return Array.isArray(value) && value.includes(optionValue);
@@ -106,10 +97,10 @@ export function ThemedSelect({
           <TouchableOpacity onPress={() => setVisible(true)}>
             <TextInput
               label={label}
+              error={error}
               value={getDisplayText()}
               editable={false}
               right={<TextInput.Icon icon={visible ? 'chevron-up' : 'chevron-down'} />}
-              error={error}
               mode={mode}
               underlineColor={borderColor}
               activeUnderlineColor={primaryColor}
@@ -147,7 +138,7 @@ export function ThemedSelect({
         ))}
       </Menu>
 
-      {/* Chips para múltipla seleção */}
+      {/* TODO: Chips DE CRÉDITO E DÉBITO REFATORAR */}
       {multiple && getSelectedOptions().length > 0 && (
         <View style={styles.chipsContainer}>
           {getSelectedOptions().map((option) => (
@@ -162,9 +153,6 @@ export function ThemedSelect({
           ))}
         </View>
       )}
-
-      {/* Mensagem de erro */}
-      {error && errorMessage && <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>}
     </View>
   );
 }

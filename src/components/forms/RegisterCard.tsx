@@ -1,3 +1,4 @@
+// CardRegisterForm corrigido
 import { CardFormData, CardFormField, CardFormProps, SelectOption } from '@src/models/card';
 import { useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
@@ -40,13 +41,13 @@ const cardFields: CardFormField[] = [
   {
     name: 'category',
     label: 'Categoria',
-    placeholder: 'ategoria do cartão',
+    placeholder: 'Categoria do cartão',
     required: true,
     type: 'select',
     options: categoryOptions,
   },
   {
-    name: 'function',
+    name: 'functions',
     label: 'Função',
     placeholder: 'Função do cartão',
     required: true,
@@ -56,12 +57,17 @@ const cardFields: CardFormField[] = [
 ];
 
 export function CardRegisterForm({ onSubmit, disabled, errors, initialData }: CardFormProps) {
-  const { control, handleSubmit } = useForm<CardFormData>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors: formErrors },
+  } = useForm<CardFormData>({
     mode: 'onBlur',
     defaultValues: {
       number: '',
       category: '',
-      function: [],
+      functions: [],
+      expiryDate: '',
       ...initialData,
     },
   });
@@ -73,10 +79,21 @@ export function CardRegisterForm({ onSubmit, disabled, errors, initialData }: Ca
       label: field.label,
       rules: {
         required: field.required ? `${field.label} é obrigatório` : false,
+        ...(field.name === 'number' && {
+          minLength: {
+            value: 13,
+            message: 'Número deve ter no mínimo 13 dígitos',
+          },
+        }),
+        ...(field.name === 'expiryDate' && {
+          pattern: {
+            value: /^(0[1-9]|1[0-2])\/\d{2}$/,
+            message: 'Formato deve ser MM/AA',
+          },
+        }),
       },
     };
 
-    // Renderizar campo de seleção única
     if (field.type === 'select') {
       return (
         <View key={field.name} style={styles.fieldContainer}>
@@ -86,16 +103,15 @@ export function CardRegisterForm({ onSubmit, disabled, errors, initialData }: Ca
             placeholder={field.placeholder}
             multiple={false}
           />
-          {errors?.[field.name] && (
+          {(formErrors[field.name] || errors?.[field.name]) && (
             <ThemedText textType="default" colorName="error" style={styles.errorText}>
-              {errors[field.name]}
+              {formErrors[field.name]?.message || errors?.[field.name]}
             </ThemedText>
           )}
         </View>
       );
     }
 
-    // Renderizar campo de seleção múltipla
     if (field.type === 'multiselect') {
       return (
         <View key={field.name} style={styles.fieldContainer}>
@@ -105,16 +121,16 @@ export function CardRegisterForm({ onSubmit, disabled, errors, initialData }: Ca
             placeholder={field.placeholder}
             multiple={true}
           />
-          {errors?.[field.name] && (
+          {(formErrors[field.name] || errors?.[field.name]) && (
             <ThemedText textType="default" colorName="error" style={styles.errorText}>
-              {errors[field.name]}
+              {formErrors[field.name]?.message || errors?.[field.name]}
             </ThemedText>
           )}
         </View>
       );
     }
 
-    // Renderizar campo de texto
+    // Campo de texto
     return (
       <View key={field.name} style={styles.fieldContainer}>
         <InputController
@@ -125,9 +141,9 @@ export function CardRegisterForm({ onSubmit, disabled, errors, initialData }: Ca
           maxLength={field.maxLength}
           autoComplete={field.autoComplete}
         />
-        {errors?.[field.name] && (
+        {(formErrors[field.name] || errors?.[field.name]) && (
           <ThemedText textType="default" colorName="error" style={styles.errorText}>
-            {errors[field.name]}
+            {formErrors[field.name]?.message || errors?.[field.name]}
           </ThemedText>
         )}
       </View>
@@ -152,17 +168,15 @@ export function CardRegisterForm({ onSubmit, disabled, errors, initialData }: Ca
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    paddingTop: 18,
-    paddingBottom: 18,
+    paddingBottom: 20,
   },
   fieldContainer: {
-    marginBottom: 12,
+    marginBottom: 10,
   },
   errorText: {
-    marginTop: 4,
-    fontSize: 12,
+    fontSize: 14,
   },
   submitButton: {
-    marginTop: 24,
+    marginTop: 20,
   },
 });

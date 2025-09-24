@@ -64,7 +64,7 @@ export function InputController<TFieldValues extends FieldValues>({
           onChange={onChange}
           placeholder={placeholder}
           secureTextEntry={secureTextEntry && !isPasswordVisible}
-          error={false}
+          error={!!error}
           icon={passwordIcon}
           keyboardType={keyboardType}
           maxLength={maxLength}

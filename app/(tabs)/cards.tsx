@@ -1,11 +1,15 @@
 import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
+import { CreateCardData } from '@src/api/firebase/Card';
 import { CardRegisterForm } from '@src/components/forms';
 import { ThemedCard } from '@src/components/ThemedCard';
 import { ThemedText } from '@src/components/ThemedText';
+import { useCardActions } from '@src/hooks/useCardActions';
 import React, { useState } from 'react';
+import { FieldValues } from 'react-hook-form';
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -18,16 +22,36 @@ export type ThemedProps = {
   darkColor?: string;
 };
 
+type FieldErrors = Record<string, string>;
+
 export default function CardsScreen({ lightColor, darkColor }: ThemedProps) {
-  const [card, setCard] = useState(true);
-  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  //   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
 
-  const handleSubmit = () => {
-    console.log('submiteeeeeiiiiii');
+  const { createCard, loading, error, clearError } = useCardActions();
+
+  const handleSubmit = async (data: FieldValues) => {
+    setMessage(null);
+    setFieldErrors({});
+    clearError();
+
+    const cardData: CreateCardData = {
+      number: data.number,
+      functions: data.functions || [],
+      category: data.category,
+      expiryDate: data.expiryDate,
+    };
+
+    const result = await createCard(cardData);
+
+    if (result.success) {
+      setMessage('Cartão cadastrado com sucesso!');
+      Alert.alert('Sucesso!', 'Cartão cadastrado!');
+    } else {
+      setMessage(result.error || 'Erro ao cadastrar cartão');
+    }
   };
 
   return (
@@ -51,18 +75,21 @@ export default function CardsScreen({ lightColor, darkColor }: ThemedProps) {
 
           <View style={styles.cardWrapper}>
             <ThemedCard style={styles.card}>
-              <CardRegisterForm
-                onSubmit={handleSubmit}
-                disabled={loading}
-                // errors={fieldErrors} // passa os erros para o form
-              />
+              <CardRegisterForm onSubmit={handleSubmit} disabled={loading} errors={fieldErrors} />
 
               {message && (
                 <ThemedText
                   style={styles.message}
-                  textType={message.startsWith('❌') ? 'default' : 'default'}
+                  textType="default"
+                  colorName={message.startsWith('❌') ? 'error' : 'primary'}
                 >
                   {message}
+                </ThemedText>
+              )}
+
+              {error && !message && (
+                <ThemedText style={styles.message} textType="default" colorName="error">
+                  ❌ {error}
                 </ThemedText>
               )}
             </ThemedCard>
@@ -71,7 +98,7 @@ export default function CardsScreen({ lightColor, darkColor }: ThemedProps) {
               <View style={styles.overlay}>
                 <ActivityIndicator size="large" />
                 <ThemedText style={styles.loadingText} textType="default">
-                  Processando...
+                  Salvando cartão...
                 </ThemedText>
               </View>
             )}
@@ -113,20 +140,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     minHeight: 500, // Altura mínima fixa evitar movimento do menu
   },
-  forgotText: {
-    marginTop: 10,
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  switchText: {
-    marginTop: 20,
-    fontSize: 14,
-    textAlign: 'center',
-  },
   message: {
-    marginTop: 10,
+    marginTop: 16,
     fontSize: 14,
     textAlign: 'center',
+    fontWeight: '500',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -140,5 +158,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     textAlign: 'center',
+    color: '#fff',
   },
 });
