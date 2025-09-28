@@ -14,7 +14,7 @@ export const transactionCategories: SelectOption[] = [
   { label: 'Freelance', value: 'freelance' },
   { label: 'Investimentos', value: 'investments' },
   { label: 'Vendas', value: 'sales' },
-  { label: 'Prêmios/Bonificações', value: 'bonus' },
+  { label: 'Bonificações', value: 'bonus' },
   { label: 'Aluguel Recebido', value: 'rental_income' },
   { label: 'Outros Ganhos', value: 'other_income' },
 
@@ -24,10 +24,10 @@ export const transactionCategories: SelectOption[] = [
   { label: 'Saúde', value: 'health' },
   { label: 'Educação', value: 'education' },
   { label: 'Lazer', value: 'entertainment' },
-  { label: 'Casa/Moradia', value: 'home' },
+  { label: 'Moradia', value: 'home' },
   { label: 'Roupas', value: 'clothing' },
   { label: 'Tecnologia', value: 'technology' },
-  { label: 'Contas/Utilities', value: 'utilities' },
+  { label: 'Contas', value: 'utilities' },
   { label: 'Combustível', value: 'fuel' },
   { label: 'Viagens', value: 'travel' },
   { label: 'Presentes', value: 'gifts' },
@@ -130,4 +130,48 @@ export const calculateBalance = (transactions: Transaction[]): number => {
 // Validar se valor está dentro de um range válido
 export const isValidAmount = (centavos: number): boolean => {
   return centavos > 0 && centavos <= 999999999; // Máximo: R$ 9.999.999,99
+};
+
+// mapeamento para os ícones da listagem
+export const getCategoryIcon = (categoryId: string): string => {
+  const iconMap: Record<string, string> = {
+    // Receitas
+    salary: 'card',
+    freelance: 'laptop',
+    investments: 'trending-up',
+    sales: 'storefront',
+    bonus: 'gift',
+    rental_income: 'home',
+    other_income: 'add-circle',
+
+    // Despesas
+    food: 'restaurant',
+    transport: 'bus',
+    health: 'medical',
+    education: 'school',
+    entertainment: 'game-controller',
+    home: 'home',
+    clothing: 'shirt',
+    technology: 'laptop',
+    utilities: 'flash',
+    fuel: 'car',
+    travel: 'airplane',
+    gifts: 'gift',
+    pharmacy: 'medical',
+    personal_care: 'person',
+    pets: 'paw',
+    subscriptions: 'refresh',
+    insurance: 'shield',
+    other_expense: 'remove-circle',
+  };
+  return iconMap[categoryId] || 'ellipse';
+};
+
+// formata valor vindo do banco em reais
+export const formatCurrency = (centavos: number): string => {
+  const reais = Math.abs(centavos) / 100;
+  return reais.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
 };
