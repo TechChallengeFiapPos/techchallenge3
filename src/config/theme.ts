@@ -125,8 +125,9 @@ const colors = {
   onBackground: '#031314', // Void
   outline: '#052224', // Fence Green
   surface: '#F1FFF3',
+  inverseSurface: '#d7ffe2',
   onSurface: '#052224', // Fence Green
-  onSurfaceVariant: '#0E3E3E', // Fence Green
+  onSurfaceVariant: '#0E3E3E',
   error: '#B00020',
   onError: '#ffffff',
 };
@@ -151,6 +152,7 @@ export const darkTheme: MD3Theme = {
     outline: '#f1fff3', // Honeydew
     onBackground: '#f1fff3', // Honeydew
     surface: '#093030',
+    inverseSurface: '#052224', // Fence Green
     onSurface: '#d7ffe2', // Light Green
     onSurfaceVariant: '#f1fff3', // Honeydew
     error: '#ea5b2bff',

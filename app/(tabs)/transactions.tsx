@@ -1,23 +1,25 @@
-import { Ionicons } from '@expo/vector-icons';
+import { useThemeColor } from '@hooks/useThemeColor';
 import { ThemedButton } from '@src/components/ThemedButton';
-import { ThemedText } from '@src/components/ThemedText';
 import { ThemedView } from '@src/components/ThemedView';
-import { useAuth } from '@src/context/AuthContext';
+import { useRouter } from 'expo-router';
 
-export default function TransactionsScreen() {
-  const { user, logout } = useAuth();
+export type ThemedProps = {
+  lightColor?: string;
+  darkColor?: string;
+};
+
+export default function TransactionsScreen({ lightColor, darkColor }: ThemedProps) {
+  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+  const router = useRouter();
+
   return (
     <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ThemedText textType="bodyMedium" colorName="onSurface">
-        Olá, {user?.email}
-      </ThemedText>
+      {/* ...sua listagem de cartões aqui */}
+
       <ThemedButton
-        title="SAIRRRR"
         type="defaultSemiBold"
-        onPress={logout}
-        icon={<Ionicons name="log-in-outline" size={20} />}
-        iconPosition="left"
-        outline
+        title="Adicionar transação"
+        onPress={() => router.push('/register-transaction')}
       />
     </ThemedView>
   );

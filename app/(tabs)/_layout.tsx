@@ -24,7 +24,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
       style={[
         styles.container,
         {
-          backgroundColor: themeColors.surface,
+          backgroundColor: themeColors.inverseSurface,
           paddingBottom: insets.bottom, // Adiciona padding para safe area
         },
       ]}
@@ -107,7 +107,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 5,
     zIndex: 1000, // Adiciona z-index alto
-    // Adiciona propriedades para manter fixo
     ...Platform.select({
       ios: {
         shadowColor: '#000',

@@ -78,6 +78,14 @@ export const ThemedInput = <T extends string = string>({
         return nums.length >= 2
           ? nums.substring(0, 2) + (nums.length > 2 ? '/' + nums.substring(2, 4) : '')
           : nums;
+      case 'currency':
+        const numbersOnly = text.replace(/\D/g, '');
+        if (!numbersOnly) return '';
+        const valueInCents = parseInt(numbersOnly);
+        return new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        }).format(valueInCents / 100);
 
       default:
         return text;
