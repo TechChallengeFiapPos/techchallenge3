@@ -1,4 +1,3 @@
-// src/models/transaction.ts
 export interface Transaction {
   id: string;
   date: Date;
