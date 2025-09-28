@@ -1,11 +1,13 @@
 import { darkTheme, lightTheme } from '@config/theme';
 import { useColorScheme } from '@hooks/useColorScheme';
 import { AuthProvider } from '@src/context/AuthContext';
+import { TransactionProvider } from '@src/context/TransactionsContext';
 import { useFonts } from 'expo-font';
 import { useKeepAwake } from 'expo-keep-awake';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Provider as PaperProvider } from 'react-native-paper';
+import { pt, registerTranslation } from 'react-native-paper-dates';
 import 'react-native-reanimated';
 
 export default function RootLayout() {
@@ -19,21 +21,24 @@ export default function RootLayout() {
     'Poppins-Thin': require('../assets/fonts/Poppins-Thin.ttf'),
   });
 
+  registerTranslation('pt', pt);
+
   useKeepAwake();
 
   if (!loaded) return null;
 
   return (
     <AuthProvider>
-      <PaperProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
-        {/* <AuthNavigator /> */}
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="login" />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </PaperProvider>
+      <TransactionProvider>
+        <PaperProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="login" />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </PaperProvider>
+      </TransactionProvider>
     </AuthProvider>
   );
 }

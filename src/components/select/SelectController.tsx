@@ -13,7 +13,7 @@ interface SelectControllerProps<
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 > extends Omit<ControllerProps<TFieldValues, TName>, 'render'> {
   label: string;
-  placeholder: string;
+  placeholder: string | undefined;
   options: SelectOption[];
   multiple: boolean;
   lightColor?: string;
@@ -29,7 +29,7 @@ export function SelectController<
   control,
   rules,
   label,
-  placeholder,
+  placeholder = 'teste',
   options,
   multiple,
   lightColor,

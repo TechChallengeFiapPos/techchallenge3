@@ -1,7 +1,7 @@
 import { useThemeColor } from '@hooks/useThemeColor';
 import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Chip, Menu, TextInput, useTheme } from 'react-native-paper';
+import { FlatList, Modal, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Chip, Divider, Text, TextInput, useTheme } from 'react-native-paper';
 import { SelectOption } from './SelectController';
 
 interface ThemedSelectProps {
@@ -88,57 +88,94 @@ export function ThemedSelect({
     }
   };
 
+  const openModal = () => {
+    setVisible(true);
+  };
+
+  const closeModal = () => {
+    setVisible(false);
+  };
+
+  const renderOption = ({ item }: { item: SelectOption }) => (
+    <TouchableOpacity
+      style={[
+        styles.optionItem,
+        isSelected(item.value) && { backgroundColor: primaryColor + '20' },
+      ]}
+      onPress={() => handleSelect(item.value)}
+    >
+      <Text
+        style={[
+          styles.optionText,
+          { color: textColor },
+          isSelected(item.value) && { color: primaryColor, fontWeight: '600' },
+        ]}
+      >
+        {item.label}
+      </Text>
+      {isSelected(item.value) && <Text style={[styles.checkMark, { color: primaryColor }]}>✓</Text>}
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
-      <Menu
-        visible={visible}
-        onDismiss={() => setVisible(false)}
-        anchor={
-          <TouchableOpacity onPress={() => setVisible(true)}>
-            <TextInput
-              label={label}
-              error={error}
-              value={getDisplayText()}
-              editable={false}
-              right={<TextInput.Icon icon={visible ? 'chevron-up' : 'chevron-down'} />}
-              mode={mode}
-              underlineColor={borderColor}
-              activeUnderlineColor={primaryColor}
-              activeOutlineColor={primaryColor}
-              outlineColor={borderColor}
-              textColor={textColor}
-              style={[
-                styles.input,
-                {
-                  backgroundColor,
-                },
-              ]}
-              theme={{
-                roundness: 50,
-                colors: {
-                  ...theme.colors,
-                  background: backgroundColor,
-                  onSurfaceVariant: labelColor,
-                },
-              }}
-              outlineStyle={{ borderRadius: 999 }}
-            />
-          </TouchableOpacity>
-        }
-        contentStyle={[styles.menuContent, { backgroundColor: surfaceColor }]}
-      >
-        {options.map((option) => (
-          <Menu.Item
-            key={option.value}
-            title={option.label}
-            onPress={() => handleSelect(option.value)}
-            leadingIcon={isSelected(option.value) ? 'check' : undefined}
-            style={[styles.menuItem, isSelected(option.value) && styles.selectedMenuItem]}
-          />
-        ))}
-      </Menu>
+      <TouchableOpacity onPress={openModal} activeOpacity={0.7}>
+        <TextInput
+          label={label}
+          error={error}
+          value={getDisplayText()}
+          editable={false}
+          pointerEvents="none"
+          right={<TextInput.Icon icon={visible ? 'chevron-up' : 'chevron-down'} />}
+          mode={mode}
+          underlineColor={borderColor}
+          activeUnderlineColor={primaryColor}
+          activeOutlineColor={primaryColor}
+          outlineColor={borderColor}
+          textColor={textColor}
+          style={[
+            styles.input,
+            {
+              backgroundColor,
+            },
+          ]}
+          theme={{
+            roundness: 50,
+            colors: {
+              ...theme.colors,
+              background: backgroundColor,
+              onSurfaceVariant: labelColor,
+            },
+          }}
+          outlineStyle={{ borderRadius: 999 }}
+        />
+      </TouchableOpacity>
 
-      {/* TODO: Chips DE CRÉDITO E DÉBITO REFATORAR */}
+      {/* Modal com opções pois a listagem normal estava bugando */}
+      <Modal visible={visible} transparent animationType="fade" onRequestClose={closeModal}>
+        <Pressable style={styles.overlay} onPress={closeModal}>
+          <View style={[styles.modalContent, { backgroundColor: surfaceColor }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: textColor }]}>{label}</Text>
+              {multiple && (
+                <TouchableOpacity onPress={closeModal}>
+                  <Text style={[styles.doneButton, { color: primaryColor }]}>Concluir</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            <Divider />
+            <FlatList
+              data={options}
+              renderItem={renderOption}
+              keyExtractor={(item) => item.value}
+              style={styles.optionsList}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* Chips para seleção múltipla */}
       {multiple && getSelectedOptions().length > 0 && (
         <View style={styles.chipsContainer}>
           {getSelectedOptions().map((option) => (
@@ -167,15 +204,55 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     backgroundColor: 'transparent',
   },
-  menuContent: {
-    maxHeight: 200,
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 350,
+    maxHeight: '70%',
     borderRadius: 12,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
   },
-  menuItem: {
-    paddingVertical: 8,
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
   },
-  selectedMenuItem: {
-    backgroundColor: '#f0f8ff',
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  doneButton: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  optionsList: {
+    maxHeight: 300,
+  },
+  optionItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  optionText: {
+    fontSize: 16,
+    flex: 1,
+  },
+  checkMark: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   chipsContainer: {
     flexDirection: 'row',
@@ -186,10 +263,5 @@ const styles = StyleSheet.create({
   chip: {
     marginRight: 4,
     marginBottom: 4,
-  },
-  errorText: {
-    color: '#d32f2f',
-    fontSize: 12,
-    marginTop: 4,
   },
 });
