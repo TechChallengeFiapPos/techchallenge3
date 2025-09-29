@@ -1,4 +1,3 @@
-// src/components/transactions/TransactionItem.tsx - Usando tema personalizado
 import { useThemeColor } from '@hooks/useThemeColor';
 import { ThemedList } from '@src/components/list/ThemedList';
 import { Transaction } from '@src/models/transactions';
@@ -37,7 +36,6 @@ export const TransactionItem = React.memo<TransactionItemProps>(({ transaction, 
     }
   };
 
-  // dados para o BaseListItem
   const title = getCategoryLabel(transaction.categoryId) || 'Transação';
   const subtitle = formatDateTime(transaction.date);
   const rightText = `${transaction.type === 'expense' ? '-' : ''}${formatCurrency(transaction.value)}`;
