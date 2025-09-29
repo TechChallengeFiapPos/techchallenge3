@@ -1,4 +1,3 @@
-// src/components/dashboard/FinancialDashboard.tsx
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { useTransactions } from '@src/context/TransactionsContext';
@@ -8,10 +7,40 @@ import { ProgressBar, Surface, Text } from 'react-native-paper';
 
 const { width: screenWidth } = Dimensions.get('window');
 
+const isTablet = screenWidth > 768;
+const isLandscape = screenWidth > 600;
+
+const formatCurrency = (centavos: number): string => {
+  const reais = centavos / 100;
+  return reais.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+};
+
+// Estilos dinâmicos
+const dynamicStyles = {
+  container: {
+    paddingHorizontal: isTablet ? 24 : 16,
+    paddingVertical: isTablet ? 20 : 16,
+  },
+  balanceSection: {
+    marginBottom: isTablet ? 24 : 20,
+  },
+  cardsContainer: {
+    flexDirection: isLandscape ? 'row' : 'column',
+    gap: isTablet ? 16 : 12,
+    marginBottom: isTablet ? 24 : 20,
+  },
+  card: {
+    flex: isLandscape ? 1 : undefined,
+    padding: isTablet ? 20 : 16,
+  },
+};
+
 export const FinancialDashboard: React.FC = () => {
   const { totalIncome, totalExpenses, balance } = useTransactions();
 
-  // Cores do tema
   const backgroundColor = useThemeColor({}, 'background');
   const surfaceColor = useThemeColor({}, 'surface');
   const primaryColor = useThemeColor({}, 'primary');
@@ -19,61 +48,29 @@ export const FinancialDashboard: React.FC = () => {
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
 
-  // Responsividade
-  const isTablet = screenWidth > 768;
-  const isLandscape = screenWidth > 600;
-
-  // Formatação de moeda
-  const formatCurrency = (centavos: number): string => {
-    const reais = centavos / 100;
-    return reais.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    });
-  };
-
-  // Calcular percentual de gastos
   const expensePercentage = totalIncome > 0 ? (totalExpenses / totalIncome) * 100 : 0;
-  const progressValue = Math.min(expensePercentage / 100, 1); // Max 100%
+  const progressValue = Math.min(expensePercentage / 100, 1);
 
-  // Calcular meta fictícia para a barra de progresso (baseada na imagem)
-  const targetAmount = 2000000; // R$ 20.000,00 em centavos (valor da imagem)
-  const targetProgressValue = Math.min(totalExpenses / targetAmount, 1);
+  console.log('Dashboard:', {
+    totalIncome,
+    totalExpenses,
+    balance,
+    expensePercentage,
+    progressValue,
+  });
 
-  // Mensagem de status
   const getStatusMessage = (): string => {
     if (expensePercentage <= 30) {
-      return `${Math.round(expensePercentage)}% Of Your Expenses, Looks Good.`;
+      return `${Math.round(expensePercentage)}% da sua renda gasta, parece bom.`;
     } else if (expensePercentage <= 70) {
-      return `${Math.round(expensePercentage)}% Of Your Expenses, Pay Attention.`;
+      return `${Math.round(expensePercentage)}% da sua renda gasta, preste atenção.`;
     } else {
-      return `${Math.round(expensePercentage)}% Of Your Expenses, Be Careful.`;
+      return `${Math.round(expensePercentage)}% da sua renda gasta, tenha cuidado.`;
     }
-  };
-
-  // Estilos dinâmicos
-  const dynamicStyles = {
-    container: {
-      paddingHorizontal: isTablet ? 24 : 16,
-      paddingVertical: isTablet ? 20 : 16,
-    },
-    balanceSection: {
-      marginBottom: isTablet ? 24 : 20,
-    },
-    cardsContainer: {
-      flexDirection: isLandscape ? 'row' : 'column',
-      gap: isTablet ? 16 : 12,
-      marginBottom: isTablet ? 24 : 20,
-    },
-    card: {
-      flex: isLandscape ? 1 : undefined,
-      padding: isTablet ? 20 : 16,
-    },
   };
 
   return (
     <View style={[styles.container, dynamicStyles.container, { backgroundColor }]}>
-      {/* Seção de Saldo Total e Despesas */}
       <Surface
         style={[
           styles.balanceSection,
@@ -82,7 +79,6 @@ export const FinancialDashboard: React.FC = () => {
         ]}
       >
         <View style={styles.balanceRow}>
-          {/* Total Balance */}
           <View style={styles.balanceItem}>
             <View style={styles.balanceHeader}>
               <Ionicons name="wallet" size={16} color={onSurfaceVariantColor} />
@@ -90,21 +86,19 @@ export const FinancialDashboard: React.FC = () => {
                 variant="bodySmall"
                 style={[styles.balanceLabel, { color: onSurfaceVariantColor }]}
               >
-                Total Balance
+                Saldo Total
               </Text>
             </View>
             <Text
-              variant={isTablet ? 'displaySmall' : 'headlineLarge'}
+              variant={isTablet ? 'displaySmall' : 'bodyLarge'}
               style={[styles.balanceAmount, { color: onSurfaceColor }]}
             >
               {formatCurrency(balance)}
             </Text>
           </View>
 
-          {/* Separador */}
           <View style={[styles.separator, { backgroundColor: onSurfaceVariantColor }]} />
 
-          {/* Total Expense */}
           <View style={styles.expenseItem}>
             <View style={styles.balanceHeader}>
               <Ionicons name="trending-down" size={16} color={secondaryColor} />
@@ -112,11 +106,11 @@ export const FinancialDashboard: React.FC = () => {
                 variant="bodySmall"
                 style={[styles.balanceLabel, { color: onSurfaceVariantColor }]}
               >
-                Total Expense
+                Total de Despesas
               </Text>
             </View>
             <Text
-              variant={isTablet ? 'headlineMedium' : 'headlineSmall'}
+              variant={isTablet ? 'headlineMedium' : 'bodyLarge'}
               style={[styles.expenseAmount, { color: secondaryColor }]}
             >
               -{formatCurrency(totalExpenses)}
@@ -124,67 +118,28 @@ export const FinancialDashboard: React.FC = () => {
           </View>
         </View>
 
-        {/* Barra de Progresso */}
         <View style={styles.progressSection}>
           <View style={styles.progressLabels}>
             <Text variant="bodySmall" style={[styles.progressLabel, { color: onSurfaceColor }]}>
-              {Math.round(expensePercentage)}%
+              {expensePercentage < 0.01
+                ? '<0.01%'
+                : `${Math.round(expensePercentage * 100) / 100}%`}
             </Text>
             <Text
               variant="bodySmall"
               style={[styles.progressTarget, { color: onSurfaceVariantColor }]}
             >
-              {formatCurrency(targetAmount)}
+              {formatCurrency(totalIncome)}
             </Text>
           </View>
           <ProgressBar
-            progress={targetProgressValue}
+            progress={Math.max(progressValue, 0.02)}
             color={primaryColor}
             style={[styles.progressBar, { backgroundColor: onSurfaceVariantColor + '30' }]}
           />
         </View>
       </Surface>
 
-      {/* Cards de Income e Expense */}
-      <View style={[styles.cardsContainer, dynamicStyles.cardsContainer]}>
-        {/* Income Card */}
-        <Surface style={[styles.card, dynamicStyles.card, { backgroundColor: surfaceColor }]}>
-          <View style={styles.cardHeader}>
-            <View style={[styles.cardIcon, { backgroundColor: primaryColor + '20' }]}>
-              <Ionicons name="trending-up" size={24} color={primaryColor} />
-            </View>
-            <Text variant="bodyMedium" style={[styles.cardLabel, { color: onSurfaceVariantColor }]}>
-              Income
-            </Text>
-          </View>
-          <Text
-            variant={isTablet ? 'headlineMedium' : 'headlineSmall'}
-            style={[styles.cardAmount, { color: onSurfaceColor }]}
-          >
-            {formatCurrency(totalIncome)}
-          </Text>
-        </Surface>
-
-        {/* Expense Card */}
-        <Surface style={[styles.card, dynamicStyles.card, { backgroundColor: surfaceColor }]}>
-          <View style={styles.cardHeader}>
-            <View style={[styles.cardIcon, { backgroundColor: secondaryColor + '20' }]}>
-              <Ionicons name="trending-down" size={24} color={secondaryColor} />
-            </View>
-            <Text variant="bodyMedium" style={[styles.cardLabel, { color: onSurfaceVariantColor }]}>
-              Expense
-            </Text>
-          </View>
-          <Text
-            variant={isTablet ? 'headlineMedium' : 'headlineSmall'}
-            style={[styles.cardAmount, { color: secondaryColor }]}
-          >
-            {formatCurrency(totalExpenses)}
-          </Text>
-        </Surface>
-      </View>
-
-      {/* Mensagem de Status */}
       <View style={styles.statusSection}>
         <Ionicons name="checkmark-circle" size={16} color={primaryColor} />
         <Text variant="bodyMedium" style={[styles.statusMessage, { color: onSurfaceVariantColor }]}>
@@ -197,7 +152,8 @@ export const FinancialDashboard: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    // Padding dinâmico aplicado via dynamicStyles
+    // Padding dinâmico dynamicStyles
+    paddingTop: 70,
   },
   balanceSection: {
     borderRadius: 16,
@@ -262,7 +218,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   cardsContainer: {
-    // Flex dinâmico aplicado via dynamicStyles
+    // Flex dinâmico dynamicStyles
   },
   card: {
     borderRadius: 16,

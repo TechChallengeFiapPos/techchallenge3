@@ -1,4 +1,5 @@
 import { useThemeColor } from '@hooks/useThemeColor';
+import { FinancialDashboard } from '@src/components/dashboard/FinancialDashboard';
 import { TransactionItem } from '@src/components/list/TransactionItem';
 import { ThemedView } from '@src/components/ThemedView';
 import { useTransactions } from '@src/context/TransactionsContext';
@@ -7,6 +8,7 @@ import { useRouter } from 'expo-router';
 import React, { useCallback, useMemo } from 'react';
 import { Dimensions, FlatList, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, FAB, Snackbar, Text } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -17,13 +19,13 @@ export type ThemedProps = {
 
 export default function TransactionsScreen({ lightColor, darkColor }: ThemedProps) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
-  const surfaceColor = useThemeColor({}, 'surface');
   const primaryColor = useThemeColor({}, 'primary');
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
 
-  // Context do Firebase integrado
   const {
     transactions,
     loading,
@@ -43,7 +45,6 @@ export default function TransactionsScreen({ lightColor, darkColor }: ThemedProp
       isTablet,
       isLandscape,
       itemHeight: isTablet ? 80 : isLandscape ? 70 : 64,
-      headerPadding: isTablet ? 32 : 24,
       horizontalPadding: isTablet ? 24 : 16,
     };
   }, []);
@@ -54,9 +55,7 @@ export default function TransactionsScreen({ lightColor, darkColor }: ThemedProp
       <TransactionItem
         transaction={item}
         onPress={(transaction) => {
-          // Por enquanto só log - implemente navegação quando tiver a rota
           console.log('Transaction pressed:', transaction.id);
-          // Futuro: router.push(`/transaction/${transaction.id}`);
         }}
       />
     ),
@@ -76,7 +75,7 @@ export default function TransactionsScreen({ lightColor, darkColor }: ThemedProp
     [screenMetrics.itemHeight],
   );
 
-  // Loading footer - só mostra se estiver carregando e tem mais dados
+  // Loading footer
   const renderFooter = useCallback(() => {
     if (!loading || !hasMore) return null;
 
@@ -88,7 +87,7 @@ export default function TransactionsScreen({ lightColor, darkColor }: ThemedProp
         </Text>
       </View>
     );
-  }, [loading, hasMore, primaryColor, onSurfaceVariantColor]);
+  }, [loading, hasMore]);
 
   // Empty state
   const renderEmpty = useCallback(() => {
@@ -100,11 +99,11 @@ export default function TransactionsScreen({ lightColor, darkColor }: ThemedProp
           Nenhuma transação encontrada
         </Text>
         <Text variant="bodyMedium" style={[styles.emptySubtitle, { color: onSurfaceVariantColor }]}>
-          Suas transações aparecerão aqui quando forem adicionadas
+          Adicione sua primeira transação para começar
         </Text>
       </View>
     );
-  }, [loading, onSurfaceColor, onSurfaceVariantColor]);
+  }, [loading]);
 
   // Handle scroll infinito
   const handleLoadMore = useCallback(() => {
@@ -118,43 +117,49 @@ export default function TransactionsScreen({ lightColor, darkColor }: ThemedProp
     refreshTransactions();
   }, [refreshTransactions]);
 
-  // Header da seção
+  // Header da lista com dashboard, título E FAB
   const renderHeader = useCallback(() => {
     return (
-      <View
-        style={[
-          styles.header,
-          {
-            paddingHorizontal: screenMetrics.horizontalPadding,
-            paddingTop: screenMetrics.headerPadding,
-          },
-        ]}
-      >
-        <Text
-          variant={screenMetrics.isTablet ? 'headlineMedium' : 'headlineSmall'}
-          style={[styles.headerTitle, { color: onSurfaceColor }]}
+      <View style={styles.headerContainer}>
+        {/* Dashboard Financeiro */}
+        <FinancialDashboard />
+
+        {/* Título da seção de transações com FAB */}
+        <View
+          style={[
+            styles.transactionsHeader,
+            { paddingHorizontal: screenMetrics.horizontalPadding },
+          ]}
         >
-          Transações
-        </Text>
-        <Text
-          variant={screenMetrics.isTablet ? 'bodyLarge' : 'bodyMedium'}
-          style={[styles.transactionCount, { color: onSurfaceVariantColor }]}
-        >
-          {transactions.length} {transactions.length === 1 ? 'transação' : 'transações'}
-        </Text>
+          <Text
+            variant={screenMetrics.isTablet ? 'headlineMedium' : 'headlineSmall'}
+            style={[styles.transactionsTitle, { color: onSurfaceColor }]}
+          >
+            Suas Transações
+          </Text>
+
+          {/* FAB integrado no header */}
+          <FAB
+            icon="plus"
+            size="small"
+            onPress={() => router.push('/register-transaction')}
+            style={[styles.headerFab, { backgroundColor: primaryColor }]}
+            color="white"
+          />
+        </View>
       </View>
     );
-  }, [screenMetrics, onSurfaceColor, onSurfaceVariantColor, transactions.length]);
+  }, [screenMetrics, onSurfaceColor, primaryColor, router]);
 
-  // Estilos dinâmicos
+  // Estilos dinâmicos com safe area insets e espaço para tab bar
   const dynamicStyles = useMemo(
     () => ({
       listContent: {
-        paddingBottom: screenMetrics.isTablet ? 100 : 80, // Espaço para FAB
-        paddingHorizontal: screenMetrics.horizontalPadding,
+        paddingTop: insets.top,
+        paddingBottom: Math.max(insets.bottom, 80) + 20, // Garante espaço mínimo para tab bar
       },
     }),
-    [screenMetrics],
+    [insets],
   );
 
   return (
@@ -164,7 +169,7 @@ export default function TransactionsScreen({ lightColor, darkColor }: ThemedProp
         renderItem={renderTransaction}
         keyExtractor={keyExtractor}
         getItemLayout={getItemLayout}
-        // Header da lista
+        // Header com dashboard E FAB
         ListHeaderComponent={renderHeader}
         // Otimizações de performance
         removeClippedSubviews={true}
@@ -172,10 +177,10 @@ export default function TransactionsScreen({ lightColor, darkColor }: ThemedProp
         windowSize={screenMetrics.isTablet ? 15 : 10}
         initialNumToRender={screenMetrics.isTablet ? 20 : 15}
         updateCellsBatchingPeriod={50}
-        // Scroll infinito integrado com Context
+        // Scroll infinito
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
-        // Pull to refresh integrado com Context
+        // Pull to refresh
         onRefresh={handleRefresh}
         refreshing={loading}
         // Estados
@@ -189,15 +194,6 @@ export default function TransactionsScreen({ lightColor, darkColor }: ThemedProp
         showsVerticalScrollIndicator={false}
       />
 
-      {/* FAB para adicionar nova transação */}
-      <FAB
-        icon="plus"
-        label="Nova transação"
-        onPress={() => router.push('/register-transaction')}
-        style={[styles.fab, { backgroundColor: primaryColor }]}
-        color="white"
-      />
-
       {/* Snackbar para erros */}
       <Snackbar
         visible={!!error}
@@ -207,7 +203,7 @@ export default function TransactionsScreen({ lightColor, darkColor }: ThemedProp
           label: 'OK',
           onPress: clearError,
         }}
-        style={styles.errorSnackbar}
+        style={[styles.errorSnackbar, { bottom: Math.max(insets.bottom, 60) }]}
       >
         {error}
       </Snackbar>
@@ -219,18 +215,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
+  headerContainer: {
+    // Container do header com dashboard
+  },
+  transactionsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 16,
-    paddingBottom: 8,
+    paddingTop: 24,
   },
-  headerTitle: {
+  transactionsTitle: {
     fontWeight: 'bold',
+    flex: 1,
   },
-  transactionCount: {
-    opacity: 0.7,
+  headerFab: {
+    marginLeft: 12,
+    elevation: 4,
   },
   emptyList: {
     flexGrow: 1,
@@ -261,12 +262,6 @@ const styles = StyleSheet.create({
   footerText: {
     marginLeft: 8,
     opacity: 0.7,
-  },
-  fab: {
-    position: 'absolute',
-    margin: 16,
-    right: 0,
-    bottom: 0,
   },
   errorSnackbar: {
     backgroundColor: '#F44336',
