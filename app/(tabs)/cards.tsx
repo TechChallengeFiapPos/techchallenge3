@@ -1,4 +1,5 @@
 import { useThemeColor } from '@hooks/useThemeColor';
+// import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedButton } from '@src/components/ThemedButton';
 import { ThemedView } from '@src/components/ThemedView';
 import { useRouter } from 'expo-router';
@@ -14,11 +15,15 @@ export default function CardsScreen({ lightColor, darkColor }: ThemedProps) {
 
   return (
     <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      {/* ...sua listagem de cartões aqui */}
+      {/* <PageHeader
+        title="Novo Cartão"
+        showBackButton={true}
+        showLogout={true}
+      /> */}
 
       <ThemedButton
         type="defaultSemiBold"
-        title="Adicionar cartão"
+        title="Adicione um novo cartão"
         onPress={() => router.push('/register-card')}
       />
     </ThemedView>

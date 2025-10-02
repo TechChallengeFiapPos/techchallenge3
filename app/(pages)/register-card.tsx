@@ -2,6 +2,7 @@ import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { CreateCardData } from '@src/api/firebase/Card';
 import { CardRegisterForm } from '@src/components/forms';
+import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedCard } from '@src/components/ThemedCard';
 import { ThemedText } from '@src/components/ThemedText';
 import { useCardActions } from '@src/hooks/useCardActions';
@@ -61,6 +62,12 @@ export default function RegisterCardScreen({ lightColor, darkColor }: ThemedProp
       enabled={Platform.OS === 'ios'}
     >
       <ThemedView style={[styles.container, { backgroundColor }]}>
+        <PageHeader
+          title="Transações"
+          showBackButton={true}
+          showLogout={true}
+        />
+
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}

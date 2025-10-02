@@ -17,7 +17,7 @@ type TransactionContextType = {
   loading: boolean;
   error: string | null;
 
-  // Estatísticas essenciais
+  // Estatísticas essenciais (baseadas em TODAS as transações)
   totalIncome: number;
   totalExpenses: number;
   balance: number;
@@ -47,7 +47,7 @@ const TransactionContext = createContext<TransactionContextType>({} as Transacti
 export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
 
-  // Estados principais
+  // Estados principais - Lista paginada
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,25 +55,60 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   // Scroll infinito
   const [hasMore, setHasMore] = useState(true);
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | undefined>();
+  
+  // Armazenar os filtros ativos
+  const [activeFilters, setActiveFilters] = useState<TransactionFilters>({});
 
-  // Estatísticas calculadas automaticamente
-  const totalIncome = calculateIncome(transactions);
-  const totalExpenses = calculateExpenses(transactions);
-  const balance = calculateBalance(transactions);
+  // Totais separados (independentes da paginação)
+  const [totalIncome, setTotalIncome] = useState(0);
+  const [totalExpenses, setTotalExpenses] = useState(0);
+  const [balance, setBalance] = useState(0);
 
   // Utilitários
   const clearError = useCallback(() => setError(null), []);
 
-  // Carregar transações
+  // Carregar TOTAIS (todas as transações, separado da lista paginada)
+  const loadTotals = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      console.log('📊 Carregando totais...');
+      const result = await TransactionAPI.getAllByUser(user.uid);
+
+      if (result.success && result.data) {
+        const allTransactions = result.data;
+        
+        const income = calculateIncome(allTransactions);
+        const expenses = calculateExpenses(allTransactions);
+        const bal = calculateBalance(allTransactions);
+
+        setTotalIncome(income);
+        setTotalExpenses(expenses);
+        setBalance(bal);
+
+        console.log('✅ Totais carregados:', {
+          income: income / 100,
+          expenses: expenses / 100,
+          balance: bal / 100,
+          total: allTransactions.length,
+        });
+      }
+    } catch (err: any) {
+      console.error('Erro ao carregar totais:', err);
+    }
+  }, [user]);
+
+  // Carregar transações (lista paginada)
   const loadTransactions = useCallback(
     async (filters?: TransactionFilters) => {
-      if (!user) return;
+      if (!user || loading) return;
 
       setLoading(true);
       setError(null);
+      setActiveFilters(filters || {}); // Salvar os filtros ativos
 
       try {
-        const result = await TransactionAPI.getByUser(user.uid, filters || {}, 20);
+        const result = await TransactionAPI.getByUser(user.uid, filters || {}, 12);
 
         if (result.success && result.data) {
           setTransactions(result.data);
@@ -88,20 +123,26 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     },
-    [user],
+    [user, loading],
   );
 
-  // Carregar mais (scroll infinito)
+  // Carregar mais (scroll infinito) - COM FILTROS ATIVOS
   const loadMoreTransactions = useCallback(async () => {
     if (!user || !hasMore || loading) return;
 
     setLoading(true);
 
     try {
-      const result = await TransactionAPI.getByUser(user.uid, {}, 20, lastDoc);
+      // Usa os filtros ativos
+      const result = await TransactionAPI.getByUser(user.uid, activeFilters, 12, lastDoc);
 
       if (result.success && result.data) {
-        setTransactions((prev) => [...prev, ...result.data!]);
+        // Filtra duplicatas antes de adicionar
+        setTransactions((prev) => {
+          const existingIds = new Set(prev.map(t => t.id));
+          const newTransactions = result.data!.filter(t => !existingIds.has(t.id));
+          return [...prev, ...newTransactions];
+        });
         setLastDoc(result.lastDoc);
         setHasMore(result.hasMore || false);
       } else {
@@ -112,14 +153,14 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setLoading(false);
     }
-  }, [user, hasMore, loading, lastDoc]);
+  }, [user, hasMore, loading, lastDoc, activeFilters]);
 
-  // Refresh
+  // Refresh (recarrega lista E totais)
   const refreshTransactions = useCallback(async () => {
     setLastDoc(undefined);
     setHasMore(true);
-    await loadTransactions();
-  }, [loadTransactions]);
+    await Promise.all([loadTransactions(activeFilters), loadTotals()]);
+  }, [loadTransactions, loadTotals, activeFilters]);
 
   // Criar transação
   const createTransaction = useCallback(
@@ -133,7 +174,8 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         const result = await TransactionAPI.create(user.uid, data);
 
         if (result.success && result.data) {
-          setTransactions((prev) => [result.data!, ...prev]);
+          // Recarrega lista E totais
+          await Promise.all([refreshTransactions(), loadTotals()]);
           return { success: true };
         } else {
           setError(result.error || 'Erro ao criar transação');
@@ -146,68 +188,79 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     },
-    [user],
+    [user, refreshTransactions, loadTotals],
   );
 
   // Atualizar transação
-  const updateTransaction = useCallback(async (id: string, data: UpdateTransactionData) => {
-    setLoading(true);
-    setError(null);
+  const updateTransaction = useCallback(
+    async (id: string, data: UpdateTransactionData) => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const result = await TransactionAPI.update(id, data);
+      try {
+        const result = await TransactionAPI.update(id, data);
 
-      if (result.success) {
-        setTransactions((prev) =>
-          prev.map((t) => (t.id === id ? { ...t, ...data, updatedAt: new Date() } : t)),
-        );
-        return { success: true };
-      } else {
-        setError(result.error || 'Erro ao atualizar transação');
-        return { success: false, error: result.error };
+        if (result.success) {
+          // Recarrega lista E totais
+          await Promise.all([refreshTransactions(), loadTotals()]);
+          return { success: true };
+        } else {
+          setError(result.error || 'Erro ao atualizar transação');
+          return { success: false, error: result.error };
+        }
+      } catch (err: any) {
+        setError('Erro inesperado ao atualizar transação');
+        return { success: false, error: 'Erro inesperado' };
+      } finally {
+        setLoading(false);
       }
-    } catch (err: any) {
-      setError('Erro inesperado ao atualizar transação');
-      return { success: false, error: 'Erro inesperado' };
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [refreshTransactions, loadTotals],
+  );
 
   // Deletar transação
-  const deleteTransaction = useCallback(async (id: string) => {
-    setLoading(true);
-    setError(null);
+  const deleteTransaction = useCallback(
+    async (id: string) => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const result = await TransactionAPI.delete(id);
+      try {
+        const result = await TransactionAPI.delete(id);
 
-      if (result.success) {
-        setTransactions((prev) => prev.filter((t) => t.id !== id));
-        return { success: true };
-      } else {
-        setError(result.error || 'Erro ao deletar transação');
-        return { success: false, error: result.error };
+        if (result.success) {
+          // Recarrega lista E totais
+          await Promise.all([refreshTransactions(), loadTotals()]);
+          return { success: true };
+        } else {
+          setError(result.error || 'Erro ao deletar transação');
+          return { success: false, error: result.error };
+        }
+      } catch (err: any) {
+        setError('Erro inesperado ao deletar transação');
+        return { success: false, error: 'Erro inesperado' };
+      } finally {
+        setLoading(false);
       }
-    } catch (err: any) {
-      setError('Erro inesperado ao deletar transação');
-      return { success: false, error: 'Erro inesperado' };
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [refreshTransactions, loadTotals],
+  );
 
-  // Carregar transações quando usuário muda
+  // Carregar transações E totais quando usuário muda
   useEffect(() => {
     if (user) {
       loadTransactions();
+      loadTotals();
     } else {
       setTransactions([]);
       setError(null);
       setLastDoc(undefined);
       setHasMore(true);
+      setActiveFilters({});
+      setTotalIncome(0);
+      setTotalExpenses(0);
+      setBalance(0);
     }
-  }, [user, loadTransactions]);
+  }, [user]);
 
   const value: TransactionContextType = {
     // Estados principais
@@ -215,7 +268,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     loading,
     error,
 
-    // Estatísticas essenciais
+    // Estatísticas essenciais (agora fixas!)
     totalIncome,
     totalExpenses,
     balance,
