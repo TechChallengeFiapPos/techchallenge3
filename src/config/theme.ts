@@ -128,7 +128,7 @@ const colors = {
   inverseSurface: '#d7ffe2',
   onSurface: '#052224', // Fence Green
   onSurfaceVariant: '#0E3E3E',
-  error: '#B00020',
+  error: '#ea5b2bff',
   onError: '#ffffff',
 };
 

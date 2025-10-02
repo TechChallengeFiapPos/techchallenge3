@@ -107,14 +107,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 5,
     zIndex: 1000, // Adiciona z-index alto
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-    }),
   },
   tab: {
     flex: 1,
