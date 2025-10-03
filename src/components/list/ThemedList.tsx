@@ -1,9 +1,10 @@
-// src/components/ui/BaseListItem.tsx
+// src/components/ui/BaseListItem.tsx - Versão corrigida
+
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
 import React from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
+import { IconButton, Text } from 'react-native-paper';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -18,22 +19,23 @@ interface BaseListItemProps {
   iconColor?: string;
   iconBackgroundColor?: string;
 
-  // Cores customizáveis (opcional - usa tema se não fornecido)
+  // Cores customizáveis
   titleColor?: string;
   subtitleColor?: string;
   rightTextColor?: string;
-  centerTextColor?: string;
+
+  // Ações (ADICIONE)
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onPress?: () => void;
 
   // Comportamento
-  onPress?: () => void;
   disabled?: boolean;
 }
 
-// Responsividade baseada na largura da tela
 const isTablet = screenWidth > 768;
 const isLandscape = screenWidth > 600;
 
-// Estilos dinâmicos baseados no tamanho da tela
 const dynamicStyles = {
   container: {
     paddingHorizontal: isTablet ? 24 : 16,
@@ -57,9 +59,6 @@ const dynamicStyles = {
     height: isTablet ? 50 : 40,
     marginHorizontal: isTablet ? 20 : 16,
   },
-  centerSection: {
-    flex: isLandscape ? 1.5 : 1,
-  },
   rightSection: {
     flex: isLandscape ? 1.5 : 1.2,
   },
@@ -76,72 +75,87 @@ export const ThemedList = React.memo<BaseListItemProps>(
     titleColor,
     subtitleColor,
     rightTextColor,
+    onEdit, // ADICIONE
+    onDelete, // ADICIONE
   }) => {
-    // Usar cores do tema
     const backgroundColor = useThemeColor({}, 'surface');
     const defaultTitleColor = useThemeColor({}, 'onSurface');
     const defaultSubtitleColor = useThemeColor({}, 'onSurfaceVariant');
     const defaultRightColor = useThemeColor({}, 'onSurface');
     const separatorColor = useThemeColor({}, 'outline');
     const primaryColor = useThemeColor({}, 'primary');
+    const errorColor = useThemeColor({}, 'error');
 
-    // Cor padrão do ícone se não fornecida
     const getDefaultIconBackgroundColor = (): string => {
       if (iconBackgroundColor) return iconBackgroundColor;
-      return primaryColor; // Usar cor primária do tema
+      return primaryColor;
     };
 
     return (
-      <View style={[styles.container, dynamicStyles.container, { backgroundColor }]}>
-        <View style={[styles.content, dynamicStyles.content]}>
-          {/* Ícone */}
-          <View
-            style={[
-              styles.iconContainer,
-              dynamicStyles.iconContainer,
-              { backgroundColor: getDefaultIconBackgroundColor() },
-            ]}
-          >
-            <Ionicons name={iconName as any} size={dynamicStyles.iconSize} color={iconColor} />
-          </View>
-
-          {/* Informações principais */}
-          <View style={[styles.mainInfo, dynamicStyles.mainInfo]}>
-            <Text
-              variant={isTablet ? 'titleMedium' : 'bodyLarge'}
-              style={[styles.title, { color: titleColor || defaultTitleColor }]}
-              numberOfLines={1}
-              ellipsizeMode="tail"
+      <Pressable>
+        <View style={[styles.container, dynamicStyles.container, { backgroundColor }]}>
+          <View style={[styles.content, dynamicStyles.content]}>
+            {/* Ícone */}
+            <View
+              style={[
+                styles.iconContainer,
+                dynamicStyles.iconContainer,
+                { backgroundColor: getDefaultIconBackgroundColor() },
+              ]}
             >
-              {title}
-            </Text>
-            <Text
-              variant={isTablet ? 'bodyMedium' : 'bodySmall'}
-              style={[styles.subtitle, { color: subtitleColor || defaultSubtitleColor }]}
-            >
-              {subtitle}
-            </Text>
-          </View>
+              <Ionicons name={iconName as any} size={dynamicStyles.iconSize} color={iconColor} />
+            </View>
 
-          {/* Separador */}
-          <View
-            style={[styles.separator, dynamicStyles.separator, { backgroundColor: separatorColor }]}
-          />
+            {/* Informações principais */}
+            <View style={[styles.mainInfo, dynamicStyles.mainInfo]}>
+              <Text
+                variant={isTablet ? 'titleMedium' : 'bodyLarge'}
+                style={[styles.title, { color: titleColor || defaultTitleColor }]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {title}
+              </Text>
+              <Text
+                variant={isTablet ? 'bodyMedium' : 'bodySmall'}
+                style={[styles.subtitle, { color: subtitleColor || defaultSubtitleColor }]}
+              >
+                {subtitle}
+              </Text>
+            </View>
 
-          {/* Seção direita */}
-          <View style={[styles.rightSection, dynamicStyles.rightSection]}>
-            <Text
-              variant={isTablet ? 'titleMedium' : 'bodyLarge'}
-              style={[styles.rightText, { color: rightTextColor || defaultRightColor }]}
-              numberOfLines={1}
-              adjustsFontSizeToFit={true}
-              minimumFontScale={0.8}
-            >
-              {rightText}
-            </Text>
+            {/* Separador */}
+            <View
+              style={[styles.separator, dynamicStyles.separator, { backgroundColor: separatorColor }]}
+            />
+
+            {/* Seção direita */}
+            <View style={[styles.rightSection, dynamicStyles.rightSection]}>
+              <Text
+                variant={isTablet ? 'titleMedium' : 'bodyLarge'}
+                style={[styles.rightText, { color: rightTextColor || defaultRightColor }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit={true}
+                minimumFontScale={0.8}
+              >
+                {rightText}
+              </Text>
+
+              {/* BOTÕES DE AÇÃO - CRÍTICO */}
+              {(onEdit || onDelete) && (
+                <View style={styles.actions}>
+                  {onEdit && (
+                    <IconButton icon="pencil" size={20} onPress={onEdit} iconColor={primaryColor} />
+                  )}
+                  {onDelete && (
+                    <IconButton icon="delete" size={20} onPress={onDelete} iconColor={errorColor} />
+                  )}
+                </View>
+              )}
+            </View>
           </View>
         </View>
-      </View>
+      </Pressable>
     );
   },
 );
@@ -169,26 +183,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  mainInfo: {
-    // Flex dinâmico aplicado via dynamicStyles
-  },
+  mainInfo: {},
   title: {
     fontWeight: '600',
     marginBottom: 4,
   },
-  subtitle: {
-    // Cor dinâmica aplicada via tema
-  },
+  subtitle: {},
   separator: {
     width: 1,
     opacity: 0.3,
-  },
-  centerSection: {
-    alignItems: 'center',
-    paddingHorizontal: 8,
-  },
-  centerText: {
-    textAlign: 'center',
   },
   rightSection: {
     alignItems: 'flex-end',
@@ -196,5 +199,9 @@ const styles = StyleSheet.create({
   },
   rightText: {
     fontWeight: 'bold',
+  },
+  actions: {
+    flexDirection: 'row',
+    marginTop: -8,
   },
 });
