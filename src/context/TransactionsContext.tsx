@@ -1,4 +1,5 @@
 // src/contexts/TransactionContext.tsx
+
 import { TransactionAPI } from '@src/api/firebase/Transactions';
 import { useAuth } from '@src/context/AuthContext';
 import {
@@ -13,11 +14,12 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useState 
 
 type TransactionContextType = {
   // Estados principais
-  transactions: Transaction[];
+  transactions: Transaction[]; // Lista paginada/filtrada
+  allTransactions: Transaction[]; // TODAS as transações (para gráficos)
   loading: boolean;
   error: string | null;
 
-  // Estatísticas essenciais (baseadas em TODAS as transações)
+  // Estatísticas
   totalIncome: number;
   totalExpenses: number;
   balance: number;
@@ -25,7 +27,7 @@ type TransactionContextType = {
   // Scroll infinito
   hasMore: boolean;
 
-  // Ações essenciais
+  // Ações
   createTransaction: (data: CreateTransactionData) => Promise<{ success: boolean; error?: string }>;
   updateTransaction: (
     id: string,
@@ -47,65 +49,62 @@ const TransactionContext = createContext<TransactionContextType>({} as Transacti
 export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
 
-  // Estados principais - Lista paginada
+  // Lista paginada/filtrada (para a tela de transações)
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  
+  // TODAS as transações (para gráficos - NUNCA FILTRADO)
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Scroll infinito
   const [hasMore, setHasMore] = useState(true);
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | undefined>();
-  
-  // Armazenar os filtros ativos
   const [activeFilters, setActiveFilters] = useState<TransactionFilters>({});
 
-  // Totais separados (independentes da paginação)
+  // Totais
   const [totalIncome, setTotalIncome] = useState(0);
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [balance, setBalance] = useState(0);
 
-  // Utilitários
   const clearError = useCallback(() => setError(null), []);
 
-  // Carregar TOTAIS (todas as transações, separado da lista paginada)
-  const loadTotals = useCallback(async () => {
+  // Carregar TODAS as transações (para gráficos e totais)
+  const loadAllTransactions = useCallback(async () => {
     if (!user) return;
 
     try {
-      console.log('📊 Carregando totais...');
       const result = await TransactionAPI.getAllByUser(user.uid);
 
       if (result.success && result.data) {
-        const allTransactions = result.data;
+        const all = result.data;
         
-        const income = calculateIncome(allTransactions);
-        const expenses = calculateExpenses(allTransactions);
-        const bal = calculateBalance(allTransactions);
+        // Atualiza TODAS as transações (para gráficos)
+        setAllTransactions(all);
+        
+        // Calcula totais
+        const income = calculateIncome(all);
+        const expenses = calculateExpenses(all);
+        const bal = calculateBalance(all);
 
         setTotalIncome(income);
         setTotalExpenses(expenses);
         setBalance(bal);
-
-        console.log('✅ Totais carregados:', {
-          income: income / 100,
-          expenses: expenses / 100,
-          balance: bal / 100,
-          total: allTransactions.length,
-        });
       }
     } catch (err: any) {
-      console.error('Erro ao carregar totais:', err);
+      console.error('Erro ao carregar todas transações:', err);
     }
   }, [user]);
 
-  // Carregar transações (lista paginada)
+  // Carregar transações paginadas/filtradas (para listagem)
   const loadTransactions = useCallback(
     async (filters?: TransactionFilters) => {
       if (!user || loading) return;
 
       setLoading(true);
       setError(null);
-      setActiveFilters(filters || {}); // Salvar os filtros ativos
+      setActiveFilters(filters || {});
 
       try {
         const result = await TransactionAPI.getByUser(user.uid, filters || {}, 12);
@@ -126,18 +125,16 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     [user, loading],
   );
 
-  // Carregar mais (scroll infinito) - COM FILTROS ATIVOS
+  // Scroll infinito
   const loadMoreTransactions = useCallback(async () => {
     if (!user || !hasMore || loading) return;
 
     setLoading(true);
 
     try {
-      // Usa os filtros ativos
       const result = await TransactionAPI.getByUser(user.uid, activeFilters, 12, lastDoc);
 
       if (result.success && result.data) {
-        // Filtra duplicatas antes de adicionar
         setTransactions((prev) => {
           const existingIds = new Set(prev.map(t => t.id));
           const newTransactions = result.data!.filter(t => !existingIds.has(t.id));
@@ -155,14 +152,17 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user, hasMore, loading, lastDoc, activeFilters]);
 
-  // Refresh (recarrega lista E totais)
+  // Refresh
   const refreshTransactions = useCallback(async () => {
     setLastDoc(undefined);
     setHasMore(true);
-    await Promise.all([loadTransactions(activeFilters), loadTotals()]);
-  }, [loadTransactions, loadTotals, activeFilters]);
+    await Promise.all([
+      loadTransactions(activeFilters),
+      loadAllTransactions() // Atualiza gráficos também
+    ]);
+  }, [loadTransactions, loadAllTransactions, activeFilters]);
 
-  // Criar transação
+  // Criar
   const createTransaction = useCallback(
     async (data: CreateTransactionData) => {
       if (!user) return { success: false, error: 'Usuário não autenticado' };
@@ -173,9 +173,8 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       try {
         const result = await TransactionAPI.create(user.uid, data);
 
-        if (result.success && result.data) {
-          // Recarrega lista E totais
-          await Promise.all([refreshTransactions(), loadTotals()]);
+        if (result.success) {
+          await Promise.all([refreshTransactions(), loadAllTransactions()]);
           return { success: true };
         } else {
           setError(result.error || 'Erro ao criar transação');
@@ -188,21 +187,22 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     },
-    [user, refreshTransactions, loadTotals],
+    [user, refreshTransactions, loadAllTransactions],
   );
 
-  // Atualizar transação
+  // Atualizar (precisa do userId agora)
   const updateTransaction = useCallback(
     async (id: string, data: UpdateTransactionData) => {
+      if (!user) return { success: false, error: 'Usuário não autenticado' };
+
       setLoading(true);
       setError(null);
 
       try {
-        const result = await TransactionAPI.update(id, data);
+        const result = await TransactionAPI.update(user.uid, id, data);
 
         if (result.success) {
-          // Recarrega lista E totais
-          await Promise.all([refreshTransactions(), loadTotals()]);
+          await Promise.all([refreshTransactions(), loadAllTransactions()]);
           return { success: true };
         } else {
           setError(result.error || 'Erro ao atualizar transação');
@@ -215,21 +215,22 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     },
-    [refreshTransactions, loadTotals],
+    [user, refreshTransactions, loadAllTransactions],
   );
 
-  // Deletar transação
+  // Deletar (precisa do userId agora)
   const deleteTransaction = useCallback(
     async (id: string) => {
+      if (!user) return { success: false, error: 'Usuário não autenticado' };
+
       setLoading(true);
       setError(null);
 
       try {
-        const result = await TransactionAPI.delete(id);
+        const result = await TransactionAPI.delete(user.uid, id);
 
         if (result.success) {
-          // Recarrega lista E totais
-          await Promise.all([refreshTransactions(), loadTotals()]);
+          await Promise.all([refreshTransactions(), loadAllTransactions()]);
           return { success: true };
         } else {
           setError(result.error || 'Erro ao deletar transação');
@@ -242,16 +243,17 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     },
-    [refreshTransactions, loadTotals],
+    [user, refreshTransactions, loadAllTransactions],
   );
 
-  // Carregar transações E totais quando usuário muda
+  // Carregar ao montar
   useEffect(() => {
     if (user) {
       loadTransactions();
-      loadTotals();
+      loadAllTransactions();
     } else {
       setTransactions([]);
+      setAllTransactions([]);
       setError(null);
       setLastDoc(undefined);
       setHasMore(true);
@@ -263,30 +265,20 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   }, [user]);
 
   const value: TransactionContextType = {
-    // Estados principais
-    transactions,
+    transactions, // Lista filtrada
+    allTransactions, // TODAS (para gráficos)
     loading,
     error,
-
-    // Estatísticas essenciais (agora fixas!)
     totalIncome,
     totalExpenses,
     balance,
-
-    // Scroll infinito
     hasMore,
-
-    // Ações essenciais
     createTransaction,
     updateTransaction,
     deleteTransaction,
-
-    // Carregamento
     loadTransactions,
     loadMoreTransactions,
     refreshTransactions,
-
-    // Utilitários
     clearError,
   };
 

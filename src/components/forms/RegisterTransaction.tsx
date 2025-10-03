@@ -1,6 +1,8 @@
+
 import { getUserCards } from '@src/api/firebase/Card';
 import { useAuth } from '@src/context/AuthContext';
 import {
+  TransactionAttachment,
   TransactionFormData,
   TransactionFormField,
   TransactionFormProps,
@@ -19,6 +21,7 @@ import { CurrencyInputController } from '../input/CurrencyInputController';
 import { SelectController } from '../select/SelectController';
 import { ThemedButton } from '../ThemedButton';
 import { ThemedText } from '../ThemedText';
+import { AttachmentPicker } from '../upload/TransactionAttachmentPicker';
 
 const transactionFields: TransactionFormField[] = [
   {
@@ -83,6 +86,9 @@ export function TransactionRegisterForm({
 }: TransactionFormProps) {
   const { user } = useAuth();
   const [userCards, setUserCards] = useState<{ label: string; value: string }[]>([]);
+  const [attachment, setAttachment] = useState<TransactionAttachment | undefined>(
+    initialData?.attachment
+  );
 
   const {
     control,
@@ -126,16 +132,10 @@ export function TransactionRegisterForm({
     loadUserCards();
   }, [user]);
 
-  // Debug para dados iniciais
-  useEffect(() => {
-    // console.log('Dados iniciais', initialData);
-  }, [initialData]);
-
   const renderField = (field: TransactionFormField) => {
     if (field.conditional) {
       const formData = watch();
       if (!field.conditional(formData)) {
-        //  console.log('Campo condicional escondido:', field.name);
         return null;
       }
     }
@@ -144,7 +144,6 @@ export function TransactionRegisterForm({
       required: field.required ? `${field.label} é obrigatório` : false,
     };
 
-    // seleção
     if (field.type === 'select') {
       let options = field.options || [];
 
@@ -182,7 +181,6 @@ export function TransactionRegisterForm({
       );
     }
 
-    //  valor - com validação específica para números
     if (field.type === 'currency') {
       return (
         <View key={field.name}>
@@ -209,7 +207,6 @@ export function TransactionRegisterForm({
       );
     }
 
-    // data
     if (field.type === 'date') {
       const dateProps = {
         control,
@@ -230,7 +227,6 @@ export function TransactionRegisterForm({
       );
     }
 
-    // texto padrão
     const defaultProps = {
       control,
       name: field.name,
@@ -259,6 +255,7 @@ export function TransactionRegisterForm({
     const processedData = {
       ...data,
       value: typeof data.value === 'string' ? parseInt(data.value) || 0 : data.value,
+      attachment, // Adiciona o attachment aos dados
     };
 
     onSubmit(processedData);
@@ -267,6 +264,13 @@ export function TransactionRegisterForm({
   return (
     <View style={styles.container}>
       {transactionFields.map(renderField)}
+
+      {/* Componente de Upload de Anexo */}
+      <AttachmentPicker
+        attachment={attachment}
+        onAttachmentChange={setAttachment}
+        disabled={disabled}
+      />
 
       <ThemedButton
         title={mode === 'edit' ? 'Atualizar Transação' : 'Salvar Transação'}
