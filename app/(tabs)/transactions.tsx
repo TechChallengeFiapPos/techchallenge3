@@ -14,6 +14,7 @@ import { Dimensions, FlatList, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, FAB, Snackbar, Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function TransactionsScreen() {
@@ -92,18 +93,18 @@ export default function TransactionsScreen() {
     };
   }, []);
 
-  // ... resto das funções (renderTransaction, keyExtractor, etc)
+  const handleEdit = (transaction: Transaction) => {
+    router.push(`/(pages)/edit-transaction/${transaction.id}`);
+  };
 
   const renderTransaction = useCallback(
     ({ item }: { item: Transaction }) => (
       <TransactionItem
         transaction={item}
-        onPress={(transaction) => {
-          console.log('Transaction pressed:', transaction.id);
-        }}
+        onEdit={handleEdit} // ← Deve passar aqui
       />
     ),
-    [],
+    [handleEdit],
   );
 
   const keyExtractor = useCallback((item: Transaction) => item.id, []);
@@ -196,7 +197,7 @@ export default function TransactionsScreen() {
       </View>
     );
   }, [screenMetrics, onSurfaceColor, primaryColor, router, filterType, advancedFilters, transactions.length]);
-
+ 
   const dynamicStyles = useMemo(
     () => {
       const tabBarHeight = 90 + Math.max(insets.bottom, 0) + 20;
@@ -229,7 +230,7 @@ export default function TransactionsScreen() {
         onRefresh={handleRefresh}
         refreshing={loading}
         ListEmptyComponent={renderEmpty}
-        ListFooterComponent={renderFooter}
+        ListFooterComponent={renderFooter} 
         contentContainerStyle={[
           dynamicStyles.listContent,
           transactions.length === 0 && styles.emptyList,
