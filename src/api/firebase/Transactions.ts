@@ -1,3 +1,5 @@
+// src/api/firebase/Transactions.ts - Versão corrigida completa
+
 import { db } from '@config/firebaseConfig';
 import {
   CreateTransactionData,
@@ -24,8 +26,6 @@ import {
   where,
 } from 'firebase/firestore';
 
-const COLLECTION_NAME = 'transactions';
-
 const getUserTransactionsCollection = (userId: string) => {
   return collection(db, 'users', userId, 'transactions');
 };
@@ -39,15 +39,19 @@ export class TransactionAPI {
     try {
       console.log('🔄 Criando nova transação:', { userId, data });
 
-      const transactionData = {
-        ...data,
-        userId,
-        date: Timestamp.fromDate(new Date(data.date)),
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      };
+   // Remove attachment se for undefined
+    const { attachment, ...restData } = data;
+    
+    const transactionData = {
+      ...restData,
+      userId,
+      date: Timestamp.fromDate(new Date(data.date)),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      // Só adiciona attachment se existir
+      ...(attachment && { attachment }),
+    };
 
-      console.log(data);
       const docRef = await addDoc(getUserTransactionsCollection(userId), transactionData);
 
       const transaction: Transaction = {
@@ -74,13 +78,13 @@ export class TransactionAPI {
 
   // ============ BUSCAR TRANSAÇÃO POR ID ============
   static async getById(
-    transactionId: string,
     userId: string,
+    transactionId: string,
   ): Promise<{ success: boolean; data?: Transaction; error?: string }> {
     try {
-      console.log('Buscando transação:', transactionId);
+      console.log('Buscando transação:', { userId, transactionId });
 
-      const docRef = doc(db, COLLECTION_NAME, transactionId);
+      const docRef = doc(db, 'users', userId, 'transactions', transactionId);
       const docSnap = await getDoc(docRef);
 
       if (!docSnap.exists()) {
@@ -127,7 +131,7 @@ export class TransactionAPI {
 
       let q = query(getUserTransactionsCollection(userId), orderBy('date', 'desc'));
 
-      // ===== APLICAR FILTROS =====
+      // Aplicar filtros
       if (filters.type && filters.type !== 'all') {
         q = query(q, where('type', '==', filters.type));
       }
@@ -144,7 +148,6 @@ export class TransactionAPI {
         q = query(q, where('cardId', '==', filters.cardId));
       }
 
-      // Filtros de data (requer índices compostos no Firestore)
       if (filters.startDate) {
         q = query(q, where('date', '>=', Timestamp.fromDate(filters.startDate)));
       }
@@ -153,10 +156,8 @@ export class TransactionAPI {
         q = query(q, where('date', '<=', Timestamp.fromDate(filters.endDate)));
       }
 
-      // ===== SCROLL INFINITO =====
       q = query(q, limit(pageSize));
 
-      // Se há um lastDoc, continuar de onde parou
       if (lastDoc) {
         q = query(q, startAfter(lastDoc));
       }
@@ -209,9 +210,8 @@ export class TransactionAPI {
 
       const q = query(
         getUserTransactionsCollection(userId),
-        where('userId', '==', userId),
         orderBy('date', 'desc'),
-        limit(limitCount), // Limite configurável para performance
+        limit(limitCount),
       );
 
       const querySnapshot = await getDocs(q);
@@ -254,9 +254,9 @@ export class TransactionAPI {
         type,
       });
 
+      // REMOVIDO where('userId', '==', userId)
       let q = query(
         getUserTransactionsCollection(userId),
-        where('userId', '==', userId),
         where('date', '>=', Timestamp.fromDate(startDate)),
         where('date', '<=', Timestamp.fromDate(endDate)),
         orderBy('date', 'desc'),
@@ -293,19 +293,24 @@ export class TransactionAPI {
 
   // ============ ATUALIZAR TRANSAÇÃO ============
   static async update(
+    userId: string,
     transactionId: string,
     data: UpdateTransactionData,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log('🔄 Atualizando transação:', { transactionId, data });
+    console.log('🔄 Atualizando transação:', { userId, transactionId, data });
 
-      const updateData = {
-        ...data,
-        ...(data.date && { date: Timestamp.fromDate(data.date) }),
-        updatedAt: serverTimestamp(),
-      };
+    const { attachment, date, ...restData } = data;
 
-      await updateDoc(doc(db, COLLECTION_NAME, transactionId), updateData);
+    const updateData = {
+      ...restData,
+      ...(date && { date: Timestamp.fromDate(date) }),
+      ...(attachment !== undefined && { attachment }), // Permite null para remover
+      updatedAt: serverTimestamp(),
+    };
+
+      const docRef = doc(db, 'users', userId, 'transactions', transactionId);
+      await updateDoc(docRef, updateData);
 
       console.log('Transação atualizada com sucesso');
       return { success: true };
@@ -322,11 +327,15 @@ export class TransactionAPI {
   }
 
   // ============ DELETAR TRANSAÇÃO ============
-  static async delete(transactionId: string): Promise<{ success: boolean; error?: string }> {
+  static async delete(
+    userId: string,
+    transactionId: string
+  ): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log('🔄 Deletando transação:', transactionId);
+      console.log('🔄 Deletando transação:', { userId, transactionId });
 
-      await deleteDoc(doc(db, COLLECTION_NAME, transactionId));
+      const docRef = doc(db, 'users', userId, 'transactions', transactionId);
+      await deleteDoc(docRef);
 
       console.log('✅ Transação deletada com sucesso');
       return { success: true };
@@ -350,9 +359,9 @@ export class TransactionAPI {
     try {
       console.log('🔄 Buscando transações recentes:', { userId, limitCount });
 
+      // REMOVIDO where('userId', '==', userId)
       const q = query(
         getUserTransactionsCollection(userId),
-        where('userId', '==', userId),
         orderBy('createdAt', 'desc'),
         limit(limitCount),
       );

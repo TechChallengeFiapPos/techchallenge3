@@ -1,4 +1,5 @@
 // src/components/dashboard/FinancialCharts.tsx
+
 import { useThemeColor } from '@hooks/useThemeColor';
 import { Transaction } from '@src/models/transactions';
 import { getCategoryLabel } from '@src/utils/transactions';
@@ -72,7 +73,17 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
       categoryMap[category] = (categoryMap[category] || 0) + t.value;
     });
 
-    return Object.entries(categoryMap)
+    // LOG: Debug do mapeamento de categorias
+    console.log('📊 PIZZA - Total de despesas encontradas:', expenses.length);
+    console.log('📊 PIZZA - Valores brutos (em centavos) por categoria:', categoryMap);
+    
+    const formattedMap: Record<string, string> = {};
+    Object.entries(categoryMap).forEach(([cat, val]) => {
+      formattedMap[getCategoryLabel(cat)] = formatValue(val / 100);
+    });
+    console.log('📊 PIZZA - Valores formatados (em reais) por categoria:', formattedMap);
+
+    const result = Object.entries(categoryMap)
       .map(([category, value], index) => ({
         name: getCategoryLabel(category),
         value: value / 100,
@@ -83,6 +94,10 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
       }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 5);
+
+    console.log('📊 PIZZA - Top 5 categorias para exibir:', result.map(r => ({ name: r.name, value: formatValue(r.value) })));
+
+    return result;
   }, [transactions, primaryColor, secondaryColor, tertiaryColor]);
 
   // 2. Evolução últimos 6 meses
@@ -97,27 +112,34 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
       };
     });
 
-    const incomeData = last6Months.map(({ year, monthIndex }) =>
-      transactions
+    console.log('📈 LINHA - Meses analisados:', last6Months.map(m => `${m.label}/${m.year}`));
+
+    const incomeData = last6Months.map(({ year, monthIndex }) => {
+      const value = transactions
         .filter(
           (t) =>
             t.type === 'income' &&
             new Date(t.date).getFullYear() === year &&
             new Date(t.date).getMonth() === monthIndex
         )
-        .reduce((sum, t) => sum + t.value, 0) / 100
-    );
+        .reduce((sum, t) => sum + t.value, 0) / 100;
+      return value;
+    });
 
-    const expenseData = last6Months.map(({ year, monthIndex }) =>
-      transactions
+    const expenseData = last6Months.map(({ year, monthIndex }) => {
+      const value = transactions
         .filter(
           (t) =>
             t.type === 'expense' &&
             new Date(t.date).getFullYear() === year &&
             new Date(t.date).getMonth() === monthIndex
         )
-        .reduce((sum, t) => sum + t.value, 0) / 100
-    );
+        .reduce((sum, t) => sum + t.value, 0) / 100;
+      return value;
+    });
+
+    console.log('📈 LINHA - Receitas por mês (em reais):', incomeData.map((v, i) => `${last6Months[i].label}: ${formatValue(v)}`));
+    console.log('📈 LINHA - Despesas por mês (em reais):', expenseData.map((v, i) => `${last6Months[i].label}: ${formatValue(v)}`));
 
     return {
       labels: last6Months.map((m) => m.label),
@@ -132,8 +154,8 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
     const lastMonth = new Date();
     lastMonth.setMonth(current.getMonth() - 1);
 
-    const sumByMonth = (month: Date, type: 'income' | 'expense') =>
-      transactions
+    const sumByMonth = (month: Date, type: 'income' | 'expense') => {
+      const value = transactions
         .filter(
           (t) =>
             t.type === type &&
@@ -141,11 +163,41 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
             new Date(t.date).getMonth() === month.getMonth()
         )
         .reduce((sum, t) => sum + t.value, 0) / 100;
+      return value;
+    };
 
-    return [
-      { month: 'Mês Passado', income: sumByMonth(lastMonth, 'income'), expense: sumByMonth(lastMonth, 'expense') },
-      { month: 'Mês Atual', income: sumByMonth(current, 'income'), expense: sumByMonth(current, 'expense') },
+    const result = [
+      { 
+        month: 'Mês Passado', 
+        income: sumByMonth(lastMonth, 'income'), 
+        expense: sumByMonth(lastMonth, 'expense') 
+      },
+      { 
+        month: 'Mês Atual', 
+        income: sumByMonth(current, 'income'), 
+        expense: sumByMonth(current, 'expense') 
+      },
     ];
+
+    console.log('📊 BARRAS - Comparativo mensal:');
+    console.log(`   Mês Passado (${lastMonth.getMonth() + 1}/${lastMonth.getFullYear()}):`);
+    console.log(`      Receitas: ${formatValue(result[0].income)}`);
+    console.log(`      Despesas: ${formatValue(result[0].expense)}`);
+    console.log(`   Mês Atual (${current.getMonth() + 1}/${current.getFullYear()}):`);
+    console.log(`      Receitas: ${formatValue(result[1].income)}`);
+    console.log(`      Despesas: ${formatValue(result[1].expense)}`);
+
+    return result;
+  }, [transactions]);
+
+  // LOG: Resumo geral
+  useEffect(() => {
+    console.log('═══════════════════════════════════════');
+    console.log('📊 RESUMO DOS GRÁFICOS');
+    console.log(`Total de transações carregadas: ${transactions.length}`);
+    console.log(`Receitas: ${transactions.filter(t => t.type === 'income').length}`);
+    console.log(`Despesas: ${transactions.filter(t => t.type === 'expense').length}`);
+    console.log('═══════════════════════════════════════');
   }, [transactions]);
 
   if (transactions.length === 0) {
@@ -176,7 +228,7 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
                 x="name"
                 y="value"
                 colorScale={expensesByCategory.map((d) => d.color)}
-                labels={() => ''} // Remove labels sobre as fatias
+                labels={() => ''}
                 innerRadius={50}
                 labelRadius={70}
                 width={screenWidth * 0.9}
@@ -209,7 +261,7 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
         </AnimatedSection>
       )}
 
-{/* Evolução últimos 6 meses */}
+      {/* Evolução últimos 6 meses */}
       <AnimatedSection delay={300}>
         <Card style={[styles.card, { backgroundColor: surfaceColor }]}>
           <Card.Content>

@@ -21,7 +21,7 @@ export default function HomeScreen() {
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const negative = useThemeColor({}, 'error');
 
-  const { transactions } = useTransactions();
+  const { allTransactions } = useTransactions();
 
   // Animação para seções
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -48,8 +48,8 @@ export default function HomeScreen() {
 
   // Transações recentes (últimas 3)
   const recentTransactions = useMemo(() => {
-    return transactions.slice(0, 3);
-  }, [transactions]);
+    return allTransactions.slice(0, 3);
+  }, [allTransactions]);
 
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
@@ -83,7 +83,7 @@ export default function HomeScreen() {
         >
 
 
-          <FinancialCharts transactions={transactions} />
+          <FinancialCharts transactions={allTransactions} />
         </Animated.View>
 
         {/* Transações Recentes */}
