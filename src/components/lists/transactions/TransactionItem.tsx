@@ -1,10 +1,8 @@
-// src/components/list/TransactionItem.tsx - Com data no centro
-
 import { useThemeColor } from '@hooks/useThemeColor';
-import { ThemedList } from '@src/components/list/ThemedList';
 import { Transaction } from '@src/models/transactions';
 import { formatCurrency, getCategoryIcon, getCategoryLabel } from '@src/utils/transactions';
 import React from 'react';
+import { BaseTransactionListItem } from './BaseTransactionListItem';
 
 interface TransactionItemProps {
   transaction: Transaction;
@@ -41,13 +39,13 @@ export const TransactionItem = React.memo<TransactionItemProps>(
 
     const title = getCategoryLabel(transaction.categoryId) || 'Transação';
     const subtitle = `${transaction.type === 'expense' ? '-' : '+'}${formatCurrency(transaction.value)}`;
-    const centerText = formatDateTime(transaction.date); // DATA
+    const centerText = formatDateTime(transaction.date); // data 
     const rightText = '';
     const iconName = getCategoryIcon(transaction.categoryId);
     const colors = getTransactionColors();
 
     return (
-      <ThemedList
+      <BaseTransactionListItem
         title={title}
         subtitle={subtitle}
         centerText={centerText}

@@ -1,7 +1,7 @@
 import { darkTheme, lightTheme } from '@config/theme';
 import { useColorScheme } from '@hooks/useColorScheme';
-import { AuthProvider } from '@src/context/AuthContext';
-import { TransactionProvider } from '@src/context/TransactionsContext';
+import { AuthProvider } from '@src/contexts/AuthContext';
+import { TransactionProvider } from '@src/contexts/TransactionsContext';
 import { useFonts } from 'expo-font';
 import { useKeepAwake } from 'expo-keep-awake';
 import { Stack } from 'expo-router';

@@ -3,7 +3,7 @@ import { FinancialCharts } from '@src/components/dashboard/FinancialCharts';
 import { FinancialDashboard } from '@src/components/dashboard/FinancialDashboard';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedView } from '@src/components/ThemedView';
-import { useTransactions } from '@src/context/TransactionsContext';
+import { useTransactions } from '@src/contexts/TransactionsContext';
 import { useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
 import { Animated, Dimensions, ScrollView, StyleSheet, View } from 'react-native';

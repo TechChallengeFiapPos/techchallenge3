@@ -1,11 +1,11 @@
 // app/(tabs)/transactions.tsx
 
 import { useThemeColor } from '@hooks/useThemeColor';
-import { TransactionFilters } from '@src/components/filters/TransactionFilters';
-import { TransactionItem } from '@src/components/list/TransactionItem';
+import { TransactionFilters } from '@src/components/filters/transactions/TransactionFilters';
+import { TransactionItem } from '@src/components/lists/transactions/TransactionItem';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedView } from '@src/components/ThemedView';
-import { useTransactions } from '@src/context/TransactionsContext';
+import { useTransactions } from '@src/contexts/TransactionsContext';
 import { Transaction } from '@src/models/transactions';
 import { formatCurrency, paymentMethods, transactionCategories } from '@src/utils/transactions';
 import { useRouter } from 'expo-router';

@@ -1,7 +1,7 @@
-// src/components/ui/BaseListItem.tsx - Layout com data separada
-
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
+import { ThemedText } from '@src/components/ThemedText';
+import { ThemedView } from '@src/components/ThemedView';
 import React from 'react';
 import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
@@ -59,19 +59,17 @@ const dynamicStyles = {
   },
 };
 
-export const ThemedList = React.memo<BaseListItemProps>(
+export const BaseTransactionListItem = React.memo<BaseListItemProps>(
   ({
     title,
     subtitle,
     centerText,
-    rightText,
     iconName,
     iconColor = 'white',
     iconBackgroundColor,
     titleColor,
     subtitleColor,
     centerTextColor,
-    rightTextColor,
     onPress,
     onEdit,
     onDelete,
@@ -90,9 +88,8 @@ export const ThemedList = React.memo<BaseListItemProps>(
 
     return (
       <Pressable onPress={onPress} disabled={!onPress}>
-        <View style={[styles.container, dynamicStyles.container, { backgroundColor }]}>
+        <ThemedView style={[styles.container, dynamicStyles.container, { backgroundColor }]}>
           <View style={[styles.content, dynamicStyles.content]}>
-            {/* Ícone */}
             <View
               style={[
                 styles.iconContainer,
@@ -103,15 +100,14 @@ export const ThemedList = React.memo<BaseListItemProps>(
               <Ionicons name={iconName as any} size={dynamicStyles.iconSize} color={iconColor} />
             </View>
 
-            {/* Informações principais: Categoria e Valor */}
             <View style={[styles.mainInfo, dynamicStyles.mainInfo]}>
-              <Text
-                variant={isTablet ? 'titleMedium' : 'bodyLarge'}
+              <ThemedText
+                textType={isTablet ? 'titleMedium' : 'bodyLarge'}
                 style={[styles.title, { color: titleColor || defaultTitleColor }]}
                 numberOfLines={1}
               >
                 {title}
-              </Text>
+              </ThemedText>
               <Text
                 variant={isTablet ? 'bodyMedium' : 'bodyLarge'}
                 style={[styles.subtitle, { color: subtitleColor || defaultSubtitleColor }]}
@@ -121,25 +117,22 @@ export const ThemedList = React.memo<BaseListItemProps>(
               </Text>
             </View>
 
-            {/* Data (centro) */}
             {centerText && (
               <View style={[styles.centerSection, dynamicStyles.centerSection]}>
-                <Text
-                  variant="bodySmall"
+                <ThemedText
+                  textType="bodySmall"
                   style={[styles.centerText, { color: centerTextColor || defaultSubtitleColor }]}
                   numberOfLines={1}
                 >
                   {centerText}
-                </Text>
+                </ThemedText>
               </View>
             )}
 
-            {/* Separador */}
             <View
               style={[styles.separator, dynamicStyles.separator, { backgroundColor: separatorColor }]}
             />
 
-            {/* Botões à direita */}
             {(onEdit || onDelete) && (
               <View style={styles.actionsContainer}>
                 {onEdit && (
@@ -163,13 +156,13 @@ export const ThemedList = React.memo<BaseListItemProps>(
               </View>
             )}
           </View>
-        </View>
+        </ThemedView>
       </Pressable>
     );
   },
 );
 
-ThemedList.displayName = 'ThemedList';
+BaseTransactionListItem.displayName = 'ThemedList';
 
 const styles = StyleSheet.create({
   container: {

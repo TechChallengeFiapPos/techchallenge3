@@ -1,13 +1,11 @@
-// src/components/transaction/AttachmentPicker.tsx - Versão com Upload Real
-
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { StorageAPI } from '@src/api/firebase/Storage';
-import { useAuth } from '@src/context/AuthContext';
+import { useAuth } from '@src/contexts/AuthContext';
 import { TransactionAttachment } from '@src/models/transactions';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Alert, Image, Linking, StyleSheet, View } from 'react-native';
 import { Button, Card, IconButton, Menu, ProgressBar, Text } from 'react-native-paper';
 
@@ -15,7 +13,7 @@ interface AttachmentPickerProps {
   attachment?: TransactionAttachment;
   onAttachmentChange: (attachment?: TransactionAttachment) => void;
   disabled?: boolean;
-  transactionId?: string; // Para uploads de edição
+  transactionId?: string; 
 }
 
 export function AttachmentPicker({
@@ -34,7 +32,6 @@ export function AttachmentPicker({
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const errorColor = useThemeColor({}, 'error');
 
-  // Função genérica para fazer upload
   const handleFileUpload = async (uri: string, fileName: string, mimeType: string) => {
     if (!user) {
       Alert.alert('Erro', 'Usuário não autenticado');
@@ -45,10 +42,9 @@ export function AttachmentPicker({
     setUploadProgress(0);
 
     try {
-      // Gerar ID temporário se não houver transactionId
+      // Gerar ID temporário se não houver transactionId (novaa transacao)
       const tempId = transactionId || `temp_${Date.now()}`;
 
-      // Upload com progresso
       const result = await StorageAPI.uploadWithProgress(
         user.uid,
         tempId,
@@ -74,7 +70,6 @@ export function AttachmentPicker({
     }
   };
 
-  // Pegar imagem da câmera
   const pickFromCamera = async () => {
     setMenuVisible(false);
 
@@ -100,7 +95,6 @@ export function AttachmentPicker({
     }
   };
 
-  // Pegar imagem da galeria
   const pickFromGallery = async () => {
     setMenuVisible(false);
 
@@ -126,7 +120,6 @@ export function AttachmentPicker({
     }
   };
 
-  // Pegar documento
   const pickDocument = async () => {
     setMenuVisible(false);
 
@@ -145,7 +138,6 @@ export function AttachmentPicker({
     }
   };
 
-  // Remover anexo
   const removeAttachment = () => {
     Alert.alert(
       'Remover anexo',
@@ -156,7 +148,7 @@ export function AttachmentPicker({
           text: 'Remover',
           style: 'destructive',
           onPress: async () => {
-            // Deletar do Firebase Storage
+            // Deletar no Firebase Storage
             if (attachment?.url) {
               await StorageAPI.deleteAttachment(attachment.url);
             }
@@ -167,14 +159,12 @@ export function AttachmentPicker({
     );
   };
 
-  // Visualizar anexo
   const viewAttachment = () => {
     if (attachment?.url) {
       Linking.openURL(attachment.url);
     }
   };
 
-  // Formatar tamanho do arquivo
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -199,7 +189,7 @@ export function AttachmentPicker({
               disabled={disabled || uploading}
               style={styles.button}
             >
-              Adicionar Anexo
+              Adicionar Comprovante
             </Button>
           }
         >
@@ -222,19 +212,16 @@ export function AttachmentPicker({
       ) : (
         <Card style={[styles.attachmentCard, { backgroundColor: surfaceColor }]}>
           <Card.Content style={styles.attachmentContent}>
-            {/* Preview de Imagem */}
             {attachment.type.startsWith('image/') && (
               <Image source={{ uri: attachment.url }} style={styles.preview} />
             )}
 
-            {/* Preview de PDF */}
             {attachment.type === 'application/pdf' && (
               <View style={[styles.pdfPreview, { backgroundColor: errorColor + '20' }]}>
                 <Ionicons name="document-text" size={40} color={errorColor} />
               </View>
             )}
 
-            {/* Informações do Arquivo */}
             <View style={styles.fileInfo}>
               <Text variant="bodyMedium" style={{ color: onSurfaceColor }} numberOfLines={1}>
                 {attachment.name}
@@ -244,7 +231,6 @@ export function AttachmentPicker({
               </Text>
             </View>
 
-            {/* Ações */}
             <View style={styles.actions}>
               <IconButton
                 icon="eye"
@@ -264,7 +250,6 @@ export function AttachmentPicker({
         </Card>
       )}
 
-      {/* Barra de Progresso */}
       {uploading && (
         <View style={styles.progressContainer}>
           <ProgressBar progress={uploadProgress / 100} color={primaryColor} />
