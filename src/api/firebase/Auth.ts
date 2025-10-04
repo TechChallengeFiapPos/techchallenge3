@@ -1,4 +1,5 @@
 import { auth, db } from '@config/firebaseConfig.js';
+import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
@@ -16,7 +17,7 @@ export const register = async (email: string, password: string, name: string) =>
     // Retorna o objeto user do Firebase
     return { success: true, user };
   } catch (error: any) {
-    return { success: false, error: error.message };
+    return { success: false, error: getFirebaseErrorMessage(error) };
   }
 };
 
@@ -32,6 +33,6 @@ export const login = async (email: string, password: string) => {
     // Retorna o objeto user do Firebase
     return { success: true, user };
   } catch (error: any) {
-    return { success: false, error: error.message };
+    return { success: false, error: getFirebaseErrorMessage(error) };
   }
 };

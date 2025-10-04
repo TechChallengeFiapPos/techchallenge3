@@ -1,6 +1,6 @@
 import * as cardAPI from '@src/api/firebase/Card';
 import { CardData } from '@src/api/firebase/Card';
-import { useAuth } from '@src/context/AuthContext';
+import { useAuth } from '@src/contexts/AuthContext';
 import { useCallback, useEffect, useState } from 'react';
 
 export const useCards = () => {
