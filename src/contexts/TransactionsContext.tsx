@@ -7,6 +7,7 @@ import {
   TransactionFilters,
   UpdateTransactionData,
 } from '@src/models/transactions';
+import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import { calculateBalance, calculateExpenses, calculateIncome } from '@src/utils/transactions';
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
@@ -50,10 +51,10 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
 
   // Lista paginada/filtrada (para a tela de transações)
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  
+
   // TODAS as transações (para gráficos - NUNCA FILTRADO)
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,10 +79,10 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
 
       if (result.success && result.data) {
         const all = result.data;
-        
+
         // Atualiza TODAS as transações (para gráficos)
         setAllTransactions(all);
-        
+
         // Calcula totais
         const income = calculateIncome(all);
         const expenses = calculateExpenses(all);
@@ -180,8 +181,8 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
           return { success: false, error: result.error };
         }
       } catch (err: any) {
-        setError('Erro inesperado ao criar transação');
-        return { success: false, error: 'Erro inesperado' };
+        const friendlyError = getFirebaseErrorMessage(err);
+        return { success: false, error: friendlyError };
       } finally {
         setLoading(false);
       }
@@ -218,42 +219,42 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   );
 
   // Deletar (precisa do userId agora)
-const deleteTransaction = useCallback(
-  async (id: string) => {
-    if (!user) return { success: false, error: 'Usuário não autenticado' };
+  const deleteTransaction = useCallback(
+    async (id: string) => {
+      if (!user) return { success: false, error: 'Usuário não autenticado' };
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    try {
-      // Buscar transação para pegar anexo
-      const transaction = allTransactions.find(t => t.id === id);
-      
-      // Deletar anexo do Storage primeiro, se existir
-      if (transaction?.attachment?.url) {
-        console.log('🗑️ Deletando anexo do Storage...');
-        await StorageAPI.deleteAttachment(transaction.attachment.url);
+      try {
+        // Buscar transação para pegar anexo
+        const transaction = allTransactions.find(t => t.id === id);
+
+        // Deletar anexo do Storage primeiro, se existir
+        if (transaction?.attachment?.url) {
+          console.log('🗑️ Deletando anexo do Storage...');
+          await StorageAPI.deleteAttachment(transaction.attachment.url);
+        }
+
+        // Deletar transação do Firestore
+        const result = await TransactionAPI.delete(user.uid, id);
+
+        if (result.success) {
+          await Promise.all([refreshTransactions(), loadAllTransactions()]);
+          return { success: true };
+        } else {
+          setError(result.error || 'Erro ao deletar transação');
+          return { success: false, error: result.error };
+        }
+      } catch (err: any) {
+        setError('Erro inesperado ao deletar transação');
+        return { success: false, error: 'Erro inesperado' };
+      } finally {
+        setLoading(false);
       }
-
-      // Deletar transação do Firestore
-      const result = await TransactionAPI.delete(user.uid, id);
-
-      if (result.success) {
-        await Promise.all([refreshTransactions(), loadAllTransactions()]);
-        return { success: true };
-      } else {
-        setError(result.error || 'Erro ao deletar transação');
-        return { success: false, error: result.error };
-      }
-    } catch (err: any) {
-      setError('Erro inesperado ao deletar transação');
-      return { success: false, error: 'Erro inesperado' };
-    } finally {
-      setLoading(false);
-    }
-  },
-  [user, allTransactions, refreshTransactions, loadAllTransactions],
-);
+    },
+    [user, allTransactions, refreshTransactions, loadAllTransactions],
+  );
 
   // Carregar ao montar
   useEffect(() => {
@@ -286,7 +287,7 @@ const deleteTransaction = useCallback(
     updateTransaction,
     deleteTransaction,
     loadTransactions,
-  
+
 
     loadMoreTransactions,
     refreshTransactions,
