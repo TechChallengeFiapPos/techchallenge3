@@ -1,3 +1,4 @@
+// src/components/forms/TransactionRegisterForm.tsx - Código completo com upload
 
 import { getUserCards } from '@src/api/firebase/Card';
 import { useAuth } from '@src/context/AuthContext';
@@ -67,6 +68,7 @@ const transactionFields: TransactionFormField[] = [
     placeholder: 'Descrição da transação (opcional)',
     required: false,
     type: 'text',
+    maxLength: 20,
   },
   {
     name: 'date',
@@ -88,7 +90,7 @@ export function TransactionRegisterForm({
   const [userCards, setUserCards] = useState<{ label: string; value: string }[]>([]);
   const [attachment, setAttachment] = useState<TransactionAttachment | undefined>(
     initialData?.attachment
-  );
+  ); // ESTADO DO ATTACHMENT
 
   const {
     control,
@@ -157,17 +159,13 @@ export function TransactionRegisterForm({
         options = userCards;
       }
 
-      const selectProps = {
-        control,
-        name: field.name,
-        label: field.label,
-        rules: baseRules,
-      };
-
       return (
         <View key={field.name}>
           <SelectController
-            {...selectProps}
+            control={control}
+            name={field.name}
+            label={field.label}
+            rules={baseRules}
             options={options}
             placeholder={field.placeholder || 'Selecione uma opção'}
             multiple={false}
@@ -190,10 +188,23 @@ export function TransactionRegisterForm({
             label={field.label}
             placeholder={field.placeholder}
             rules={{
-              ...baseRules,
+              required: 'Valor é obrigatório',
               validate: (value: any) => {
-                if (!value || value === 0) return 'Valor é obrigatório';
-                return value > 0 || 'Valor deve ser maior que zero';
+                const numValue = typeof value === 'string' ? parseInt(value) : value;
+                
+                if (!numValue || numValue === 0) {
+                  return 'Valor é obrigatório';
+                }
+                
+                if (numValue <= 0) {
+                  return 'Valor deve ser maior que zero';
+                }
+                
+                if (numValue > 99999999) {
+                  return 'Valor máximo: R$ 999.999,99';
+                }
+                
+                return true;
               },
             }}
             disabled={disabled}
@@ -208,16 +219,29 @@ export function TransactionRegisterForm({
     }
 
     if (field.type === 'date') {
-      const dateProps = {
-        control,
-        name: field.name,
-        label: field.label,
-        rules: baseRules,
-        defaultValue: initialData?.date || new Date(),
-      };
       return (
         <View key={field.name}>
-          <DateController {...dateProps} />
+          <DateController
+            control={control}
+            name={field.name}
+            label={field.label}
+            rules={{
+              required: 'Data é obrigatória',
+              validate: (value: Date) => {
+                if (!value) return 'Data é obrigatória';
+                
+                const today = new Date();
+                today.setHours(23, 59, 59, 999);
+                
+                if (value > today) {
+                  return 'Data não pode ser futura';
+                }
+                
+                return true;
+              },
+            }}
+            defaultValue={initialData?.date || new Date()}
+          />
           {(formErrors[field.name] || errors?.[field.name]) && (
             <ThemedText textType="default" colorName="error" style={styles.errorText}>
               {formErrors[field.name]?.message || errors?.[field.name]}
@@ -227,17 +251,21 @@ export function TransactionRegisterForm({
       );
     }
 
-    const defaultProps = {
-      control,
-      name: field.name,
-      label: field.label,
-      rules: baseRules,
-    };
-
     return (
       <View key={field.name}>
         <InputController
-          {...defaultProps}
+          control={control}
+          name={field.name}
+          label={field.label}
+          rules={{
+            ...baseRules,
+            ...(field.maxLength && {
+              maxLength: {
+                value: field.maxLength,
+                message: `${field.label} deve ter no máximo ${field.maxLength} caracteres`,
+              },
+            }),
+          }}
           placeholder={field.placeholder}
           keyboardType="default"
           maxLength={field.maxLength}
@@ -255,7 +283,7 @@ export function TransactionRegisterForm({
     const processedData = {
       ...data,
       value: typeof data.value === 'string' ? parseInt(data.value) || 0 : data.value,
-      attachment, // Adiciona o attachment aos dados
+      attachment, // INCLUI ATTACHMENT
     };
 
     onSubmit(processedData);
@@ -265,7 +293,7 @@ export function TransactionRegisterForm({
     <View style={styles.container}>
       {transactionFields.map(renderField)}
 
-      {/* Componente de Upload de Anexo */}
+      {/* COMPONENTE DE UPLOAD */}
       <AttachmentPicker
         attachment={attachment}
         onAttachmentChange={setAttachment}
@@ -290,6 +318,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 12,
+    marginTop: 4,
   },
   submitButton: {
     marginTop: 24,
