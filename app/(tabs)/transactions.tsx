@@ -7,10 +7,10 @@ import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedView } from '@src/components/ThemedView';
 import { useTransactions } from '@src/context/TransactionsContext';
 import { Transaction } from '@src/models/transactions';
-import { paymentMethods, transactionCategories } from '@src/utils/transactions';
+import { formatCurrency, paymentMethods, transactionCategories } from '@src/utils/transactions';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Dimensions, FlatList, StyleSheet, View } from 'react-native';
+import { Alert, Dimensions, FlatList, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, FAB, Snackbar, Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -35,6 +35,7 @@ export default function TransactionsScreen() {
     loadMoreTransactions,
     refreshTransactions,
     clearError,
+    deleteTransaction
   } = useTransactions();
 
   // Estados dos filtros
@@ -97,14 +98,41 @@ export default function TransactionsScreen() {
     router.push(`/(pages)/edit-transaction/${transaction.id}`);
   };
 
+   const handleDelete = (transaction: Transaction) => {
+    Alert.alert(
+      'Deletar Transação',
+      `Tem certeza que deseja deletar esta transação de ${formatCurrency(transaction.value)}?`,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Deletar',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await deleteTransaction(transaction.id);
+            
+            if (result.success) {
+              Alert.alert('Sucesso', 'Transação deletada com sucesso!');
+            } else {
+              Alert.alert('Erro', result.error || 'Erro ao deletar transação');
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const renderTransaction = useCallback(
     ({ item }: { item: Transaction }) => (
       <TransactionItem
         transaction={item}
         onEdit={handleEdit} // ← Deve passar aqui
+        onDelete={handleDelete}
       />
     ),
-    [handleEdit],
+    [handleEdit, handleDelete],
   );
 
   const keyExtractor = useCallback((item: Transaction) => item.id, []);

@@ -177,14 +177,21 @@ export class StorageAPI {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       console.log('🗑️ Deletando arquivo:', attachmentUrl);
+
+      // Cria referência a partir da URL
       const storageRef = ref(storage, attachmentUrl);
       await deleteObject(storageRef);
+
       console.log('✅ Arquivo deletado com sucesso');
       return { success: true };
     } catch (error: any) {
       console.error('❌ Erro ao deletar arquivo:', error);
-      console.error('  Código:', error.code);
-      console.error('  Mensagem:', error.message);
+
+      // Se o arquivo não existe, considerar sucesso
+      if (error.code === 'storage/object-not-found') {
+        return { success: true };
+      }
+
       return { success: false, error: error.message };
     }
   }
