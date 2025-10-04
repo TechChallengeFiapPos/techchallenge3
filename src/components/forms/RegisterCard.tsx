@@ -2,8 +2,8 @@
 import { CardFormData, CardFormField, CardFormProps, SelectOption } from '@src/models/card';
 import { useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
-import { InputController } from '../input';
-import { SelectController } from '../select/SelectController';
+import { InputController } from '../inputs';
+import { SelectController } from '../selects/SelectController';
 import { ThemedButton } from '../ThemedButton';
 import { ThemedText } from '../ThemedText';
 

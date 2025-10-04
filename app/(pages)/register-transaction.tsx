@@ -4,7 +4,7 @@ import { useThemeColor } from '@hooks/useThemeColor';
 import { TransactionRegisterForm } from '@src/components/forms';
 import { ThemedCard } from '@src/components/ThemedCard';
 import { ThemedText } from '@src/components/ThemedText';
-import { useTransactions } from '@src/context/TransactionsContext';
+import { useTransactions } from '@src/contexts/TransactionsContext';
 import { CreateTransactionData } from '@src/models/transactions';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';

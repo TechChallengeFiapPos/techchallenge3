@@ -2,7 +2,7 @@ import { ThemedButton } from '@src/components/ThemedButton';
 import { ThemedText } from '@src/components/ThemedText';
 import { FieldValues, useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
-import { InputController } from '../input/InputController';
+import { InputController } from '../inputs/InputController';
 
 export type FormField = {
   name: string;

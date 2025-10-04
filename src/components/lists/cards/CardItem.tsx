@@ -2,7 +2,7 @@
 import { useThemeColor } from '@hooks/useThemeColor';
 import { CardData } from '@src/models/card';
 import React from 'react';
-import { ThemedFlatList } from './ThemedList';
+import { ThemedList } from '../transactions/BaseTransactionListItem';
 
 interface CardItemProps {
   card: CardData;
@@ -84,7 +84,7 @@ export const CardItem = React.memo<CardItemProps>(({ card, onPress }) => {
   };
 
   return (
-    <ThemedFlatList
+    <ThemedList
       title={title}
       subtitle={subtitle}
       centerText={centerText}

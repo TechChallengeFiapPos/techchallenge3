@@ -1,8 +1,6 @@
-// src/contexts/TransactionContext.tsx
-
 import { StorageAPI } from '@src/api/firebase/Storage';
 import { TransactionAPI } from '@src/api/firebase/Transactions';
-import { useAuth } from '@src/context/AuthContext';
+import { useAuth } from '@src/contexts/AuthContext';
 import {
   CreateTransactionData,
   Transaction,

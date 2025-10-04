@@ -1,5 +1,5 @@
 import { useThemeColor } from '@hooks/useThemeColor';
-import { useAuth } from '@src/context/AuthContext';
+import { useAuth } from '@src/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { Appbar, Text } from 'react-native-paper';
@@ -45,8 +45,6 @@ export function PageHeader({
           onPress: async () => {
             try {
               await logout();
-              // O redirecionamento para /login será feito automaticamente
-              // pelo seu sistema de autenticação no _layout.tsx
             } catch (error) {
               console.error('Erro ao fazer logout:', error);
               Alert.alert('Erro', 'Não foi possível sair. Tente novamente.');
@@ -78,15 +76,12 @@ export function PageHeader({
         </View>
       </View>
 
-      {/* Botão de voltar */}
       {showBackButton && (
         <Appbar.BackAction onPress={handleBack} color={onSurfaceColor} size={24} />
       )}
 
-      {/* Título da página */}
       <Appbar.Content title={title} titleStyle={[styles.title, { color: onSurfaceColor }]} />
 
-      {/* Botão de logout */}
       {showLogout && (
         <Pressable
           onPress={handleLogout}

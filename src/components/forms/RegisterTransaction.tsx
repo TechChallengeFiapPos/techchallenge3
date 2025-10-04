@@ -1,7 +1,7 @@
 // src/components/forms/TransactionRegisterForm.tsx - Código completo com upload
 
 import { getUserCards } from '@src/api/firebase/Card';
-import { useAuth } from '@src/context/AuthContext';
+import { useAuth } from '@src/contexts/AuthContext';
 import {
   TransactionAttachment,
   TransactionFormData,
@@ -17,9 +17,9 @@ import {
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
-import { DateController, InputController } from '../input';
-import { CurrencyInputController } from '../input/CurrencyInputController';
-import { SelectController } from '../select/SelectController';
+import { DateController, InputController } from '../inputs';
+import { CurrencyInputController } from '../inputs/CurrencyInputController';
+import { SelectController } from '../selects/SelectController';
 import { ThemedButton } from '../ThemedButton';
 import { ThemedText } from '../ThemedText';
 import { AttachmentPicker } from '../upload/TransactionAttachmentPicker';

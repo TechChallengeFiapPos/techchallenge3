@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
-import { useTransactions } from '@src/context/TransactionsContext';
+import { useTransactions } from '@src/contexts/TransactionsContext';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import { ProgressBar, Surface, Text } from 'react-native-paper';
 

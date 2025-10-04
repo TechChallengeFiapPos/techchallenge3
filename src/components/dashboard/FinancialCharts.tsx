@@ -1,5 +1,3 @@
-// src/components/dashboard/FinancialCharts.tsx
-
 import { useThemeColor } from '@hooks/useThemeColor';
 import { Transaction } from '@src/models/transactions';
 import { getCategoryLabel } from '@src/utils/transactions';
