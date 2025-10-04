@@ -284,12 +284,12 @@ const styles = StyleSheet.create({
   headerContainer: { marginBottom: 8 },
   transactionsHeader: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     paddingVertical: 16,
     paddingTop: 24,
   },
-  transactionsTitle: { fontWeight: 'bold', flex: 1 },
+  transactionsTitle: { fontWeight: 'bold', marginRight: 8,},
   headerFab: { marginLeft: 12, elevation: 4 },
   emptyList: { flexGrow: 1 },
   emptyContainer: {
