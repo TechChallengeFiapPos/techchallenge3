@@ -1,5 +1,6 @@
 // src/contexts/TransactionContext.tsx
 
+import { StorageAPI } from '@src/api/firebase/Storage';
 import { TransactionAPI } from '@src/api/firebase/Transactions';
 import { useAuth } from '@src/context/AuthContext';
 import {
@@ -219,32 +220,42 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   );
 
   // Deletar (precisa do userId agora)
-  const deleteTransaction = useCallback(
-    async (id: string) => {
-      if (!user) return { success: false, error: 'Usuário não autenticado' };
+const deleteTransaction = useCallback(
+  async (id: string) => {
+    if (!user) return { success: false, error: 'Usuário não autenticado' };
 
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      try {
-        const result = await TransactionAPI.delete(user.uid, id);
-
-        if (result.success) {
-          await Promise.all([refreshTransactions(), loadAllTransactions()]);
-          return { success: true };
-        } else {
-          setError(result.error || 'Erro ao deletar transação');
-          return { success: false, error: result.error };
-        }
-      } catch (err: any) {
-        setError('Erro inesperado ao deletar transação');
-        return { success: false, error: 'Erro inesperado' };
-      } finally {
-        setLoading(false);
+    try {
+      // Buscar transação para pegar anexo
+      const transaction = allTransactions.find(t => t.id === id);
+      
+      // Deletar anexo do Storage primeiro, se existir
+      if (transaction?.attachment?.url) {
+        console.log('🗑️ Deletando anexo do Storage...');
+        await StorageAPI.deleteAttachment(transaction.attachment.url);
       }
-    },
-    [user, refreshTransactions, loadAllTransactions],
-  );
+
+      // Deletar transação do Firestore
+      const result = await TransactionAPI.delete(user.uid, id);
+
+      if (result.success) {
+        await Promise.all([refreshTransactions(), loadAllTransactions()]);
+        return { success: true };
+      } else {
+        setError(result.error || 'Erro ao deletar transação');
+        return { success: false, error: result.error };
+      }
+    } catch (err: any) {
+      setError('Erro inesperado ao deletar transação');
+      return { success: false, error: 'Erro inesperado' };
+    } finally {
+      setLoading(false);
+    }
+  },
+  [user, allTransactions, refreshTransactions, loadAllTransactions],
+);
 
   // Carregar ao montar
   useEffect(() => {
@@ -265,7 +276,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   }, [user]);
 
   const value: TransactionContextType = {
-    transactions, // Lista filtrada
+    transactions, // Lista filtradaπ
     allTransactions, // TODAS (para gráficos)
     loading,
     error,
@@ -277,6 +288,8 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     updateTransaction,
     deleteTransaction,
     loadTransactions,
+  
+
     loadMoreTransactions,
     refreshTransactions,
     clearError,

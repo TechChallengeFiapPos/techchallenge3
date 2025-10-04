@@ -1,4 +1,4 @@
-// src/components/ui/BaseListItem.tsx - Versão corrigida
+// src/components/ui/BaseListItem.tsx - Layout com data separada
 
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
@@ -9,27 +9,20 @@ import { IconButton, Text } from 'react-native-paper';
 const { width: screenWidth } = Dimensions.get('window');
 
 interface BaseListItemProps {
-  // Dados principais
   title: string;
   subtitle: string;
+  centerText?: string; // Data
   rightText: string;
-
-  // Configuração do ícone
   iconName: string;
   iconColor?: string;
   iconBackgroundColor?: string;
-
-  // Cores customizáveis
   titleColor?: string;
   subtitleColor?: string;
+  centerTextColor?: string;
   rightTextColor?: string;
-
-  // Ações (ADICIONE)
+  onPress?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
-  onPress?: () => void;
-
-  // Comportamento
   disabled?: boolean;
 }
 
@@ -48,19 +41,21 @@ const dynamicStyles = {
     width: isTablet ? 56 : 48,
     height: isTablet ? 56 : 48,
     borderRadius: isTablet ? 28 : 24,
-    marginRight: isTablet ? 20 : 16,
+    marginRight: isTablet ? 16 : 12,
   },
   iconSize: isTablet ? 28 : 24,
   mainInfo: {
-    flex: isLandscape ? 3 : 2,
-    paddingRight: isTablet ? 20 : 16,
+    flex: 1,
+    paddingRight: 8,
+  },
+  centerSection: {
+    minWidth: 60,
+    paddingRight: 8,
+    justifyContent: 'center' as const,
   },
   separator: {
     height: isTablet ? 50 : 40,
-    marginHorizontal: isTablet ? 20 : 16,
-  },
-  rightSection: {
-    flex: isLandscape ? 1.5 : 1.2,
+    marginHorizontal: isTablet ? 12 : 8,
   },
 };
 
@@ -68,20 +63,22 @@ export const ThemedList = React.memo<BaseListItemProps>(
   ({
     title,
     subtitle,
+    centerText,
     rightText,
     iconName,
     iconColor = 'white',
     iconBackgroundColor,
     titleColor,
     subtitleColor,
+    centerTextColor,
     rightTextColor,
-    onEdit, // ADICIONE
-    onDelete, // ADICIONE
+    onPress,
+    onEdit,
+    onDelete,
   }) => {
     const backgroundColor = useThemeColor({}, 'surface');
     const defaultTitleColor = useThemeColor({}, 'onSurface');
     const defaultSubtitleColor = useThemeColor({}, 'onSurfaceVariant');
-    const defaultRightColor = useThemeColor({}, 'onSurface');
     const separatorColor = useThemeColor({}, 'outline');
     const primaryColor = useThemeColor({}, 'primary');
     const errorColor = useThemeColor({}, 'error');
@@ -92,7 +89,7 @@ export const ThemedList = React.memo<BaseListItemProps>(
     };
 
     return (
-      <Pressable>
+      <Pressable onPress={onPress} disabled={!onPress}>
         <View style={[styles.container, dynamicStyles.container, { backgroundColor }]}>
           <View style={[styles.content, dynamicStyles.content]}>
             {/* Ícone */}
@@ -106,53 +103,65 @@ export const ThemedList = React.memo<BaseListItemProps>(
               <Ionicons name={iconName as any} size={dynamicStyles.iconSize} color={iconColor} />
             </View>
 
-            {/* Informações principais */}
+            {/* Informações principais: Categoria e Valor */}
             <View style={[styles.mainInfo, dynamicStyles.mainInfo]}>
               <Text
                 variant={isTablet ? 'titleMedium' : 'bodyLarge'}
                 style={[styles.title, { color: titleColor || defaultTitleColor }]}
                 numberOfLines={1}
-                ellipsizeMode="tail"
               >
                 {title}
               </Text>
               <Text
-                variant={isTablet ? 'bodyMedium' : 'bodySmall'}
+                variant={isTablet ? 'bodyMedium' : 'bodyLarge'}
                 style={[styles.subtitle, { color: subtitleColor || defaultSubtitleColor }]}
+                numberOfLines={1}
               >
                 {subtitle}
               </Text>
             </View>
+
+            {/* Data (centro) */}
+            {centerText && (
+              <View style={[styles.centerSection, dynamicStyles.centerSection]}>
+                <Text
+                  variant="bodySmall"
+                  style={[styles.centerText, { color: centerTextColor || defaultSubtitleColor }]}
+                  numberOfLines={1}
+                >
+                  {centerText}
+                </Text>
+              </View>
+            )}
 
             {/* Separador */}
             <View
               style={[styles.separator, dynamicStyles.separator, { backgroundColor: separatorColor }]}
             />
 
-            {/* Seção direita */}
-            <View style={[styles.rightSection, dynamicStyles.rightSection]}>
-              <Text
-                variant={isTablet ? 'titleMedium' : 'bodyLarge'}
-                style={[styles.rightText, { color: rightTextColor || defaultRightColor }]}
-                numberOfLines={1}
-                adjustsFontSizeToFit={true}
-                minimumFontScale={0.8}
-              >
-                {rightText}
-              </Text>
-
-              {/* BOTÕES DE AÇÃO - CRÍTICO */}
-              {(onEdit || onDelete) && (
-                <View style={styles.actions}>
-                  {onEdit && (
-                    <IconButton icon="pencil" size={20} onPress={onEdit} iconColor={primaryColor} />
-                  )}
-                  {onDelete && (
-                    <IconButton icon="delete" size={20} onPress={onDelete} iconColor={errorColor} />
-                  )}
-                </View>
-              )}
-            </View>
+            {/* Botões à direita */}
+            {(onEdit || onDelete) && (
+              <View style={styles.actionsContainer}>
+                {onEdit && (
+                  <IconButton
+                    icon="pencil"
+                    size={18}
+                    onPress={onEdit}
+                    iconColor={primaryColor}
+                    style={styles.actionButton}
+                  />
+                )}
+                {onDelete && (
+                  <IconButton
+                    icon="delete"
+                    size={18}
+                    onPress={onDelete}
+                    iconColor={errorColor}
+                    style={styles.actionButton}
+                  />
+                )}
+              </View>
+            )}
           </View>
         </View>
       </Pressable>
@@ -183,25 +192,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  mainInfo: {},
+  mainInfo: {
+    justifyContent: 'center',
+  },
   title: {
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  subtitle: {},
+  subtitle: {
+    fontWeight: '600',
+  },
+  centerSection: {
+    alignItems: 'flex-end',
+  },
+  centerText: {
+    fontSize: 12,
+  },
   separator: {
     width: 1,
     opacity: 0.3,
   },
-  rightSection: {
-    alignItems: 'flex-end',
-    paddingLeft: 8,
-  },
-  rightText: {
-    fontWeight: 'bold',
-  },
-  actions: {
+  actionsContainer: {
     flexDirection: 'row',
-    marginTop: -8,
+    marginLeft: 4,
+  },
+  actionButton: {
+    margin: 0,
+    width: 36,
+    height: 36,
   },
 });
