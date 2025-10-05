@@ -1,4 +1,3 @@
-import { useThemeColor } from '@hooks/useThemeColor';
 import { CardData } from '@src/api/firebase/Card';
 import { maskCardNumber } from '@src/utils/cards';
 import React from 'react';
@@ -13,8 +12,6 @@ interface CardItemProps {
 
 export const CardItem = React.memo<CardItemProps>(
   ({ card, onPress, onEdit, onDelete }) => {
-    const primaryColor = useThemeColor({}, 'primary');
-
     const formatFunctions = (functions: string[]) => {
       return functions
         .map(f => f === 'credit' ? 'Crédito' : 'Débito')
@@ -30,11 +27,21 @@ export const CardItem = React.memo<CardItemProps>(
       return labels[category] || category;
     };
 
+    const getCategoryColor = (category: string): string => {
+      const colors: Record<string, string> = {
+        platinum: '#0EA5E9',
+        gold: '#F59E0B',     
+        black: '#6B7280',    
+      };
+      return colors[category] || '#0EA5E9'; 
+    };
+
     const title = getCategoryLabel(card.category);
     const maskedNumber = maskCardNumber(card.number);
-    const subtitle = `${maskedNumber}\n${formatFunctions(card.functions)}`; // QUEBRA LINHA
+    const subtitle = `${maskedNumber}\n${formatFunctions(card.functions)}`;
     const centerText = card.expiryDate;
     const iconName = 'card-outline';
+    const iconBackgroundColor = getCategoryColor(card.category); 
 
     return (
       <ThemedListItem
@@ -44,7 +51,7 @@ export const CardItem = React.memo<CardItemProps>(
         rightText=""
         iconName={iconName}
         iconColor="white"
-        iconBackgroundColor={primaryColor}
+        iconBackgroundColor={iconBackgroundColor}
         onPress={onPress ? () => onPress(card) : undefined}
         onEdit={onEdit ? () => onEdit(card) : undefined}
         onDelete={onDelete ? () => onDelete(card) : undefined}
