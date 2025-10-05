@@ -4,7 +4,7 @@ import { useColorScheme } from '@hooks/useColorScheme';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,6 +12,7 @@ const ICONS: Record<string, string> = {
   index: 'chart-line',
   cards: 'credit-card-multiple',
   transactions: 'bank-transfer-in',
+  profile: 'account',
 };
 
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
@@ -87,6 +88,7 @@ export default function TabLayout() {
       <Tabs.Screen name="index" options={{ title: 'Início' }} />
       <Tabs.Screen name="transactions" options={{ title: 'Transações' }} />
       <Tabs.Screen name="cards" options={{ title: 'Cartões' }} />
+      <Tabs.Screen name="profile" options={{ title: 'Perfil' }} />
     </Tabs>
   );
 }
