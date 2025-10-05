@@ -8,6 +8,7 @@ import {
   TransactionFormField,
   TransactionFormProps,
 } from '@src/models/transactions';
+import { maskCardNumber } from '@src/utils/cards';
 import {
   getCategoriesByType,
   methodRequiresCard,
@@ -121,7 +122,7 @@ export function TransactionRegisterForm({
         const result = await getUserCards();
         if (result.success && result.cards) {
           const cardOptions = result.cards.map((card) => ({
-            label: `${card.category} - **** ${card.number.slice(-4)}`,
+            label: `${card.category} - ${maskCardNumber(card.number)}`,
             value: card.id!,
           }));
           setUserCards(cardOptions);
