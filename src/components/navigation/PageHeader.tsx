@@ -1,20 +1,24 @@
+// src/components/navigation/PageHeader.tsx
+
 import { useThemeColor } from '@hooks/useThemeColor';
 import { useAuth } from '@src/contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import { Appbar, Text } from 'react-native-paper';
+import { Alert, Image, Pressable, StyleSheet, View } from 'react-native';
+import { Appbar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface PageHeaderProps {
   title: string;
   showBackButton?: boolean;
   showLogout?: boolean;
+  showLogo?: boolean;
 }
 
 export function PageHeader({
   title,
   showBackButton = true,
   showLogout = true,
+  showLogo = true,
 }: PageHeaderProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -67,14 +71,17 @@ export function PageHeader({
       ]}
       elevated={true}
     >
-      {/* Logo ou ícone do app */}
-      <View style={styles.logoContainer}>
-        <View style={[styles.logoCircle, { backgroundColor: primaryColor }]}>
-          <Text variant="titleMedium" style={styles.logoText}>
-            $
-          </Text>
+      {showLogo && (
+        <View style={styles.logoContainer}>
+          <View style={[styles.logoCircle, { backgroundColor: primaryColor }]}>
+            <Image
+              source={require('../assets/images/bytebank-logo.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
         </View>
-      </View>
+      )}
 
       {showBackButton && (
         <Appbar.BackAction onPress={handleBack} color={onSurfaceColor} size={24} />
@@ -110,9 +117,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoText: {
-    color: 'white',
-    fontWeight: 'bold',
+  logo: {
+    width: 28,
+    height: 28,
   },
   title: {
     fontWeight: '600',
