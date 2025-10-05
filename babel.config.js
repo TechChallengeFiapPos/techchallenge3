@@ -13,12 +13,10 @@ module.exports = function(api) {
             '@config': './src/config',
             '@screens': './src/screens',
             '@services': './src/services',
-            '@components': './src/components',
-            // adicione mais conforme sua estrutura
           },
         },
       ],
-      'react-native-reanimated/plugin', // mantenha se usa reanimated
+      'react-native-worklets/plugin',
     ],
   };
 };

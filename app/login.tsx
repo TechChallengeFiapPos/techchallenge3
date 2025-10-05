@@ -1,9 +1,10 @@
 import { ThemedView } from '@components/ThemedView';
 import { auth, db } from '@config/firebaseConfig';
 import { useThemeColor } from '@hooks/useThemeColor';
-import { LoginRegisterForm } from '@src/components/form';
+import { LoginRegisterUserForm } from '@src/components/forms';
 import { ThemedCard } from '@src/components/ThemedCard';
 import { ThemedText } from '@src/components/ThemedText';
+import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
@@ -95,11 +96,12 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
         setMessage('✅ Registro realizado com sucesso');
       }
     } catch (error: any) {
-      setMessage(`❌ ${error.message}`);
+      const friendlyMessage = getFirebaseErrorMessage(error);
+      setMessage(`❌ ${friendlyMessage}`);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
@@ -109,7 +111,7 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
 
       <ThemedView style={styles.cardWrapper}>
         <ThemedCard style={styles.card}>
-          <LoginRegisterForm
+          <LoginRegisterUserForm
             type={isLogin ? 'login' : 'register'}
             onSubmit={handleSubmit}
             disabled={loading}
