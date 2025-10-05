@@ -1,6 +1,6 @@
 import { Colors } from '@constants/Colors';
 import React, { ReactNode } from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import { Card, useTheme } from 'react-native-paper';
 
 interface ThemedCardProps {
@@ -24,7 +24,6 @@ export const ThemedCard: React.FC<ThemedCardProps> = ({
   return (
     <Card
       style={[
-        styles.card,
         {
           borderRadius: theme.roundness * 20,
           backgroundColor: colorName ? Colors.light[colorName] : theme.colors.surface,
@@ -37,9 +36,3 @@ export const ThemedCard: React.FC<ThemedCardProps> = ({
     </Card>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    marginVertical: 12,
-  },
-});

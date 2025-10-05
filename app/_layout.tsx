@@ -1,10 +1,10 @@
 import { darkTheme, lightTheme } from '@config/theme';
 import { AuthProvider, useAuth } from '@src/contexts/AuthContext';
-import { ThemeProvider, useTheme } from '@src/contexts/ThemeContext'; // ADICIONE
+import { ThemeProvider, useTheme } from '@src/contexts/ThemeContext';
 import { TransactionProvider } from '@src/contexts/TransactionsContext';
 import { useFonts } from 'expo-font';
 import { useKeepAwake } from 'expo-keep-awake';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
@@ -16,20 +16,28 @@ function ProtectedLayout() {
   const { theme } = useTheme();
   const { user, loading } = useAuth();
   const router = useRouter();
-  const segments = useSegments();
+  const pathname = usePathname();
 
-  // isso aqui é pra evitar o looping manter o replace!
   useEffect(() => {
     if (loading) return;
 
-    const inAuthGroup = segments[0] === '(tabs)';
+    const isInWelcome = pathname.includes('welcome');
+    const isInLogin = pathname.includes('login');
+    const isInTabs = pathname.includes('(tabs)');
 
-    if (!user && inAuthGroup) {
-      router.replace('/login');
-    } else if (user && !inAuthGroup) {
+    // Se não tem user e está nas tabs -> /welcome
+    if (!user && isInTabs) {
+      router.replace('/welcome');
+    }
+    // Se não tem user e não está em welcome nem login ->  /welcome
+    else if (!user && !isInWelcome && !isInLogin) {
+      router.replace('/welcome');
+    }
+    // Se tem user e está em welcome ou login -> /tabs
+    else if (user && (isInWelcome || isInLogin)) {
       router.replace('/(tabs)');
     }
-  }, [user, loading, segments]);
+  }, [user, loading, pathname]);
 
   if (loading) {
     return (
@@ -43,10 +51,10 @@ function ProtectedLayout() {
     <TransactionProvider>
       <PaperProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
         <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="welcome" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="login" />
           <Stack.Screen name="+not-found" />
-          <Stack.Screen name="welcome" />
         </Stack>
         <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       </PaperProvider>
