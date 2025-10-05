@@ -1,9 +1,8 @@
 import { ThemedButton } from '@src/components/ThemedButton';
 import { ThemedText } from '@src/components/ThemedText';
-import React from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
-import { InputController } from '../input/InputController';
+import { InputController } from '../inputs/InputController';
 
 export type FormField = {
   name: string;
@@ -52,7 +51,7 @@ const registerFields: FormField[] = [
   },
 ];
 
-export function LoginRegisterForm({ type = 'login', onSubmit, disabled, errors }: Props) {
+export function LoginRegisterUserForm({ type = 'login', onSubmit, disabled, errors }: Props) {
   const { control, handleSubmit } = useForm({
     mode: 'onBlur',
   });

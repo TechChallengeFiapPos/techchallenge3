@@ -4,20 +4,31 @@ import { useColorScheme } from '@hooks/useColorScheme';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Icon } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ICONS: Record<string, string> = {
   index: 'chart-line',
-  explore: 'credit-card-multiple',
+  cards: 'credit-card-multiple',
+  transactions: 'bank-transfer-in',
 };
 
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? 'light'];
+  const insets = useSafeAreaInsets();
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: themeColors.surface }]}>
+    <ThemedView
+      style={[
+        styles.container,
+        {
+          backgroundColor: themeColors.inverseSurface,
+          paddingBottom: insets.bottom, // Adiciona padding para safe area
+        },
+      ]}
+    >
       {state.routes.map((route, index) => {
         const isFocused = state.index === index;
 
@@ -33,7 +44,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
           }
         };
 
-        const iconName = ICONS[route.name] || 'help-circle'; // fallback
+        const iconName = ICONS[route.name] || 'help-circle';
 
         return (
           <Pressable
@@ -74,8 +85,8 @@ export default function TabLayout() {
       tabBar={(props) => <CustomTabBar {...props} />}
     >
       <Tabs.Screen name="index" options={{ title: 'Início' }} />
-      <Tabs.Screen name="explore" options={{ title: 'Layers' }} />
-      {/* adicionar mais rotas internas */}
+      <Tabs.Screen name="transactions" options={{ title: 'Transações' }} />
+      <Tabs.Screen name="cards" options={{ title: 'Cartões' }} />
     </Tabs>
   );
 }
@@ -85,20 +96,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     position: 'absolute',
-    bottom: 2,
+    bottom: 0, // Mudou de 2 para 0
     left: 0,
     right: 0,
     borderTopLeftRadius: 70,
     borderTopRightRadius: 70,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-    height: 90,
+    minHeight: 90, // Mudou de height para minHeight
     alignItems: 'center',
     elevation: 5,
+    zIndex: 1000, // Adiciona z-index alto
   },
   tab: {
     flex: 1,
     alignItems: 'center',
+    paddingVertical: 10, // Adiciona padding vertical
   },
   iconWrapper: {
     width: 50,
