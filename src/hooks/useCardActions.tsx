@@ -29,6 +29,28 @@ export const useCardActions = () => {
     }
   };
 
+  //editar cartao
+   const updateCard = async (cardId: string, cardData: cardAPI.UpdateCardData) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await cardAPI.updateCard(cardId, cardData);
+
+      if (!result.success) {
+        setError(result.error || 'Erro ao atualizar cartão');
+        return result;
+      }
+
+      return result;
+    } catch (error: any) {
+      setError(error.message || 'Erro inesperado');
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Deletar cartão
   const deleteCard = async (cardId: string) => {
     setLoading(true);
@@ -78,6 +100,7 @@ export const useCardActions = () => {
   return {
     createCard,
     deleteCard,
+    updateCard,
     checkCardExists,
     loading,
     error,
