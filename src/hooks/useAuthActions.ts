@@ -1,6 +1,6 @@
 import * as authAPI from '@src/api/firebase/Auth';
 import { createUserProfile } from '@src/api/firebase/User';
-import { useAuth } from '@src/context/AuthContext';
+import { useAuth } from '@src/contexts/AuthContext';
 
 export const useAuthActions = () => {
   // Não temos mais setUser/setProfile
