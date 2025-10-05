@@ -1,8 +1,6 @@
-// app/_layout.tsx - VERSÃO SEM LOOP
-
 import { darkTheme, lightTheme } from '@config/theme';
-import { useColorScheme } from '@hooks/useColorScheme';
 import { AuthProvider, useAuth } from '@src/contexts/AuthContext';
+import { ThemeProvider, useTheme } from '@src/contexts/ThemeContext'; // ADICIONE
 import { TransactionProvider } from '@src/contexts/TransactionsContext';
 import { useFonts } from 'expo-font';
 import { useKeepAwake } from 'expo-keep-awake';
@@ -15,11 +13,12 @@ import { pt, registerTranslation } from 'react-native-paper-dates';
 import 'react-native-reanimated';
 
 function ProtectedLayout() {
-  const colorScheme = useColorScheme();
+  const { theme } = useTheme();
   const { user, loading } = useAuth();
   const router = useRouter();
   const segments = useSegments();
 
+  // isso aqui é pra evitar o looping manter o replace!
   useEffect(() => {
     if (loading) return;
 
@@ -42,13 +41,14 @@ function ProtectedLayout() {
 
   return (
     <TransactionProvider>
-      <PaperProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
+      <PaperProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="login" />
           <Stack.Screen name="+not-found" />
+          <Stack.Screen name="welcome" />
         </Stack>
-        <StatusBar style="auto" />
+        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       </PaperProvider>
     </TransactionProvider>
   );
@@ -70,8 +70,10 @@ export default function RootLayout() {
   if (!loaded) return null;
 
   return (
-    <AuthProvider>
-      <ProtectedLayout />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <ProtectedLayout />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
