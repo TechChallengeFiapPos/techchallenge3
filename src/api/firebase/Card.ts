@@ -1,4 +1,5 @@
 import { auth, db } from '@config/firebaseConfig';
+import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import {
   addDoc,
   collection,
@@ -9,6 +10,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 
@@ -31,17 +33,6 @@ export type CreateCardData = {
 };
 
 export type UpdateCardData = Partial<CreateCardData>;
-
-// mascara
-const maskCardNumber = (cardNumber: string): string => {
-  const cleanNumber = cardNumber.replace(/\s/g, '');
-  if (cleanNumber.length >= 4) {
-    const lastFour = cleanNumber.slice(-4);
-    const maskedPart = '*'.repeat(cleanNumber.length - 4);
-    return `${maskedPart}${lastFour}`;
-  }
-  return cleanNumber;
-};
 
 // user está autenticado?
 const getCurrentUser = () => {
@@ -194,12 +185,13 @@ export const checkCardExists = async (cardNumber: string, excludeCardId?: string
   try {
     const currentUser = getCurrentUser();
     const cardsCollection = getUserCardsCollection(currentUser.uid);
-    const maskedNumber = maskCardNumber(cardNumber);
 
-    const q = query(cardsCollection, where('number', '==', maskedNumber));
+    // Remove espaços do número fornecido
+    const cleanNumber = cardNumber.replace(/\s/g, '');
+
+    const q = query(cardsCollection, where('number', '==', cleanNumber));
     const querySnapshot = await getDocs(q);
 
-    // Se está excluindo um cartão específico da verificação
     if (excludeCardId && !querySnapshot.empty) {
       const existingCards = querySnapshot.docs.filter((doc) => doc.id !== excludeCardId);
       return {
@@ -216,7 +208,7 @@ export const checkCardExists = async (cardNumber: string, excludeCardId?: string
     console.error('Erro ao verificar cartão:', error);
     return {
       success: false,
-      error: error.message || 'Erro ao verificar cartão',
+      error: getFirebaseErrorMessage(error),
       exists: false,
     };
   }
@@ -286,6 +278,51 @@ export const getCardsByFunction = async (functionType: string) => {
     return {
       success: false,
       error: error.message || 'Erro ao buscar cartões por função',
+    };
+  }
+};
+
+//editar cartao
+export const updateCard = async (cardId: string, cardData: UpdateCardData) => {
+  try {
+    const currentUser = getCurrentUser();
+    const cardDoc = doc(db, 'users', currentUser.uid, 'cards', cardId);
+
+    const docSnap = await getDoc(cardDoc);
+    if (!docSnap.exists()) {
+      return {
+        success: false,
+        error: 'Cartão não encontrado',
+      };
+    }
+
+    // Se estiver atualizando o número, verifica núemro existente SEM MASCARA
+    if (cardData.number) {
+      const existsResult = await checkCardExists(cardData.number, cardId);
+      if (existsResult.exists) {
+        return {
+          success: false,
+          error: 'Este número de cartão já está cadastrado',
+        };
+      }
+    }
+
+    const updateData = {
+      ...cardData,
+      updatedAt: serverTimestamp(),
+    };
+
+    await updateDoc(cardDoc, updateData);
+
+    return {
+      success: true,
+      message: 'Cartão atualizado com sucesso',
+    };
+  } catch (error: any) {
+    console.error('Erro ao atualizar cartão:', error);
+    return {
+      success: false,
+      error: getFirebaseErrorMessage(error),
     };
   }
 };

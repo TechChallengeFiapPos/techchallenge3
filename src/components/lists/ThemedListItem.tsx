@@ -59,7 +59,7 @@ const dynamicStyles = {
   },
 };
 
-export const BaseTransactionListItem = React.memo<BaseListItemProps>(
+export const ThemedListItem = React.memo<BaseListItemProps>(
   ({
     title,
     subtitle,
@@ -111,7 +111,7 @@ export const BaseTransactionListItem = React.memo<BaseListItemProps>(
               <Text
                 variant={isTablet ? 'bodyMedium' : 'bodyLarge'}
                 style={[styles.subtitle, { color: subtitleColor || defaultSubtitleColor }]}
-                numberOfLines={1}
+                numberOfLines={2}
               >
                 {subtitle}
               </Text>
@@ -162,7 +162,7 @@ export const BaseTransactionListItem = React.memo<BaseListItemProps>(
   },
 );
 
-BaseTransactionListItem.displayName = 'ThemedList';
+ThemedListItem.displayName = 'ThemedList';
 
 const styles = StyleSheet.create({
   container: {

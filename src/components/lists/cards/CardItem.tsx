@@ -1,101 +1,63 @@
-// src/components/cards/CardItem.tsx - Usando tema personalizado
-import { useThemeColor } from '@hooks/useThemeColor';
-import { CardData } from '@src/models/card';
+import { CardData } from '@src/api/firebase/Card';
+import { maskCardNumber } from '@src/utils/cards';
 import React from 'react';
-import { ThemedList } from '../transactions/BaseTransactionListItem';
+import { ThemedListItem } from '../ThemedListItem';
 
 interface CardItemProps {
   card: CardData;
   onPress?: (card: CardData) => void;
+  onEdit?: (card: CardData) => void;
+  onDelete?: (card: CardData) => void;
 }
 
-export const CardItem = React.memo<CardItemProps>(({ card, onPress }) => {
-  // Cores do tema
-  const primaryColor = useThemeColor({}, 'primary');
-  const secondaryColor = useThemeColor({}, 'secondary');
-  const errorColor = useThemeColor({}, 'error');
-
-  // Formatação de moeda para limite e usado
-  const formatCurrency = (centavos: number): string => {
-    const reais = centavos / 100;
-    return reais.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    });
-  };
-
-  // Formatação da data de vencimento
-  const formatDueDate = (date: Date): string => {
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: 'short',
-    }).format(date);
-  };
-
-  // Calcular percentual usado
-  const getUsagePercentage = (): number => {
-    if (card.limit === 0) return 0;
-    return Math.round((card.used / card.limit) * 100);
-  };
-
-  // Ícone baseado na bandeira do cartão
-  const getCardIcon = (brand: string): string => {
-    const iconMap: Record<string, string> = {
-      visa: 'card',
-      mastercard: 'card',
-      elo: 'card',
-      amex: 'card',
+export const CardItem = React.memo<CardItemProps>(
+  ({ card, onPress, onEdit, onDelete }) => {
+    const formatFunctions = (functions: string[]) => {
+      return functions
+        .map(f => f === 'credit' ? 'Crédito' : 'Débito')
+        .join(' / ');
     };
-    return iconMap[brand] || 'card';
-  };
 
-  // Cores baseadas no percentual de uso usando o tema
-  const getUsageColors = () => {
-    const percentage = getUsagePercentage();
-
-    if (percentage >= 90) {
-      return {
-        centerTextColor: errorColor, // Vermelho do tema - perigo
-        iconBackgroundColor: errorColor,
+    const getCategoryLabel = (category: string) => {
+      const labels: Record<string, string> = {
+        platinum: 'Platinum',
+        gold: 'Gold',
+        black: 'Black',
       };
-    } else if (percentage >= 70) {
-      return {
-        centerTextColor: secondaryColor, // Azul do tema - atenção
-        iconBackgroundColor: secondaryColor,
+      return labels[category] || category;
+    };
+
+    const getCategoryColor = (category: string): string => {
+      const colors: Record<string, string> = {
+        platinum: '#0EA5E9',
+        gold: '#F59E0B',     
+        black: '#6B7280',    
       };
-    } else {
-      return {
-        centerTextColor: primaryColor, // Verde do tema - ok
-        iconBackgroundColor: primaryColor,
-      };
-    }
-  };
+      return colors[category] || '#0EA5E9'; 
+    };
 
-  // Preparar dados para o BaseListItem
-  const title = `${card.category} - **** ${card.number.slice(-4)}`;
-  const subtitle = `Vence: ${formatDueDate(card.dueDate)}`;
-  const centerText = `${getUsagePercentage()}% usado`;
-  const rightText = `${formatCurrency(card.limit - card.used)} disponível`;
-  const iconName = getCardIcon(card.brand);
-  const colors = getUsageColors();
+    const title = getCategoryLabel(card.category);
+    const maskedNumber = maskCardNumber(card.number);
+    const subtitle = `${maskedNumber}\n${formatFunctions(card.functions)}`;
+    const centerText = card.expiryDate;
+    const iconName = 'card-outline';
+    const iconBackgroundColor = getCategoryColor(card.category); 
 
-  const handlePress = () => {
-    onPress?.(card);
-  };
-
-  return (
-    <ThemedList
-      title={title}
-      subtitle={subtitle}
-      centerText={centerText}
-      rightText={rightText}
-      iconName={iconName}
-      iconColor="white"
-      iconBackgroundColor={colors.iconBackgroundColor}
-      centerTextColor={colors.centerTextColor}
-      onPress={onPress ? handlePress : undefined}
-    />
-  );
-});
+    return (
+      <ThemedListItem
+        title={title}
+        subtitle={subtitle}
+        centerText={centerText}
+        rightText=""
+        iconName={iconName}
+        iconColor="white"
+        iconBackgroundColor={iconBackgroundColor}
+        onPress={onPress ? () => onPress(card) : undefined}
+        onEdit={onEdit ? () => onEdit(card) : undefined}
+        onDelete={onDelete ? () => onDelete(card) : undefined}
+      />
+    );
+  },
+);
 
 CardItem.displayName = 'CardItem';

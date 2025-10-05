@@ -2,7 +2,7 @@ import { useThemeColor } from '@hooks/useThemeColor';
 import { Transaction } from '@src/models/transactions';
 import { formatCurrency, getCategoryIcon, getCategoryLabel } from '@src/utils/transactions';
 import React from 'react';
-import { BaseTransactionListItem } from './BaseTransactionListItem';
+import { ThemedListItem } from '../ThemedListItem';
 
 interface TransactionItemProps {
   transaction: Transaction;
@@ -45,7 +45,7 @@ export const TransactionItem = React.memo<TransactionItemProps>(
     const colors = getTransactionColors();
 
     return (
-      <BaseTransactionListItem
+      <ThemedListItem
         title={title}
         subtitle={subtitle}
         centerText={centerText}
