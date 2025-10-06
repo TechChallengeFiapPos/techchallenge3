@@ -20,7 +20,6 @@ interface Props {
   errors?: Record<string, string>;
 }
 
-// Campos do formulário
 const loginFields: FormField[] = [
   { name: 'email', label: 'Seu Email', placeholder: 'Digite seu e-mail', required: true },
   {

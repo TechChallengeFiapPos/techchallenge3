@@ -27,6 +27,7 @@ type FieldErrors = Record<string, string>;
 export default function CreateTransactionScreen({ lightColor, darkColor }: ThemedProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [formKey, setFormKey] = useState(0);
   const router = useRouter();
 
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
@@ -53,6 +54,7 @@ export default function CreateTransactionScreen({ lightColor, darkColor }: Theme
             text: 'Nova transação',
             onPress: () => {
               setMessage(null);
+              setFormKey(prev => prev + 1); 
             },
           },
         ]);
@@ -81,6 +83,7 @@ export default function CreateTransactionScreen({ lightColor, darkColor }: Theme
           >
             <TransactionRegisterForm
               onSubmit={handleSubmit}
+              key={formKey}
               disabled={loading}
               errors={fieldErrors}
               mode="create"

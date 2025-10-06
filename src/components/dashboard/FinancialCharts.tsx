@@ -1,7 +1,7 @@
 import { useThemeColor } from '@hooks/useThemeColor';
 import { Transaction } from '@src/models/transactions';
 import { getCategoryLabel } from '@src/utils/transactions';
-import React, { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Animated, Dimensions, StyleSheet, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 import {
@@ -20,8 +20,7 @@ interface FinancialChartsProps {
   transactions: Transaction[];
 }
 
-// Componente de animação para cada seção
-const AnimatedSection: React.FC<{ delay?: number; children: React.ReactNode }> = ({ delay = 0, children }) => {
+function AnimatedSection({ delay = 0, children }: { delay?: number; children: React.ReactNode }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
@@ -47,7 +46,7 @@ const AnimatedSection: React.FC<{ delay?: number; children: React.ReactNode }> =
       {children}
     </Animated.View>
   );
-};
+}
 
 export function FinancialCharts({ transactions }: FinancialChartsProps) {
   const primaryColor = useThemeColor({}, 'primary');
@@ -74,7 +73,7 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
     // LOG: Debug do mapeamento de categorias
     console.log('📊 PIZZA - Total de despesas encontradas:', expenses.length);
     console.log('📊 PIZZA - Valores brutos (em centavos) por categoria:', categoryMap);
-    
+
     const formattedMap: Record<string, string> = {};
     Object.entries(categoryMap).forEach(([cat, val]) => {
       formattedMap[getCategoryLabel(cat)] = formatValue(val / 100);
@@ -87,7 +86,7 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
         value: value / 100,
         color:
           [primaryColor, secondaryColor, tertiaryColor][
-            index % 3
+          index % 3
           ] || primaryColor,
       }))
       .sort((a, b) => b.value - a.value)
@@ -165,15 +164,15 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
     };
 
     const result = [
-      { 
-        month: 'Mês Passado', 
-        income: sumByMonth(lastMonth, 'income'), 
-        expense: sumByMonth(lastMonth, 'expense') 
+      {
+        month: 'Mês Passado',
+        income: sumByMonth(lastMonth, 'income'),
+        expense: sumByMonth(lastMonth, 'expense')
       },
-      { 
-        month: 'Mês Atual', 
-        income: sumByMonth(current, 'income'), 
-        expense: sumByMonth(current, 'expense') 
+      {
+        month: 'Mês Atual',
+        income: sumByMonth(current, 'income'),
+        expense: sumByMonth(current, 'expense')
       },
     ];
 
@@ -274,7 +273,11 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
                 />
                 <VictoryAxis
                   dependentAxis
-                  tickFormat={(x) => `R$ ${x >= 1000 ? x / 1000 + 'k' : x}`}
+                  tickFormat={(x) => {
+                    if (x >= 1000000) return `R$ ${(x / 1000000).toFixed(1)}M`;
+                    if (x >= 1000) return `R$ ${(x / 1000).toFixed(0)}k`;
+                    return `R$ ${x}`;
+                  }}
                   style={{ tickLabels: { fill: onSurfaceColor }, axis: { stroke: onSurfaceColor } }}
                 />
                 <VictoryLine
@@ -293,7 +296,7 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
                   style={{ labels: { fill: onSurfaceColor } }}
                   data={[
                     { name: 'Receitas', symbol: { fill: primaryColor } },
-                    { name: 'Despesas', symbol: { fill: errorColor} },
+                    { name: 'Despesas', symbol: { fill: errorColor } },
                   ]}
                 />
               </VictoryChart>
@@ -320,7 +323,11 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
                 />
                 <VictoryAxis
                   dependentAxis
-                  tickFormat={(x) => `R$ ${x >= 1000 ? x / 1000 + 'k' : x}`}
+                  tickFormat={(x) => {
+                    if (x >= 1000000) return `R$ ${(x / 1000000).toFixed(1)}M`;
+                    if (x >= 1000) return `R$ ${(x / 1000).toFixed(0)}k`;
+                    return `R$ ${x}`;
+                  }}
                   style={{
                     tickLabels: { fill: onSurfaceColor },
                     axis: { stroke: onSurfaceColor },

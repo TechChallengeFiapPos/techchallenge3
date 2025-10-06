@@ -1,3 +1,5 @@
+// app/register-card.tsx - COM ALERT E RESET DO FORMULÁRIO
+
 import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { CreateCardData } from '@src/api/firebase/Card';
@@ -5,6 +7,7 @@ import { CardRegisterForm } from '@src/components/forms';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedText } from '@src/components/ThemedText';
 import { useCardActions } from '@src/hooks/useCardActions';
+import { useRouter } from 'expo-router'; // ADICIONE IMPORT
 import { useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 import {
@@ -27,6 +30,8 @@ type FieldErrors = Record<string, string>;
 export default function CreateCardScreen({ lightColor, darkColor }: ThemedProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [formKey, setFormKey] = useState(0);
+  const router = useRouter(); // ADICIONE useRouter
 
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const surfaceColor = useThemeColor({}, 'surface');
@@ -49,7 +54,19 @@ export default function CreateCardScreen({ lightColor, darkColor }: ThemedProps)
 
     if (result.success) {
       setMessage('Cartão cadastrado com sucesso!');
-      Alert.alert('Sucesso!', 'Cartão cadastrado!');
+      Alert.alert('Sucesso!', 'Cartão cadastrado com sucesso!', [
+        {
+          text: 'Ver cartões',
+          onPress: () => router.push('/(tabs)/cards'),
+        },
+        {
+          text: 'Novo cartão',
+          onPress: () => {
+            setMessage(null);
+            setFormKey(prev => prev + 1); // RESETA O FORMULÁRIO
+          },
+        },
+      ]);
     } else {
       setMessage(result.error || 'Erro ao cadastrar cartão');
     }
@@ -76,7 +93,13 @@ export default function CreateCardScreen({ lightColor, darkColor }: ThemedProps)
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <CardRegisterForm onSubmit={handleSubmit} disabled={loading} errors={fieldErrors} />
+            {/* ADICIONE A KEY AQUI */}
+            <CardRegisterForm 
+              key={formKey}
+              onSubmit={handleSubmit} 
+              disabled={loading} 
+              errors={fieldErrors} 
+            />
 
             {message && (
               <ThemedText
@@ -118,11 +141,6 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     alignItems: 'center',
     minHeight: 140,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
