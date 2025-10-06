@@ -1,5 +1,3 @@
-// app/(tabs)/transactions.tsx
-
 import { useThemeColor } from '@hooks/useThemeColor';
 import { TransactionFilters } from '@src/components/filters/transactions/TransactionFilters';
 import { TransactionItem } from '@src/components/lists/transactions/TransactionItem';
@@ -9,11 +7,10 @@ import { useTransactions } from '@src/contexts/TransactionsContext';
 import { Transaction } from '@src/models/transactions';
 import { formatCurrency, paymentMethods, transactionCategories } from '@src/utils/transactions';
 import { useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Dimensions, FlatList, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, FAB, Snackbar, Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -22,6 +19,7 @@ export default function TransactionsScreen() {
   const insets = useSafeAreaInsets();
 
   const backgroundColor = useThemeColor({}, 'background');
+  const surfaceColor = useThemeColor({}, 'surface');
   const primaryColor = useThemeColor({}, 'primary');
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
@@ -38,7 +36,6 @@ export default function TransactionsScreen() {
     deleteTransaction
   } = useTransactions();
 
-  // Estados dos filtros
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [advancedFilters, setAdvancedFilters] = useState<{
     categoryId?: string;
@@ -47,27 +44,21 @@ export default function TransactionsScreen() {
     endDate?: Date;
   }>({});
 
-  // ⬇️ AQUI VAI O useEffect DOS FILTROS ⬇️
-  // Aplicar filtros quando mudarem
   useEffect(() => {
     const filters: any = {};
     
-    // Filtro de tipo (Todas/Receitas/Despesas)
     if (filterType !== 'all') {
       filters.type = filterType;
     }
     
-    // Filtro de categoria
     if (advancedFilters.categoryId) {
       filters.categoryId = advancedFilters.categoryId;
     }
     
-    // Filtro de método
     if (advancedFilters.methodId) {
       filters.methodId = advancedFilters.methodId;
     }
     
-    // Filtro de período
     if (advancedFilters.startDate) {
       filters.startDate = advancedFilters.startDate;
     }
@@ -76,12 +67,9 @@ export default function TransactionsScreen() {
       filters.endDate = advancedFilters.endDate;
     }
     
-    // Carrega transações com todos os filtros combinados
     loadTransactions(filters);
-  }, [filterType, advancedFilters]); // Reexecuta quando qualquer filtro mudar
-  // ⬆️ FIM DO useEffect DOS FILTROS ⬆️
+  }, [filterType, advancedFilters]);
 
-  // Responsividade
   const screenMetrics = useMemo(() => {
     const isTablet = screenWidth > 768;
     const isLandscape = screenWidth > 600;
@@ -98,7 +86,7 @@ export default function TransactionsScreen() {
     router.push(`/(pages)/edit-transaction/${transaction.id}`);
   };
 
-   const handleDelete = (transaction: Transaction) => {
+  const handleDelete = (transaction: Transaction) => {
     Alert.alert(
       'Deletar Transação',
       `Tem certeza que deseja deletar esta transação de ${formatCurrency(transaction.value)}?`,
@@ -128,7 +116,7 @@ export default function TransactionsScreen() {
     ({ item }: { item: Transaction }) => (
       <TransactionItem
         transaction={item}
-        onEdit={handleEdit} // ← Deve passar aqui
+        onEdit={handleEdit}
         onDelete={handleDelete}
       />
     ),
@@ -136,15 +124,6 @@ export default function TransactionsScreen() {
   );
 
   const keyExtractor = useCallback((item: Transaction) => item.id, []);
-
-  const getItemLayout = useCallback(
-    (data: any, index: number) => ({
-      length: screenMetrics.itemHeight,
-      offset: screenMetrics.itemHeight * index,
-      index,
-    }),
-    [screenMetrics.itemHeight],
-  );
 
   const renderFooter = useCallback(() => {
     if (!loading || !hasMore) return null;
@@ -186,46 +165,6 @@ export default function TransactionsScreen() {
     refreshTransactions();
   }, [refreshTransactions]);
 
-  const renderHeader = useCallback(() => {
-    return (
-      <View style={styles.headerContainer}>
-        <View
-          style={[
-            styles.transactionsHeader,
-            { paddingHorizontal: screenMetrics.horizontalPadding },
-          ]}
-        >
-          <Text
-            variant={screenMetrics.isTablet ? 'headlineMedium' : 'labelLarge'}
-            style={[styles.transactionsTitle, { color: onSurfaceColor }]}
-          >
-            Adicionar Transação
-          </Text>
-
-          <FAB
-            icon="plus"
-            size="small"
-            onPress={() => router.push('/register-transaction')}
-            style={[styles.headerFab, { backgroundColor: primaryColor }]}
-            color="white"
-          />
-        </View>
-
-        {/* Componente de Filtros */}
-        <TransactionFilters
-          filterType={filterType}
-          onFilterTypeChange={setFilterType}
-          onFilterChange={setAdvancedFilters}
-          activeFilters={advancedFilters}
-          resultsCount={transactions.length}
-          horizontalPadding={screenMetrics.horizontalPadding}
-          categories={transactionCategories}
-          methods={paymentMethods}
-        />
-      </View>
-    );
-  }, [screenMetrics, onSurfaceColor, primaryColor, router, filterType, advancedFilters, transactions.length]);
- 
   const dynamicStyles = useMemo(
     () => {
       const tabBarHeight = 90 + Math.max(insets.bottom, 0) + 20;
@@ -240,31 +179,61 @@ export default function TransactionsScreen() {
 
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
-      <PageHeader title="Transações" showBackButton={false} showLogout={true} />
+      <PageHeader title="Transações" showBackButton={true} />
 
-      <FlatList
-        data={transactions}
-        renderItem={renderTransaction}
-        keyExtractor={keyExtractor}
-        getItemLayout={getItemLayout}
-        ListHeaderComponent={renderHeader}
-        removeClippedSubviews={true}
-        maxToRenderPerBatch={screenMetrics.isTablet ? 15 : 10}
-        windowSize={screenMetrics.isTablet ? 15 : 10}
-        initialNumToRender={screenMetrics.isTablet ? 20 : 15}
-        updateCellsBatchingPeriod={50}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
-        onRefresh={handleRefresh}
-        refreshing={loading}
-        ListEmptyComponent={renderEmpty}
-        ListFooterComponent={renderFooter} 
-        contentContainerStyle={[
-          dynamicStyles.listContent,
-          transactions.length === 0 && styles.emptyList,
-        ]}
-        showsVerticalScrollIndicator={false}
-      />
+      <View style={styles.headerSection}>
+        <View style={[styles.transactionsHeader, { paddingHorizontal: screenMetrics.horizontalPadding }]}>
+          <Text
+            variant={screenMetrics.isTablet ? 'headlineMedium' : 'labelLarge'}
+            style={[styles.transactionsTitle, { color: onSurfaceColor }]}
+          >
+            Adicionar Transação
+          </Text>
+
+          <FAB
+            icon="plus"
+            size="small"
+            onPress={() => router.push('/create-transaction')}
+            style={[styles.headerFab, { backgroundColor: primaryColor }]}
+            color="white"
+          />
+        </View>
+
+        <TransactionFilters
+          filterType={filterType}
+          onFilterTypeChange={setFilterType}
+          onFilterChange={setAdvancedFilters}
+          activeFilters={advancedFilters}
+          resultsCount={transactions.length}
+          horizontalPadding={screenMetrics.horizontalPadding}
+          categories={transactionCategories}
+          methods={paymentMethods}
+        />
+      </View>
+
+      <View style={[styles.card, { backgroundColor: surfaceColor }]}>
+        <FlatList
+          data={transactions}
+          renderItem={renderTransaction}
+          keyExtractor={keyExtractor}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={screenMetrics.isTablet ? 15 : 10}
+          windowSize={screenMetrics.isTablet ? 15 : 10}
+          initialNumToRender={screenMetrics.isTablet ? 20 : 15}
+          updateCellsBatchingPeriod={50}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          onRefresh={handleRefresh}
+          refreshing={loading}
+          ListEmptyComponent={renderEmpty}
+          ListFooterComponent={renderFooter} 
+          contentContainerStyle={[
+            dynamicStyles.listContent,
+            transactions.length === 0 && styles.emptyList,
+          ]}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
 
       <Snackbar
         visible={!!error}
@@ -281,16 +250,25 @@ export default function TransactionsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerContainer: { marginBottom: 8 },
+  headerSection: {
+    marginBottom: 0,
+  },
   transactionsHeader: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingVertical: 16,
-    paddingTop: 24,
+    paddingTop: 8,
   },
-  transactionsTitle: { fontWeight: 'bold', marginRight: 8,},
+  transactionsTitle: { fontWeight: 'bold', marginRight: 8 },
   headerFab: { marginLeft: 12, elevation: 4 },
+  card: {
+    flex: 1,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    marginVertical: 0,
+    paddingTop: 16,
+  },
   emptyList: { flexGrow: 1 },
   emptyContainer: {
     flex: 1,

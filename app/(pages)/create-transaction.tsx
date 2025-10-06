@@ -1,13 +1,12 @@
-
 import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { TransactionRegisterForm } from '@src/components/forms';
-import { ThemedCard } from '@src/components/ThemedCard';
+import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedText } from '@src/components/ThemedText';
 import { useTransactions } from '@src/contexts/TransactionsContext';
 import { CreateTransactionData } from '@src/models/transactions';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -25,12 +24,13 @@ export type ThemedProps = {
 
 type FieldErrors = Record<string, string>;
 
-export default function RegisterTransactionScreen({ lightColor, darkColor }: ThemedProps) {
+export default function CreateTransactionScreen({ lightColor, darkColor }: ThemedProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const router = useRouter();
 
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+  const surfaceColor = useThemeColor({}, 'surface');
 
   const { createTransaction, loading, error, clearError } = useTransactions();
 
@@ -71,57 +71,47 @@ export default function RegisterTransactionScreen({ lightColor, darkColor }: The
       enabled={Platform.OS === 'ios'}
     >
       <ThemedView style={[styles.container, { backgroundColor }]}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          bounces={false}
-        >
-          <View style={styles.headerContainer}>
-            <ThemedText style={styles.title} colorName="onSurfaceVariant" textType="titleSmall">
-              Nova Transação
-            </ThemedText>
-            <ThemedText style={styles.subtitle} colorName="onSurfaceVariant" textType="bodyMedium">
-              Registre seus gastos e ganhos
-            </ThemedText>
-          </View>
+        <PageHeader title="Nova Transação" showBackButton={true} />
 
-          <View style={styles.cardWrapper}>
-            <ThemedCard style={styles.card}>
-              <TransactionRegisterForm
-                onSubmit={handleSubmit}
-                disabled={loading}
-                errors={fieldErrors}
-                mode="create"
-              />
+        <View style={[styles.card, { backgroundColor: surfaceColor }]}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <TransactionRegisterForm
+              onSubmit={handleSubmit}
+              disabled={loading}
+              errors={fieldErrors}
+              mode="create"
+            />
 
-              {message && (
-                <ThemedText
-                  style={styles.message}
-                  textType="default"
-                  colorName={message.startsWith('Erro') ? 'error' : 'primary'}
-                >
-                  {message}
-                </ThemedText>
-              )}
-
-              {error && !message && (
-                <ThemedText style={styles.message} textType="default" colorName="error">
-                  {error}
-                </ThemedText>
-              )}
-            </ThemedCard>
-
-            {loading && (
-              <View style={styles.overlay}>
-                <ActivityIndicator size="large" />
-                <ThemedText style={styles.loadingText} textType="default">
-                  Salvando transação...
-                </ThemedText>
-              </View>
+            {message && (
+              <ThemedText
+                style={styles.message}
+                textType="default"
+                colorName={message.startsWith('Erro') ? 'error' : 'primary'}
+              >
+                {message}
+              </ThemedText>
             )}
-          </View>
-        </ScrollView>
+
+            {error && !message && (
+              <ThemedText style={styles.message} textType="default" colorName="error">
+                {error}
+              </ThemedText>
+            )}
+          </ScrollView>
+
+          {loading && (
+            <View style={styles.overlay}>
+              <ActivityIndicator size="large" color="#fff" />
+              <ThemedText style={styles.loadingText} textType="default">
+                Salvando transação...
+              </ThemedText>
+            </View>
+          )}
+        </View>
       </ThemedView>
     </KeyboardAvoidingView>
   );
@@ -131,37 +121,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContainer: {
-    flexGrow: 1,
-  },
-  headerContainer: {
-    paddingTop: 60,
-    paddingBottom: 40,
-    alignItems: 'center',
-    minHeight: 140,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    opacity: 0.7,
-  },
-  cardWrapper: {
-    width: '100%',
-    flex: 1,
-    position: 'relative',
-  },
   card: {
     flex: 1,
-    width: '100%',
-    borderTopLeftRadius: 80,
-    borderTopRightRadius: 80,
-    padding: 25,
-    justifyContent: 'flex-start',
-    minHeight: 600,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    paddingTop: 24,
+    paddingHorizontal: 16,
+    marginVertical: 0,
+    marginTop: 42,
+  },
+  scrollContent: {
+    paddingBottom: 100,
+    paddingTop: 16,
   },
   message: {
     marginTop: 16,
@@ -171,11 +142,11 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderTopLeftRadius: 80,
-    borderTopRightRadius: 80,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
   },
   loadingText: {
     marginTop: 10,

@@ -1,5 +1,3 @@
-// src/contexts/ThemeContext.tsx - VERSÃO SIMPLES SEM LOOPS
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useColorScheme as useSystemColorScheme } from 'react-native';

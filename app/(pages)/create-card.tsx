@@ -3,10 +3,9 @@ import { useThemeColor } from '@hooks/useThemeColor';
 import { CreateCardData } from '@src/api/firebase/Card';
 import { CardRegisterForm } from '@src/components/forms';
 import { PageHeader } from '@src/components/navigation/PageHeader';
-import { ThemedCard } from '@src/components/ThemedCard';
 import { ThemedText } from '@src/components/ThemedText';
 import { useCardActions } from '@src/hooks/useCardActions';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 import {
   ActivityIndicator,
@@ -25,11 +24,12 @@ export type ThemedProps = {
 
 type FieldErrors = Record<string, string>;
 
-export default function RegisterCardScreen({ lightColor, darkColor }: ThemedProps) {
+export default function CreateCardScreen({ lightColor, darkColor }: ThemedProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+  const surfaceColor = useThemeColor({}, 'surface');
 
   const { createCard, loading, error, clearError } = useCardActions();
 
@@ -62,55 +62,48 @@ export default function RegisterCardScreen({ lightColor, darkColor }: ThemedProp
       enabled={Platform.OS === 'ios'}
     >
       <ThemedView style={[styles.container, { backgroundColor }]}>
-        <PageHeader
-          title="Transações"
-          showBackButton={true}
-          showLogout={true}
-        />
+        <PageHeader title="Cadastre um novo cartão" showBackButton={true} />
 
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          bounces={false}
-        >
-          <View style={styles.headerContainer}>
-            <ThemedText style={styles.title} colorName="onSurfaceVariant" textType="titleSmall">
-              Cadastro de novo cartão
-            </ThemedText>
-          </View>
+        <View style={styles.headerContainer}>
+          <ThemedText style={styles.subtitle} colorName="onSurfaceVariant" textType="bodyMedium">
+            Registre seus cartões para maior controle
+          </ThemedText>
+        </View>
 
-          <View style={styles.cardWrapper}>
-            <ThemedCard style={styles.card}>
-              <CardRegisterForm onSubmit={handleSubmit} disabled={loading} errors={fieldErrors} />
+        <View style={[styles.card, { backgroundColor: surfaceColor }]}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <CardRegisterForm onSubmit={handleSubmit} disabled={loading} errors={fieldErrors} />
 
-              {message && (
-                <ThemedText
-                  style={styles.message}
-                  textType="default"
-                  colorName={message.startsWith('❌') ? 'error' : 'primary'}
-                >
-                  {message}
-                </ThemedText>
-              )}
-
-              {error && !message && (
-                <ThemedText style={styles.message} textType="default" colorName="error">
-                  ❌ {error}
-                </ThemedText>
-              )}
-            </ThemedCard>
-
-            {loading && (
-              <View style={styles.overlay}>
-                <ActivityIndicator size="large" />
-                <ThemedText style={styles.loadingText} textType="default">
-                  Salvando cartão...
-                </ThemedText>
-              </View>
+            {message && (
+              <ThemedText
+                style={styles.message}
+                textType="default"
+                colorName={message.startsWith('❌') ? 'error' : 'primary'}
+              >
+                {message}
+              </ThemedText>
             )}
-          </View>
-        </ScrollView>
+
+            {error && !message && (
+              <ThemedText style={styles.message} textType="default" colorName="error">
+                ❌ {error}
+              </ThemedText>
+            )}
+          </ScrollView>
+
+          {loading && (
+            <View style={styles.overlay}>
+              <ActivityIndicator size="large" color="#fff" />
+              <ThemedText style={styles.loadingText} textType="default">
+                Salvando cartão...
+              </ThemedText>
+            </View>
+          )}
+        </View>
       </ThemedView>
     </KeyboardAvoidingView>
   );
@@ -120,32 +113,31 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContainer: {
-    flexGrow: 1,
-  },
   headerContainer: {
-    paddingTop: 120,
-    paddingBottom: 60,
-    minHeight: 200, // Altura fixa para evitar movimento do menu
+    paddingTop: 60,
+    paddingBottom: 40,
+    alignItems: 'center',
+    minHeight: 140,
   },
   title: {
-    alignSelf: 'center',
     fontSize: 28,
     fontWeight: 'bold',
+    marginBottom: 8,
   },
-  cardWrapper: {
-    width: '100%',
-    flex: 1,
-    position: 'relative',
+  subtitle: {
+    fontSize: 16,
+    opacity: 0.7,
   },
   card: {
     flex: 1,
-    width: '100%',
-    borderTopLeftRadius: 80,
-    borderTopRightRadius: 80,
-    padding: 25,
-    justifyContent: 'flex-start',
-    minHeight: 500, // Altura mínima fixa evitar movimento do menu
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    paddingTop: 32,
+    paddingHorizontal: 16,
+    marginTop: 32,
+  },
+  scrollContent: {
+    paddingBottom: 100,
   },
   message: {
     marginTop: 16,
@@ -155,11 +147,11 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderTopLeftRadius: 80,
-    borderTopRightRadius: 80,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
   },
   loadingText: {
     marginTop: 10,

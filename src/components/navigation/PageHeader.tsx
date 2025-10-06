@@ -1,23 +1,19 @@
-// src/components/navigation/PageHeader.tsx
-
 import { useThemeColor } from '@hooks/useThemeColor';
 import { useAuth } from '@src/contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import { Alert, Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface PageHeaderProps {
   title: string;
   showBackButton?: boolean;
-  showLogout?: boolean;
   showLogo?: boolean;
 }
 
 export function PageHeader({
   title,
   showBackButton = true,
-  showLogout = true,
   showLogo = true,
 }: PageHeaderProps) {
   const router = useRouter();
@@ -34,31 +30,6 @@ export function PageHeader({
     }
   };
 
-  const handleLogout = async () => {
-    Alert.alert(
-      'Sair',
-      'Tem certeza que deseja sair da sua conta?',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Sair',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
-            } catch (error) {
-              console.error('Erro ao fazer logout:', error);
-              Alert.alert('Erro', 'Não foi possível sair. Tente novamente.');
-            }
-          },
-        },
-      ]
-    );
-  };
-
   return (
     <Appbar.Header
       style={[
@@ -67,6 +38,8 @@ export function PageHeader({
           backgroundColor,
           paddingTop: insets.top,
           height: 60 + insets.top,
+          borderBottomLeftRadius: 36,
+          borderBottomRightRadius: 36,
         },
       ]}
       elevated={true}
@@ -88,16 +61,6 @@ export function PageHeader({
       )}
 
       <Appbar.Content title={title} titleStyle={[styles.title, { color: onSurfaceColor }]} />
-
-      {showLogout && (
-        <Pressable
-          onPress={handleLogout}
-          style={({ pressed }) => [styles.logoutButton, pressed && styles.logoutButtonPressed]}
-          android_ripple={{ color: primaryColor + '30', borderless: true }}
-        >
-          <Appbar.Action icon="logout" color={onSurfaceColor} size={24} onPress={handleLogout} />
-        </Pressable>
-      )}
     </Appbar.Header>
   );
 }
@@ -108,7 +71,7 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     marginLeft: 8,
-    marginRight: 4,
+    marginRight: 16,
   },
   logoCircle: {
     width: 40,
@@ -118,8 +81,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 28,
-    height: 28,
+    width: 32,
+    height: 24,
   },
   title: {
     fontWeight: '600',

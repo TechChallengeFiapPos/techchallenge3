@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { ThemedText } from '@src/components/ThemedText';
-import { ThemedView } from '@src/components/ThemedView';
 import React from 'react';
 import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
@@ -11,7 +10,7 @@ const { width: screenWidth } = Dimensions.get('window');
 interface BaseListItemProps {
   title: string;
   subtitle: string;
-  centerText?: string; // Data
+  centerText?: string;
   rightText: string;
   iconName: string;
   iconColor?: string;
@@ -32,7 +31,7 @@ const isLandscape = screenWidth > 600;
 const dynamicStyles = {
   container: {
     paddingHorizontal: isTablet ? 24 : 16,
-    paddingVertical: isTablet ? 12 : 8,
+    paddingVertical: isTablet ? 12 : 12,
   },
   content: {
     minHeight: isTablet ? 80 : isLandscape ? 70 : 64,
@@ -74,7 +73,6 @@ export const ThemedListItem = React.memo<BaseListItemProps>(
     onEdit,
     onDelete,
   }) => {
-    const backgroundColor = useThemeColor({}, 'surface');
     const defaultTitleColor = useThemeColor({}, 'onSurface');
     const defaultSubtitleColor = useThemeColor({}, 'onSurfaceVariant');
     const separatorColor = useThemeColor({}, 'outline');
@@ -88,7 +86,7 @@ export const ThemedListItem = React.memo<BaseListItemProps>(
 
     return (
       <Pressable onPress={onPress} disabled={!onPress}>
-        <ThemedView style={[styles.container, dynamicStyles.container, { backgroundColor }]}>
+        <View style={[styles.container, dynamicStyles.container]}>
           <View style={[styles.content, dynamicStyles.content]}>
             <View
               style={[
@@ -109,7 +107,7 @@ export const ThemedListItem = React.memo<BaseListItemProps>(
                 {title}
               </ThemedText>
               <Text
-                variant={isTablet ? 'bodyMedium' : 'bodyLarge'}
+                variant={isTablet ? 'bodyMedium' : 'bodySmall'}
                 style={[styles.subtitle, { color: subtitleColor || defaultSubtitleColor }]}
                 numberOfLines={2}
               >
@@ -156,7 +154,7 @@ export const ThemedListItem = React.memo<BaseListItemProps>(
               </View>
             )}
           </View>
-        </ThemedView>
+        </View>
       </Pressable>
     );
   },
@@ -167,15 +165,6 @@ ThemedListItem.displayName = 'ThemedList';
 const styles = StyleSheet.create({
   container: {
     marginVertical: 4,
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
   },
   content: {
     flexDirection: 'row',
@@ -193,7 +182,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   subtitle: {
-    fontWeight: '600',
+    fontWeight: '400',
   },
   centerSection: {
     alignItems: 'flex-end',

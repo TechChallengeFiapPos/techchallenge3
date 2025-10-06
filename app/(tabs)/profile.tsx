@@ -4,8 +4,7 @@ import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedText } from '@src/components/ThemedText';
 import { useAuth } from '@src/contexts/AuthContext';
 import { useTheme } from '@src/contexts/ThemeContext';
-import React from 'react';
-import { Image, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, View } from 'react-native';
 import { Divider, List, Switch } from 'react-native-paper';
 
 export default function ProfileScreen() {
@@ -23,12 +22,37 @@ export default function ProfileScreen() {
     setThemeMode(isDarkMode ? 'light' : 'dark');
   };
 
+  const handleLogout = async () => {
+    Alert.alert(
+      'Sair',
+      'Tem certeza que deseja sair da sua conta?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Sair',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await logout();
+            } catch (error) {
+              console.error('Erro ao fazer logout:', error);
+              Alert.alert('Erro', 'Não foi possível sair. Tente novamente.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
-      <PageHeader title="Perfil" showBackButton={false} showLogout={false} />
+      <PageHeader title="Perfil" showBackButton={true}/>
 
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Logo */}
+
         <View style={styles.logoContainer}>
           <View style={[styles.logoBig, { backgroundColor: primaryColor }]}>
             <Image
@@ -39,7 +63,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Informações do Usuário */}
         <View style={[styles.card, { backgroundColor: surfaceColor }]}>
           <ThemedText textType="titleMedium" style={styles.cardTitle}>
             Informações da Conta
@@ -66,7 +89,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Configurações de Aparência */}
         <View style={[styles.card, { backgroundColor: surfaceColor }]}>
           <ThemedText textType="titleMedium" style={styles.cardTitle}>
             Aparência
@@ -86,13 +108,12 @@ export default function ProfileScreen() {
           />
         </View>
 
-        {/* Logout */}
         <View style={styles.logoutContainer}>
           <List.Item
             title="Sair da Conta"
             titleStyle={{ color: danger, fontWeight: '600' }}
             left={props => <List.Icon {...props} icon="logout" color={danger} />}
-            onPress={logout}
+            onPress={handleLogout}
             style={[styles.logoutButton, { backgroundColor: surfaceColor }]}
           />
         </View>

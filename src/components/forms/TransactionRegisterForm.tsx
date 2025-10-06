@@ -1,5 +1,3 @@
-// src/components/forms/TransactionRegisterForm.tsx - Código completo com upload
-
 import { getUserCards } from '@src/api/firebase/Card';
 import { useAuth } from '@src/contexts/AuthContext';
 import {
@@ -315,11 +313,11 @@ export function TransactionRegisterForm({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    paddingBottom: 20,
+    paddingBottom: 10,
   },
   errorText: {
     fontSize: 12,
-    marginTop: 4,
+    marginTop: -4,
   },
   submitButton: {
     marginTop: 24,

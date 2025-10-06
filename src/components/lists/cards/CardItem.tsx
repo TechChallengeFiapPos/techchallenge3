@@ -1,3 +1,5 @@
+// src/components/lists/cards/CardItem.tsx - COM CORES POR CATEGORIA
+
 import { CardData } from '@src/api/firebase/Card';
 import { maskCardNumber } from '@src/utils/cards';
 import React from 'react';
@@ -12,12 +14,6 @@ interface CardItemProps {
 
 export const CardItem = React.memo<CardItemProps>(
   ({ card, onPress, onEdit, onDelete }) => {
-    const formatFunctions = (functions: string[]) => {
-      return functions
-        .map(f => f === 'credit' ? 'Crédito' : 'Débito')
-        .join(' / ');
-    };
-
     const getCategoryLabel = (category: string) => {
       const labels: Record<string, string> = {
         platinum: 'Platinum',
@@ -29,11 +25,17 @@ export const CardItem = React.memo<CardItemProps>(
 
     const getCategoryColor = (category: string): string => {
       const colors: Record<string, string> = {
-        platinum: '#0EA5E9',
-        gold: '#F59E0B',     
-        black: '#6B7280',    
+        platinum: '#0EA5E9', // Azul
+        gold: '#F59E0B',     // Dourado
+        black: '#6B7280',    // Cinza escuro
       };
-      return colors[category] || '#0EA5E9'; 
+      return colors[category] || '#0EA5E9';
+    };
+
+    const formatFunctions = (functions: string[]) => {
+      return functions
+        .map(f => f === 'credit' ? 'Crédito' : 'Débito')
+        .join(' / ');
     };
 
     const title = getCategoryLabel(card.category);
@@ -41,7 +43,7 @@ export const CardItem = React.memo<CardItemProps>(
     const subtitle = `${maskedNumber}\n${formatFunctions(card.functions)}`;
     const centerText = card.expiryDate;
     const iconName = 'card-outline';
-    const iconBackgroundColor = getCategoryColor(card.category); 
+    const iconBackgroundColor = getCategoryColor(card.category);
 
     return (
       <ThemedListItem
