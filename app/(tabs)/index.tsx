@@ -1,5 +1,5 @@
 import { useThemeColor } from '@hooks/useThemeColor';
-import { FinancialCharts } from '@src/components/dashboard/FinancialCharts';
+import { FinancialCharts } from '@src/components/charts/FinancialCharts';
 import { FinancialDashboard } from '@src/components/dashboard/FinancialDashboard';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedView } from '@src/components/ThemedView';

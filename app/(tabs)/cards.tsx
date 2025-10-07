@@ -19,6 +19,7 @@ export default function CardsScreen() {
   const backgroundColor = useThemeColor({}, 'background');
   const surfaceColor = useThemeColor({}, 'surface');
   const primaryColor = useThemeColor({}, 'primary');
+  const secondaryColor = useThemeColor({}, 'secondary');
   const onSurfaceColor = useThemeColor({}, 'onSurface');
 
   const { cards, loading, refetch } = useCards();
@@ -108,17 +109,22 @@ export default function CardsScreen() {
           icon="plus"
           size="small"
           onPress={() => router.push('/create-card')}
-          style={[styles.fab, { backgroundColor: primaryColor }]}
+          style={[styles.fab, { backgroundColor: secondaryColor }]}
           color="white"
         />
       </View>
 
       <View style={[styles.filterCard, { backgroundColor: surfaceColor }]}>
+
         <View style={styles.filterRow}>
           <Chip
             selected={filterType === 'all'}
             onPress={() => setFilterType('all')}
-            style={styles.chip}
+            style={[
+              styles.chip,
+              filterType === 'all' && { backgroundColor: primaryColor }
+            ]}
+            textStyle={filterType === 'all' && { color: 'white' }}
             compact
           >
             Todos
@@ -126,7 +132,11 @@ export default function CardsScreen() {
           <Chip
             selected={filterType === 'credit'}
             onPress={() => setFilterType('credit')}
-            style={styles.chip}
+            style={[
+              styles.chip,
+              filterType === 'credit' && { backgroundColor: primaryColor }
+            ]}
+            textStyle={filterType === 'credit' && { color: 'white' }}
             compact
           >
             Crédito
@@ -134,7 +144,11 @@ export default function CardsScreen() {
           <Chip
             selected={filterType === 'debit'}
             onPress={() => setFilterType('debit')}
-            style={styles.chip}
+            style={[
+              styles.chip,
+              filterType === 'debit' && { backgroundColor: primaryColor }
+            ]}
+            textStyle={filterType === 'debit' && { color: 'white' }}
             compact
           >
             Débito
@@ -145,7 +159,11 @@ export default function CardsScreen() {
           <Chip
             selected={categoryFilter === 'all'}
             onPress={() => setCategoryFilter('all')}
-            style={styles.chip}
+            style={[
+              styles.chip,
+              categoryFilter === 'all' && { backgroundColor: primaryColor }
+            ]}
+            textStyle={categoryFilter === 'all' && { color: 'white' }}
             compact
           >
             Todas
@@ -153,7 +171,11 @@ export default function CardsScreen() {
           <Chip
             selected={categoryFilter === 'platinum'}
             onPress={() => setCategoryFilter('platinum')}
-            style={styles.chip}
+            style={[
+              styles.chip,
+              categoryFilter === 'platinum' && { backgroundColor: primaryColor }
+            ]}
+            textStyle={categoryFilter === 'platinum' && { color: 'white' }}
             compact
           >
             Platinum
@@ -161,7 +183,11 @@ export default function CardsScreen() {
           <Chip
             selected={categoryFilter === 'gold'}
             onPress={() => setCategoryFilter('gold')}
-            style={styles.chip}
+            style={[
+              styles.chip,
+              categoryFilter === 'gold' && { backgroundColor: primaryColor }
+            ]}
+            textStyle={categoryFilter === 'gold' && { color: 'white' }}
             compact
           >
             Gold
@@ -169,7 +195,11 @@ export default function CardsScreen() {
           <Chip
             selected={categoryFilter === 'black'}
             onPress={() => setCategoryFilter('black')}
-            style={styles.chip}
+            style={[
+              styles.chip,
+              categoryFilter === 'black' && { backgroundColor: primaryColor }
+            ]}
+            textStyle={categoryFilter === 'black' && { color: 'white' }}
             compact
           >
             Black
@@ -198,6 +228,7 @@ export default function CardsScreen() {
   );
 }
 
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
   addSection: {
@@ -224,6 +255,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     marginRight: 4,
+    borderRadius: 40,
   },
   divider: {
     marginVertical: 12,

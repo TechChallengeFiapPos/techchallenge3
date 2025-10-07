@@ -1,16 +1,13 @@
-// src/components/filters/TransactionFilters.tsx
-
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, Chip, Menu, Text, Portal, Modal, Divider } from 'react-native-paper';
+import { Button, Chip, Divider, Menu, Modal, Portal, Text } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
 
 interface TransactionFiltersProps {
   filterType: 'all' | 'income' | 'expense';
   onFilterTypeChange: (type: 'all' | 'income' | 'expense') => void;
-  // Filtros avançados
   onFilterChange: (filters: {
     categoryId?: string;
     methodId?: string;
@@ -25,7 +22,6 @@ interface TransactionFiltersProps {
   };
   resultsCount: number;
   horizontalPadding?: number;
-  // Dados dos selects vindos dos utils
   categories: { label: string; value: string }[];
   methods: { label: string; value: string }[];
 }
@@ -41,12 +37,10 @@ export function TransactionFilters({
   methods,
 }: TransactionFiltersProps) {
   const [advancedFiltersVisible, setAdvancedFiltersVisible] = useState(false);
-  
-  // Estados dos menus
+
   const [categoryMenuVisible, setCategoryMenuVisible] = useState(false);
   const [methodMenuVisible, setMethodMenuVisible] = useState(false);
-  
-  // Estados do DatePicker
+
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [dateRange, setDateRange] = useState<{ startDate?: Date; endDate?: Date }>({
     startDate: activeFilters.startDate,
@@ -59,31 +53,40 @@ export function TransactionFilters({
   const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
   const backgroundColor = useThemeColor({}, 'background');
 
+  const filtersBackgroundColor = useThemeColor(
+    { light: '#FFFFFF', dark: surfaceColor },
+    'background'
+  );
+
   const clearFilters = () => {
     onFilterTypeChange('all');
     onFilterChange({});
     setDateRange({});
   };
 
-  const hasActiveFilters = 
-    filterType !== 'all' || 
-    activeFilters.categoryId || 
-    activeFilters.methodId || 
-    activeFilters.startDate || 
+  const hasActiveFilters =
+    filterType !== 'all' ||
+    activeFilters.categoryId ||
+    activeFilters.methodId ||
+    activeFilters.startDate ||
     activeFilters.endDate;
 
   const handleCategorySelect = (categoryId: string) => {
-    onFilterChange({ 
-      ...activeFilters, 
-      categoryId: !categoryId || categoryId === '' ? undefined : categoryId 
+    onFilterChange({
+      ...activeFilters,
+      categoryId: !categoryId || categoryId === '' ? undefined : categoryId
     });
+
+    setCategoryMenuVisible(false);
   };
 
   const handleMethodSelect = (methodId: string) => {
-    onFilterChange({ 
-      ...activeFilters, 
-      methodId: !methodId || methodId === '' ? undefined : methodId 
+    onFilterChange({
+      ...activeFilters,
+      methodId: !methodId || methodId === '' ? undefined : methodId
     });
+
+    setMethodMenuVisible(false);
   };
 
   const handleDateRangeConfirm = ({ startDate, endDate }: any) => {
@@ -116,11 +119,11 @@ export function TransactionFilters({
         styles.filtersContainer,
         {
           paddingHorizontal: horizontalPadding,
-          backgroundColor: surfaceColor,
+          backgroundColor: filtersBackgroundColor,
         },
       ]}
     >
-      {/* Filtros básicos (Chips de tipo) */}
+
       <View style={styles.filtersRow}>
         <Chip
           selected={filterType === 'all'}
@@ -170,7 +173,6 @@ export function TransactionFilters({
         </Chip>
       </View>
 
-      {/* Botões de ação */}
       <View style={styles.moreFiltersRow}>
         <Button
           mode="text"
@@ -188,7 +190,6 @@ export function TransactionFilters({
         )}
       </View>
 
-      {/* Badges dos filtros ativos */}
       {hasActiveFilters && (
         <View style={styles.activeBadgesRow}>
           {activeFilters.categoryId && (
@@ -224,19 +225,17 @@ export function TransactionFilters({
         </View>
       )}
 
-      {/* Contador */}
       <View style={styles.resultsCounter}>
         <Text variant="bodySmall" style={{ color: onSurfaceVariantColor }}>
           {resultsCount} {resultsCount === 1 ? 'transação' : 'transações'} carregadas
         </Text>
       </View>
 
-      {/* Modal de Filtros Avançados */}
       <Portal>
         <Modal
           visible={advancedFiltersVisible}
           onDismiss={() => setAdvancedFiltersVisible(false)}
-          contentContainerStyle={[styles.modalContainer, { backgroundColor }]}
+          contentContainerStyle={[styles.modalContainer, { backgroundColor: surfaceColor }]}
         >
           <Text variant="headlineSmall" style={[styles.modalTitle, { color: onSurfaceColor }]}>
             Filtros Avançados
@@ -244,7 +243,6 @@ export function TransactionFilters({
 
           <Divider style={styles.divider} />
 
-          {/* Filtro de Categoria */}
           <View style={styles.filterSection}>
             <Text variant="titleSmall" style={[styles.filterLabel, { color: onSurfaceColor }]}>
               Categoria
@@ -259,6 +257,7 @@ export function TransactionFilters({
                   style={styles.selectButton}
                   contentStyle={styles.selectButtonContent}
                   icon="chevron-down"
+                  textColor={onSurfaceColor}
                 >
                   {getSelectedCategoryLabel()}
                 </Button>
@@ -275,7 +274,6 @@ export function TransactionFilters({
             </Menu>
           </View>
 
-          {/* Filtro de Método */}
           <View style={styles.filterSection}>
             <Text variant="titleSmall" style={[styles.filterLabel, { color: onSurfaceColor }]}>
               Método de Pagamento
@@ -290,6 +288,7 @@ export function TransactionFilters({
                   style={styles.selectButton}
                   contentStyle={styles.selectButtonContent}
                   icon="chevron-down"
+                  textColor={onSurfaceColor}
                 >
                   {getSelectedMethodLabel()}
                 </Button>
@@ -306,7 +305,6 @@ export function TransactionFilters({
             </Menu>
           </View>
 
-          {/* Filtro de Período */}
           <View style={styles.filterSection}>
             <Text variant="titleSmall" style={[styles.filterLabel, { color: onSurfaceColor }]}>
               Período
@@ -317,6 +315,7 @@ export function TransactionFilters({
               style={styles.selectButton}
               contentStyle={styles.selectButtonContent}
               icon="calendar"
+              textColor={onSurfaceColor}
             >
               {getDateRangeLabel()}
             </Button>
@@ -324,9 +323,8 @@ export function TransactionFilters({
 
           <Divider style={styles.divider} />
 
-          {/* Botões de ação */}
           <View style={styles.modalActions}>
-            <Button mode="outlined" onPress={() => setAdvancedFiltersVisible(false)}>
+            <Button mode="outlined" textColor={onSurfaceColor} onPress={() => setAdvancedFiltersVisible(false)}>
               Fechar
             </Button>
             <Button
@@ -341,7 +339,6 @@ export function TransactionFilters({
           </View>
         </Modal>
 
-        {/* DatePicker */}
         <DatePickerModal
           locale="pt"
           mode="range"

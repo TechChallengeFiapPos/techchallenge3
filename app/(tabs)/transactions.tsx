@@ -21,6 +21,7 @@ export default function TransactionsScreen() {
   const backgroundColor = useThemeColor({}, 'background');
   const surfaceColor = useThemeColor({}, 'surface');
   const primaryColor = useThemeColor({}, 'primary');
+  const secondaryColor = useThemeColor({}, 'secondary');
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
 
@@ -71,14 +72,12 @@ export default function TransactionsScreen() {
   }, [filterType, advancedFilters]);
 
   const screenMetrics = useMemo(() => {
-    const isTablet = screenWidth > 768;
     const isLandscape = screenWidth > 600;
 
     return {
-      isTablet,
       isLandscape,
-      itemHeight: isTablet ? 80 : isLandscape ? 70 : 64,
-      horizontalPadding: isTablet ? 24 : 16,
+      itemHeight: isLandscape ? 70 : 64,
+      horizontalPadding: 16,
     };
   }, []);
 
@@ -184,7 +183,7 @@ export default function TransactionsScreen() {
       <View style={styles.headerSection}>
         <View style={[styles.transactionsHeader, { paddingHorizontal: screenMetrics.horizontalPadding }]}>
           <Text
-            variant={screenMetrics.isTablet ? 'headlineMedium' : 'labelLarge'}
+            variant="labelLarge"
             style={[styles.transactionsTitle, { color: onSurfaceColor }]}
           >
             Adicionar Transação
@@ -194,7 +193,7 @@ export default function TransactionsScreen() {
             icon="plus"
             size="small"
             onPress={() => router.push('/create-transaction')}
-            style={[styles.headerFab, { backgroundColor: primaryColor }]}
+            style={[styles.headerFab, { backgroundColor: secondaryColor }]}
             color="white"
           />
         </View>
@@ -217,9 +216,9 @@ export default function TransactionsScreen() {
           renderItem={renderTransaction}
           keyExtractor={keyExtractor}
           removeClippedSubviews={true}
-          maxToRenderPerBatch={screenMetrics.isTablet ? 15 : 10}
-          windowSize={screenMetrics.isTablet ? 15 : 10}
-          initialNumToRender={screenMetrics.isTablet ? 20 : 15}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          initialNumToRender={15}
           updateCellsBatchingPeriod={50}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}

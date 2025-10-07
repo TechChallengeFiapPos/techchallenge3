@@ -7,12 +7,8 @@ import { useTheme } from '@src/contexts/ThemeContext';
 import { Alert, Image, ScrollView, StyleSheet, View } from 'react-native';
 import { Divider, List, Switch } from 'react-native-paper';
 
-export default function ProfileScreen() {
-  const backgroundColor = useThemeColor({}, 'background');
-  const surfaceColor = useThemeColor({}, 'surface');
-  const primaryColor = useThemeColor({}, 'primary');
-  const danger = useThemeColor({}, 'error');
 
+export default function ProfileScreen() {
   const { user, logout } = useAuth();
   const { theme, setThemeMode } = useTheme();
 
@@ -21,6 +17,12 @@ export default function ProfileScreen() {
   const handleThemeToggle = () => {
     setThemeMode(isDarkMode ? 'light' : 'dark');
   };
+
+    const backgroundColor = useThemeColor({}, 'background');
+  const surfaceColor = useThemeColor({}, 'surface');
+  const primaryColor = useThemeColor({}, 'primary');
+  const danger = useThemeColor({}, 'error');
+
 
   const handleLogout = async () => {
     Alert.alert(
@@ -108,13 +110,12 @@ export default function ProfileScreen() {
           />
         </View>
 
-        <View style={styles.logoutContainer}>
+        <View style={[styles.logoutButton, { backgroundColor: surfaceColor }]}>
           <List.Item
             title="Sair da Conta"
             titleStyle={{ color: danger, fontWeight: '600' }}
             left={props => <List.Icon {...props} icon="logout" color={danger} />}
             onPress={handleLogout}
-            style={[styles.logoutButton, { backgroundColor: surfaceColor }]}
           />
         </View>
       </ScrollView>
@@ -125,7 +126,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 16 },
-  logoContainer: { alignItems: 'center', paddingVertical: 32 },
+  logoContainer: { alignItems: 'center', paddingVertical: 14 },
   logoBig: {
     width: 120,
     height: 120,
@@ -140,6 +141,5 @@ const styles = StyleSheet.create({
   infoRow: { paddingVertical: 12 },
   infoValue: { marginTop: 4, fontWeight: '600' },
   divider: { marginVertical: 8 },
-  logoutContainer: { marginTop: 16 },
   logoutButton: { borderRadius: 12, elevation: 2 },
 });
