@@ -1,7 +1,7 @@
 import { useThemeColor } from '@hooks/useThemeColor';
 import { Transaction } from '@src/models/transactions';
 import { getCategoryLabel } from '@src/utils/transactions';
-import React, { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Animated, Dimensions, StyleSheet, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 import {
@@ -20,8 +20,7 @@ interface FinancialChartsProps {
   transactions: Transaction[];
 }
 
-// Componente de animação para cada seção
-const AnimatedSection: React.FC<{ delay?: number; children: React.ReactNode }> = ({ delay = 0, children }) => {
+function AnimatedSection({ delay = 0, children }: { delay?: number; children: React.ReactNode }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
@@ -47,56 +46,56 @@ const AnimatedSection: React.FC<{ delay?: number; children: React.ReactNode }> =
       {children}
     </Animated.View>
   );
-};
+}
 
 export function FinancialCharts({ transactions }: FinancialChartsProps) {
   const primaryColor = useThemeColor({}, 'primary');
   const secondaryColor = useThemeColor({}, 'secondary');
   const tertiaryColor = useThemeColor({}, 'onSurfaceVariant');
-  const inverseSurface = useThemeColor({}, 'inverseSurface');
   const surfaceColor = useThemeColor({}, 'surface');
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const errorColor = useThemeColor({}, 'error');
 
+  const getCategoryColor = (categoryId: string): string => {
+  const colorMap: Record<string, string> = {
+    food: primaryColor,
+    transport: secondaryColor,
+    health: '#53e3ebff',
+    education: errorColor,
+    entertainment: '#9C27B0', 
+    shopping: '#FF9800', 
+    bills: '#795548', 
+    salary: primaryColor,
+    freelance: secondaryColor,
+    investment: '#4CAF50', 
+    other: '#607D8B', 
+  };
+  return colorMap[categoryId] || primaryColor;
+};
+
   const formatValue = (value: number) =>
     `R$ ${value.toFixed(2).replace('.', ',')}`;
 
-  // 1. Despesas por Categoria
-  const expensesByCategory = useMemo(() => {
-    const expenses = transactions.filter((t) => t.type === 'expense');
-    const categoryMap: Record<string, number> = {};
+const expensesByCategory = useMemo(() => {
+  const expenses = transactions.filter((t) => t.type === 'expense');
+  const categoryMap: Record<string, number> = {};
 
-    expenses.forEach((t) => {
-      const category = t.categoryId || 'other';
-      categoryMap[category] = (categoryMap[category] || 0) + t.value;
-    });
+  expenses.forEach((t) => {
+    const category = t.categoryId || 'other';
+    categoryMap[category] = (categoryMap[category] || 0) + t.value;
+  });
 
-    // LOG: Debug do mapeamento de categorias
-    console.log('📊 PIZZA - Total de despesas encontradas:', expenses.length);
-    console.log('📊 PIZZA - Valores brutos (em centavos) por categoria:', categoryMap);
-    
-    const formattedMap: Record<string, string> = {};
-    Object.entries(categoryMap).forEach(([cat, val]) => {
-      formattedMap[getCategoryLabel(cat)] = formatValue(val / 100);
-    });
-    console.log('📊 PIZZA - Valores formatados (em reais) por categoria:', formattedMap);
+  const result = Object.entries(categoryMap)
+    .map(([category, value]) => ({
+      name: getCategoryLabel(category),
+      value: value / 100,
+      color: getCategoryColor(category), // USA A COR FIXA DA CATEGORIA!
+    }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
 
-    const result = Object.entries(categoryMap)
-      .map(([category, value], index) => ({
-        name: getCategoryLabel(category),
-        value: value / 100,
-        color:
-          [primaryColor, secondaryColor, tertiaryColor][
-            index % 3
-          ] || primaryColor,
-      }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 5);
-
-    console.log('📊 PIZZA - Top 5 categorias para exibir:', result.map(r => ({ name: r.name, value: formatValue(r.value) })));
-
-    return result;
-  }, [transactions, primaryColor, secondaryColor, tertiaryColor]);
+  return result;
+}, [transactions]);
 
   // 2. Evolução últimos 6 meses
   const monthlyTrend = useMemo(() => {
@@ -109,8 +108,6 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
         monthIndex: date.getMonth(),
       };
     });
-
-    console.log('📈 LINHA - Meses analisados:', last6Months.map(m => `${m.label}/${m.year}`));
 
     const incomeData = last6Months.map(({ year, monthIndex }) => {
       const value = transactions
@@ -135,9 +132,6 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
         .reduce((sum, t) => sum + t.value, 0) / 100;
       return value;
     });
-
-    console.log('📈 LINHA - Receitas por mês (em reais):', incomeData.map((v, i) => `${last6Months[i].label}: ${formatValue(v)}`));
-    console.log('📈 LINHA - Despesas por mês (em reais):', expenseData.map((v, i) => `${last6Months[i].label}: ${formatValue(v)}`));
 
     return {
       labels: last6Months.map((m) => m.label),
@@ -165,37 +159,19 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
     };
 
     const result = [
-      { 
-        month: 'Mês Passado', 
-        income: sumByMonth(lastMonth, 'income'), 
-        expense: sumByMonth(lastMonth, 'expense') 
+      {
+        month: 'Mês Passado',
+        income: sumByMonth(lastMonth, 'income'),
+        expense: sumByMonth(lastMonth, 'expense')
       },
-      { 
-        month: 'Mês Atual', 
-        income: sumByMonth(current, 'income'), 
-        expense: sumByMonth(current, 'expense') 
+      {
+        month: 'Mês Atual',
+        income: sumByMonth(current, 'income'),
+        expense: sumByMonth(current, 'expense')
       },
     ];
 
-    console.log('📊 BARRAS - Comparativo mensal:');
-    console.log(`   Mês Passado (${lastMonth.getMonth() + 1}/${lastMonth.getFullYear()}):`);
-    console.log(`      Receitas: ${formatValue(result[0].income)}`);
-    console.log(`      Despesas: ${formatValue(result[0].expense)}`);
-    console.log(`   Mês Atual (${current.getMonth() + 1}/${current.getFullYear()}):`);
-    console.log(`      Receitas: ${formatValue(result[1].income)}`);
-    console.log(`      Despesas: ${formatValue(result[1].expense)}`);
-
     return result;
-  }, [transactions]);
-
-  // LOG: Resumo geral
-  useEffect(() => {
-    console.log('═══════════════════════════════════════');
-    console.log('📊 RESUMO DOS GRÁFICOS');
-    console.log(`Total de transações carregadas: ${transactions.length}`);
-    console.log(`Receitas: ${transactions.filter(t => t.type === 'income').length}`);
-    console.log(`Despesas: ${transactions.filter(t => t.type === 'expense').length}`);
-    console.log('═══════════════════════════════════════');
   }, [transactions]);
 
   if (transactions.length === 0) {
@@ -212,7 +188,6 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
 
   return (
     <View style={styles.container}>
-      {/* Despesas por Categoria */}
       {expensesByCategory.length > 0 && (
         <AnimatedSection delay={100}>
           <Card style={[styles.card, { backgroundColor: surfaceColor }]}>
@@ -229,10 +204,9 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
                 labels={() => ''}
                 innerRadius={50}
                 labelRadius={70}
-                width={screenWidth * 0.9}
+                width={screenWidth * 0.85}
               />
 
-              {/* Legenda abaixo do gráfico */}
               <View style={{ marginTop: 16 }}>
                 {expensesByCategory.map((d) => (
                   <View
@@ -259,22 +233,25 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
         </AnimatedSection>
       )}
 
-      {/* Evolução últimos 6 meses */}
       <AnimatedSection delay={300}>
         <Card style={[styles.card, { backgroundColor: surfaceColor }]}>
           <Card.Content>
             <Text variant="titleLarge" style={[styles.chartTitle, { color: onSurfaceColor }]}>
               Evolução (Últimos 6 Meses)
             </Text>
-            <View style={{ width: screenWidth * 0.9, alignSelf: 'center' }}>
-              <VictoryChart domainPadding={20} width={screenWidth * 0.9}>
+            <View style={{ width: screenWidth * 0.85, alignSelf: 'center' }}>
+              <VictoryChart domainPadding={20} padding={{ left: 70, right: 45, top: 40, bottom: 40 }} width={screenWidth * 0.85}>
                 <VictoryAxis
                   tickValues={monthlyTrend.labels}
                   style={{ tickLabels: { fill: onSurfaceColor }, axis: { stroke: onSurfaceColor } }}
                 />
                 <VictoryAxis
                   dependentAxis
-                  tickFormat={(x) => `R$ ${x >= 1000 ? x / 1000 + 'k' : x}`}
+                  tickFormat={(x) => {
+                    if (x >= 1000000) return `R$ ${(x / 1000000).toFixed(1)}M`;
+                    if (x >= 1000) return `R$ ${(x / 1000).toFixed(0)}k`;
+                    return `R$ ${x}`;
+                  }}
                   style={{ tickLabels: { fill: onSurfaceColor }, axis: { stroke: onSurfaceColor } }}
                 />
                 <VictoryLine
@@ -293,7 +270,7 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
                   style={{ labels: { fill: onSurfaceColor } }}
                   data={[
                     { name: 'Receitas', symbol: { fill: primaryColor } },
-                    { name: 'Despesas', symbol: { fill: errorColor} },
+                    { name: 'Despesas', symbol: { fill: errorColor } },
                   ]}
                 />
               </VictoryChart>
@@ -302,15 +279,14 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
         </Card>
       </AnimatedSection>
 
-      {/* Comparativo Mensal */}
       <AnimatedSection delay={500}>
         <Card style={[styles.card, { backgroundColor: surfaceColor }]}>
           <Card.Content>
             <Text variant="titleLarge" style={[styles.chartTitle, { color: onSurfaceColor }]}>
               Comparativo Mensal
             </Text>
-            <View style={{ width: screenWidth * 0.9, alignSelf: 'center' }}>
-              <VictoryChart domainPadding={20} width={screenWidth * 0.9}>
+            <View style={{ width: screenWidth * 0.85, alignSelf: 'center' }}>
+              <VictoryChart domainPadding={20} padding={{ left: 70, right: 30, top: 40, bottom: 40 }} width={screenWidth * 0.85}>
                 <VictoryAxis
                   tickValues={monthlyComparison.map((m) => m.month)}
                   style={{
@@ -320,7 +296,11 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
                 />
                 <VictoryAxis
                   dependentAxis
-                  tickFormat={(x) => `R$ ${x >= 1000 ? x / 1000 + 'k' : x}`}
+                  tickFormat={(x) => {
+                    if (x >= 1000000) return `R$ ${(x / 1000000).toFixed(1)}M`;
+                    if (x >= 1000) return `R$ ${(x / 1000).toFixed(0)}k`;
+                    return `R$ ${x}`;
+                  }}
                   style={{
                     tickLabels: { fill: onSurfaceColor },
                     axis: { stroke: onSurfaceColor },

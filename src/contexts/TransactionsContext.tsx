@@ -13,34 +13,23 @@ import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
 type TransactionContextType = {
-  // Estados principais
-  transactions: Transaction[]; // Lista paginada/filtrada
-  allTransactions: Transaction[]; // TODAS as transações (para gráficos)
+  transactions: Transaction[];
+  allTransactions: Transaction[]; 
   loading: boolean;
   error: string | null;
-
-  // Estatísticas
   totalIncome: number;
   totalExpenses: number;
   balance: number;
-
-  // Scroll infinito
   hasMore: boolean;
-
-  // Ações
   createTransaction: (data: CreateTransactionData) => Promise<{ success: boolean; error?: string }>;
   updateTransaction: (
     id: string,
     data: UpdateTransactionData,
   ) => Promise<{ success: boolean; error?: string }>;
   deleteTransaction: (id: string) => Promise<{ success: boolean; error?: string }>;
-
-  // Carregamento
   loadTransactions: (filters?: TransactionFilters) => Promise<void>;
   loadMoreTransactions: () => Promise<void>;
   refreshTransactions: () => Promise<void>;
-
-  // Utilitários
   clearError: () => void;
 };
 
@@ -49,10 +38,10 @@ const TransactionContext = createContext<TransactionContextType>({} as Transacti
 export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
 
-  // Lista paginada/filtrada (para a tela de transações)
+  // Lista paginada/filtrada 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  // TODAS as transações (para gráficos - NUNCA FILTRADO)
+  // TODAS as transações 
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
 
   const [loading, setLoading] = useState(false);
@@ -70,7 +59,6 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
 
   const clearError = useCallback(() => setError(null), []);
 
-  // Carregar TODAS as transações (para gráficos e totais)
   const loadAllTransactions = useCallback(async () => {
     if (!user) return;
 
@@ -80,10 +68,8 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       if (result.success && result.data) {
         const all = result.data;
 
-        // Atualiza TODAS as transações (para gráficos)
         setAllTransactions(all);
 
-        // Calcula totais
         const income = calculateIncome(all);
         const expenses = calculateExpenses(all);
         const bal = calculateBalance(all);
@@ -97,7 +83,6 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user]);
 
-  // Carregar transações paginadas/filtradas (para listagem)
   const loadTransactions = useCallback(
     async (filters?: TransactionFilters) => {
       if (!user || loading) return;
@@ -158,7 +143,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     setHasMore(true);
     await Promise.all([
       loadTransactions(activeFilters),
-      loadAllTransactions() // Atualiza gráficos também
+      loadAllTransactions()
     ]);
   }, [loadTransactions, loadAllTransactions, activeFilters]);
 
@@ -227,16 +212,11 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
 
       try {
-        // Buscar transação para pegar anexo
         const transaction = allTransactions.find(t => t.id === id);
-
-        // Deletar anexo do Storage primeiro, se existir
         if (transaction?.attachment?.url) {
-          console.log('🗑️ Deletando anexo do Storage...');
           await StorageAPI.deleteAttachment(transaction.attachment.url);
         }
 
-        // Deletar transação do Firestore
         const result = await TransactionAPI.delete(user.uid, id);
 
         if (result.success) {
@@ -256,7 +236,6 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     [user, allTransactions, refreshTransactions, loadAllTransactions],
   );
 
-  // Carregar ao montar
   useEffect(() => {
     if (user) {
       loadTransactions();
@@ -275,20 +254,19 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   }, [user]);
 
   const value: TransactionContextType = {
-    transactions, // Lista filtradaπ
-    allTransactions, // TODAS (para gráficos)
+    transactions,
+    allTransactions, 
     loading,
     error,
     totalIncome,
     totalExpenses,
     balance,
     hasMore,
+
     createTransaction,
     updateTransaction,
     deleteTransaction,
     loadTransactions,
-
-
     loadMoreTransactions,
     refreshTransactions,
     clearError,

@@ -1,5 +1,3 @@
-// src/components/forms/TransactionRegisterForm.tsx - Código completo com upload
-
 import { getUserCards } from '@src/api/firebase/Card';
 import { useAuth } from '@src/contexts/AuthContext';
 import {
@@ -59,7 +57,7 @@ const transactionFields: TransactionFormField[] = [
     name: 'cardId',
     label: 'Cartão',
     placeholder: 'Selecione o cartão',
-    required: false,
+    required: true,
     type: 'select',
     conditional: (formData) => methodRequiresCard(formData.methodId),
   },
@@ -91,7 +89,7 @@ export function TransactionRegisterForm({
   const [userCards, setUserCards] = useState<{ label: string; value: string }[]>([]);
   const [attachment, setAttachment] = useState<TransactionAttachment | undefined>(
     initialData?.attachment
-  ); // ESTADO DO ATTACHMENT
+  ); 
 
   const {
     control,
@@ -284,7 +282,7 @@ export function TransactionRegisterForm({
     const processedData = {
       ...data,
       value: typeof data.value === 'string' ? parseInt(data.value) || 0 : data.value,
-      attachment, // INCLUI ATTACHMENT
+      attachment,
     };
 
     onSubmit(processedData);
@@ -294,7 +292,6 @@ export function TransactionRegisterForm({
     <View style={styles.container}>
       {transactionFields.map(renderField)}
 
-      {/* COMPONENTE DE UPLOAD */}
       <AttachmentPicker
         attachment={attachment}
         onAttachmentChange={setAttachment}
@@ -315,11 +312,11 @@ export function TransactionRegisterForm({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    paddingBottom: 20,
+    paddingBottom: 10,
   },
   errorText: {
     fontSize: 12,
-    marginTop: 4,
+    marginTop: -4,
   },
   submitButton: {
     marginTop: 24,

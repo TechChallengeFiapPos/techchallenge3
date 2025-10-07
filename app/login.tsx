@@ -127,14 +127,6 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
             </ThemedText>
           )}
 
-          {isLogin && (
-            <TouchableRipple onPress={() => console.log('Esqueci minha senha')} disabled={loading}>
-              <ThemedText style={styles.forgotText} textType="bodyMedium" colorName="secondary">
-                Esqueceu a senha?
-              </ThemedText>
-            </TouchableRipple>
-          )}
-
           <TouchableRipple onPress={() => setIsLogin(!isLogin)} disabled={loading}>
             <ThemedText
               style={[styles.switchText, { color: link }]}

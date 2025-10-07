@@ -1,5 +1,3 @@
-// SelectController atualizado
-import React from 'react';
 import { Controller, ControllerProps, FieldPath, FieldValues } from 'react-hook-form';
 import { ThemedSelect } from './ThemedSelect';
 

@@ -9,7 +9,6 @@ export const useCards = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  // Carregar todos os cartões do usuário
   const loadCards = useCallback(async () => {
     if (!user) {
       setCards([]);
@@ -36,30 +35,25 @@ export const useCards = () => {
     }
   }, [user]);
 
-  // Carregar cards quando o usuário mudar
   useEffect(() => {
     loadCards();
   }, [loadCards]);
 
-  // Buscar cartão por ID
   const getCard = useCallback(async (cardId: string) => {
     const result = await cardAPI.getCardById(cardId);
     return result;
   }, []);
 
-  // Buscar cartões por categoria
   const getCardsByCategory = useCallback(async (category: string) => {
     const result = await cardAPI.getCardsByCategory(category);
     return result;
   }, []);
 
-  // Buscar cartões por função
   const getCardsByFunction = useCallback(async (functionType: string) => {
     const result = await cardAPI.getCardsByFunction(functionType);
     return result;
   }, []);
 
-  // Função para recarregar dados
   const refetch = useCallback(() => {
     loadCards();
   }, [loadCards]);

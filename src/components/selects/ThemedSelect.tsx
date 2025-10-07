@@ -196,7 +196,7 @@ export function ThemedSelect({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 12,
+    marginBottom: 1,
   },
   input: {
     marginVertical: 8,

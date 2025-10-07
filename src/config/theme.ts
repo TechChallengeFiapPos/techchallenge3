@@ -118,6 +118,7 @@ const colors = {
   primary: '#00D09E', // Caribbean Green
   onPrimary: '#ffffff',
   inversePrimary: '#052224', // Fence Green
+  onPrimaryContainer: '#006cd0ff',
   secondary: '#3298FF', // Vivid Blue
   onSecondary: '#ffffff',
   tertiary: '#0E3E3E', // Cyprus
@@ -146,7 +147,8 @@ export const darkTheme: MD3Theme = {
   colors: {
     ...MD3DarkTheme.colors,
     ...colors,
-    inversePrimary: '#00D09E', // Fence Green
+    onPrimaryContainer: '#00D09E',
+    inversePrimary: '#00D09E', // sFence Green
     background: '#052224', // Void
     secondary: '#0068FF', //Ocean Blue
     outline: '#f1fff3', // Honeydew

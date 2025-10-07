@@ -19,7 +19,6 @@ export const useCard = (cardId?: string) => {
 
       try {
         const result = await cardAPI.getCardById(cardId);
-        console.log(result, 'resultado do useCard');
 
         if (result.success) {
           setCard(result.card || null);

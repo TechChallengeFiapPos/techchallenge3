@@ -1,15 +1,31 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { useTransactions } from '@src/contexts/TransactionsContext';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, View } from 'react-native';
 import { ProgressBar, Surface, Text } from 'react-native-paper';
-
-const { width: screenWidth } = Dimensions.get('window');
 
 export function FinancialDashboard() {
   const { totalIncome, totalExpenses, balance } = useTransactions();
 
-  // Theme colors
+  // Animações
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const cardFadeAnim = useRef(new Animated.Value(0)).current;
+  const cardSlideAnim = useRef(new Animated.Value(20)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+      Animated.spring(slideAnim, { toValue: 0, friction: 8, tension: 40, useNativeDriver: true }),
+    ]).start();
+
+    Animated.parallel([
+      Animated.timing(cardFadeAnim, { toValue: 1, duration: 600, delay: 200, useNativeDriver: true }),
+      Animated.spring(cardSlideAnim, { toValue: 0, friction: 8, tension: 40, delay: 200, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
   const backgroundColor = useThemeColor({}, 'surface');
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
@@ -18,40 +34,14 @@ export function FinancialDashboard() {
   const secondary = useThemeColor({}, 'secondary');
   const error = useThemeColor({}, 'error');
 
-  // Responsividade
-  const isTablet = screenWidth > 768;
-  const isLandscape = screenWidth > 600;
-
-  // Estilos dinâmicos
-  const dynamicStyles = {
-    container: {
-      padding: isTablet ? 24 : 16,
-    },
-    cardsContainer: {
-      flexDirection: isLandscape ? ('row' as const) : ('column' as const),
-      gap: isTablet ? 16 : 12,
-    },
-    card: {
-      flex: isLandscape ? 1 : undefined,
-      padding: isTablet ? 20 : 16,
-    },
-    iconSize: isTablet ? 28 : 24,
-  };
-
-  // Formatar valores em centavos para reais
   const formatCurrency = (valueInCents: number): string => {
     const reais = valueInCents / 100;
-    return reais.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    });
+    return reais.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
 
-  // Calcular percentual de gastos em relação à renda
   const expensePercentage = totalIncome > 0 ? (totalExpenses / totalIncome) * 100 : 0;
-  const progressValue = Math.min(expensePercentage / 100, 1); // Max 100%
+  const progressValue = Math.min(expensePercentage / 100, 1);
 
-  // Mensagem de status baseada no percentual
   const getStatusMessage = (): string => {
     if (expensePercentage <= 30) {
       return `${expensePercentage < 0.01 ? '<0,01' : expensePercentage.toFixed(2).replace('.', ',')}% da sua renda gasta. Muito bem!`;
@@ -64,117 +54,96 @@ export function FinancialDashboard() {
 
   return (
     <View>
-      {/* Card Principal com Balance, Expense e Barra de Progresso */}
-      <Surface style={[styles.mainCard, dynamicStyles.container, { backgroundColor }]}>
-        {/* Total Balance */}
-        <View style={styles.balanceItem}>
-          <View style={styles.balanceHeader}>
-            <Ionicons name="wallet" size={16} color={onSurfaceVariantColor} />
-            <Text
-              variant="bodySmall"
-              style={[styles.balanceLabel, { color: onSurfaceVariantColor }]}
-            >
-              Saldo Total
+      {/* Card Principal - ANIMADO */}
+      <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+        <Surface style={[styles.mainCard, { backgroundColor }]}>
+          <View style={styles.balanceItem}>
+            <View style={styles.balanceHeader}>
+              <Ionicons name="wallet" size={16} color={onSurfaceVariantColor} />
+              <Text variant="bodySmall" style={[styles.balanceLabel, { color: onSurfaceVariantColor }]}>
+                Saldo Total
+              </Text>
+            </View>
+            <Text variant="displaySmall" style={[styles.balanceValue, { color: onSurfaceColor }]}>
+              {formatCurrency(balance)}
             </Text>
           </View>
-          <Text variant="displaySmall" style={[styles.balanceValue, { color: onSurfaceColor }]}>
-            {formatCurrency(balance)}
-          </Text>
-        </View>
 
-        {/* Separador */}
-        <View style={[styles.separator, { backgroundColor: onSurfaceVariantColor + '30' }]} />
+          <View style={[styles.separator, { backgroundColor: onSurfaceVariantColor + '30' }]} />
 
-        {/* Total Expense */}
-        <View style={styles.balanceItem}>
-          <View style={styles.balanceHeader}>
-            <Ionicons name="trending-down" size={16} color={onSurfaceVariantColor} />
-            <Text
-              variant="bodySmall"
-              style={[styles.balanceLabel, { color: onSurfaceVariantColor }]}
-            >
-              Total de Despesas
+          <View style={styles.balanceItem}>
+            <View style={styles.balanceHeader}>
+              <Ionicons name="trending-down" size={16} color={onSurfaceVariantColor} />
+              <Text variant="bodySmall" style={[styles.balanceLabel, { color: onSurfaceVariantColor }]}>
+                Total de Despesas
+              </Text>
+            </View>
+            <Text variant="headlineMedium" style={[styles.expenseValue, { color: onSurfaceColor }]}>
+              {formatCurrency(totalExpenses)}
             </Text>
           </View>
-          <Text variant="headlineMedium" style={[styles.expenseValue, { color: onSurfaceColor }]}>
-            {formatCurrency(totalExpenses)}
-          </Text>
-        </View>
-      </Surface>
-
-      {/* Cards de Receitas e Despesas */}
-      <View style={[styles.cardsContainer, dynamicStyles.cardsContainer, dynamicStyles.container]}>
-        {/* Card de Receitas */}
-        <Surface style={[styles.card, dynamicStyles.card, { backgroundColor: surfaceColor }]}>
-          <View style={styles.cardContent}>
-            <View style={[styles.iconContainer, { backgroundColor: primaryColor }]}>
-              <Ionicons name="arrow-down" size={dynamicStyles.iconSize} color="white" />
-            </View>
-            <View style={styles.cardInfo}>
-              <Text variant="bodySmall" style={[styles.cardLabel, { color: onSurfaceVariantColor }]}>
-                Receitas
-              </Text>
-              <Text
-                variant={isTablet ? 'headlineSmall' : 'titleLarge'}
-                style={[styles.cardValue, { color: onSurfaceColor }]}
-              >
-                {formatCurrency(totalIncome)}
-              </Text>
-            </View>
-          </View>
         </Surface>
+      </Animated.View>
 
-        {/* Card de Despesas */}
-        <Surface style={[styles.card, dynamicStyles.card, { backgroundColor: surfaceColor }]}>
-          <View style={styles.cardContent}>
-            <View style={[styles.iconContainer, { backgroundColor: error }]}>
-              <Ionicons name="arrow-up" size={dynamicStyles.iconSize} color="white" />
+      {/* Cards Secundários - ANIMADOS */}
+      <Animated.View style={{ opacity: cardFadeAnim, transform: [{ translateY: cardSlideAnim }] }}>
+        <View style={styles.cardsContainer}>
+          <Surface style={[styles.card, { backgroundColor: surfaceColor }]}>
+            <View style={styles.cardContent}>
+              <View style={[styles.iconContainer, { backgroundColor: primaryColor }]}>
+                <Ionicons name="arrow-down" size={24} color="white" />
+              </View>
+              <View style={styles.cardInfo}>
+                <Text variant="bodySmall" style={[styles.cardLabel, { color: onSurfaceVariantColor }]}>
+                  Receitas
+                </Text>
+                <Text variant="titleLarge" style={[styles.cardValue, { color: onSurfaceColor }]}>
+                  {formatCurrency(totalIncome)}
+                </Text>
+              </View>
             </View>
-            <View style={styles.cardInfo}>
-              <Text variant="bodySmall" style={[styles.cardLabel, { color: onSurfaceVariantColor }]}>
-                Despesas
-              </Text>
-              <Text
-                variant={isTablet ? 'headlineSmall' : 'titleLarge'}
-                style={[styles.cardValue, { color: onSurfaceColor }]}
-              >
-                {formatCurrency(totalExpenses)}
-              </Text>
-            </View>
-          </View>
-        </Surface>
+          </Surface>
 
-        {/* Card de Progresso */}
-          {/* Barra de Progresso */}
+          <Surface style={[styles.card, { backgroundColor: surfaceColor }]}>
+            <View style={styles.cardContent}>
+              <View style={[styles.iconContainer, { backgroundColor: error }]}>
+                <Ionicons name="arrow-up" size={24} color="white" />
+              </View>
+              <View style={styles.cardInfo}>
+                <Text variant="bodySmall" style={[styles.cardLabel, { color: onSurfaceVariantColor }]}>
+                  Despesas
+                </Text>
+                <Text variant="titleLarge" style={[styles.cardValue, { color: onSurfaceColor }]}>
+                  {formatCurrency(totalExpenses)}
+                </Text>
+              </View>
+            </View>
+          </Surface>
+
           <View>
             <View style={styles.progressLabels}>
               <Text variant="bodySmall" style={[styles.progressLabel, { color: onSurfaceColor }]}>
-                {expensePercentage < 0.01
-                  ? '<0,01%'
-                  : `${expensePercentage.toFixed(2).replace('.', ',')}%`}
+                {expensePercentage < 0.01 ? '<0,01%' : `${expensePercentage.toFixed(2).replace('.', ',')}%`}
               </Text>
-              <Text
-                variant="bodySmall"
-                style={[styles.progressTarget, { color: onSurfaceVariantColor }]}
-              >
+              <Text variant="bodySmall" style={[styles.progressTarget, { color: onSurfaceVariantColor }]}>
                 {formatCurrency(totalIncome)}
               </Text>
             </View>
             <ProgressBar
               progress={Math.max(progressValue, 0.02)}
-              color={primaryColor}
-              style={[styles.progressBar, { backgroundColor: onSurfaceVariantColor + '30' }]}
+              color={error}
+              style={[styles.progressBar, { backgroundColor: secondary }]}
             />
           </View>
 
-          {/* Mensagem de Status */}
           <View style={styles.statusSection}>
             <Ionicons name="checkmark-circle" size={16} color={secondary} />
             <Text variant="bodySmall" style={[styles.statusText, { color: onSurfaceVariantColor }]}>
               {getStatusMessage()}
             </Text>
           </View>
-      </View>
+        </View>
+      </Animated.View>
     </View>
   );
 }
@@ -184,6 +153,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     elevation: 2,
     margin: 16,
+    padding: 16,
   },
   balanceItem: {
     marginBottom: 16,
@@ -210,9 +180,6 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     opacity: 0.5,
   },
-  progressSection: {
-    marginTop: 0,
-  },
   progressLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -232,19 +199,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginTop: 12,
+    marginTop: 2,
+    marginBottom: 20,
   },
   statusText: {
     flex: 1,
     fontSize: 12,
-    opacity: 0.8,
   },
   cardsContainer: {
     marginTop: 0,
+    padding: 16,
+    gap: 12,
   },
   card: {
     borderRadius: 16,
     elevation: 1,
+    padding: 16,
   },
   cardContent: {
     flexDirection: 'row',

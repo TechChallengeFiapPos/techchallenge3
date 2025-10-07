@@ -1,5 +1,3 @@
-// app/(tabs)/transactions.tsx
-
 import { useThemeColor } from '@hooks/useThemeColor';
 import { TransactionFilters } from '@src/components/filters/transactions/TransactionFilters';
 import { TransactionItem } from '@src/components/lists/transactions/TransactionItem';
@@ -9,25 +7,25 @@ import { useTransactions } from '@src/contexts/TransactionsContext';
 import { Transaction } from '@src/models/transactions';
 import { formatCurrency, paymentMethods, transactionCategories } from '@src/utils/transactions';
 import { useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Dimensions, FlatList, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, FAB, Snackbar, Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-
-const { width: screenWidth } = Dimensions.get('window');
 
 export default function TransactionsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
   const backgroundColor = useThemeColor({}, 'background');
+  const surfaceColor = useThemeColor({}, 'surface');
   const primaryColor = useThemeColor({}, 'primary');
+  const secondaryColor = useThemeColor({}, 'secondary');
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
 
   const {
     transactions,
+    allTransactions,
     loading,
     error,
     hasMore,
@@ -38,7 +36,6 @@ export default function TransactionsScreen() {
     deleteTransaction
   } = useTransactions();
 
-  // Estados dos filtros
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [advancedFilters, setAdvancedFilters] = useState<{
     categoryId?: string;
@@ -47,72 +44,33 @@ export default function TransactionsScreen() {
     endDate?: Date;
   }>({});
 
-  // ⬇️ AQUI VAI O useEffect DOS FILTROS ⬇️
-  // Aplicar filtros quando mudarem
   useEffect(() => {
     const filters: any = {};
-    
-    // Filtro de tipo (Todas/Receitas/Despesas)
-    if (filterType !== 'all') {
-      filters.type = filterType;
-    }
-    
-    // Filtro de categoria
-    if (advancedFilters.categoryId) {
-      filters.categoryId = advancedFilters.categoryId;
-    }
-    
-    // Filtro de método
-    if (advancedFilters.methodId) {
-      filters.methodId = advancedFilters.methodId;
-    }
-    
-    // Filtro de período
-    if (advancedFilters.startDate) {
-      filters.startDate = advancedFilters.startDate;
-    }
-    
-    if (advancedFilters.endDate) {
-      filters.endDate = advancedFilters.endDate;
-    }
-    
-    // Carrega transações com todos os filtros combinados
+
+    if (filterType !== 'all') filters.type = filterType;
+    if (advancedFilters.categoryId) filters.categoryId = advancedFilters.categoryId;
+    if (advancedFilters.methodId) filters.methodId = advancedFilters.methodId;
+    if (advancedFilters.startDate) filters.startDate = advancedFilters.startDate;
+    if (advancedFilters.endDate) filters.endDate = advancedFilters.endDate;
+
     loadTransactions(filters);
-  }, [filterType, advancedFilters]); // Reexecuta quando qualquer filtro mudar
-  // ⬆️ FIM DO useEffect DOS FILTROS ⬆️
-
-  // Responsividade
-  const screenMetrics = useMemo(() => {
-    const isTablet = screenWidth > 768;
-    const isLandscape = screenWidth > 600;
-
-    return {
-      isTablet,
-      isLandscape,
-      itemHeight: isTablet ? 80 : isLandscape ? 70 : 64,
-      horizontalPadding: isTablet ? 24 : 16,
-    };
-  }, []);
+  }, [filterType, advancedFilters]);
 
   const handleEdit = (transaction: Transaction) => {
     router.push(`/(pages)/edit-transaction/${transaction.id}`);
   };
 
-   const handleDelete = (transaction: Transaction) => {
+  const handleDelete = (transaction: Transaction) => {
     Alert.alert(
       'Deletar Transação',
       `Tem certeza que deseja deletar esta transação de ${formatCurrency(transaction.value)}?`,
       [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
+        { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Deletar',
           style: 'destructive',
           onPress: async () => {
             const result = await deleteTransaction(transaction.id);
-            
             if (result.success) {
               Alert.alert('Sucesso', 'Transação deletada com sucesso!');
             } else {
@@ -126,29 +84,15 @@ export default function TransactionsScreen() {
 
   const renderTransaction = useCallback(
     ({ item }: { item: Transaction }) => (
-      <TransactionItem
-        transaction={item}
-        onEdit={handleEdit} // ← Deve passar aqui
-        onDelete={handleDelete}
-      />
+      <TransactionItem transaction={item} onEdit={handleEdit} onDelete={handleDelete} />
     ),
-    [handleEdit, handleDelete],
+    [],
   );
 
   const keyExtractor = useCallback((item: Transaction) => item.id, []);
 
-  const getItemLayout = useCallback(
-    (data: any, index: number) => ({
-      length: screenMetrics.itemHeight,
-      offset: screenMetrics.itemHeight * index,
-      index,
-    }),
-    [screenMetrics.itemHeight],
-  );
-
   const renderFooter = useCallback(() => {
     if (!loading || !hasMore) return null;
-
     return (
       <View style={styles.footer}>
         <ActivityIndicator animating size="small" color={primaryColor} />
@@ -157,11 +101,10 @@ export default function TransactionsScreen() {
         </Text>
       </View>
     );
-  }, [loading, hasMore, primaryColor, onSurfaceVariantColor]);
+  }, [loading, hasMore]);
 
   const renderEmpty = useCallback(() => {
     if (loading) return null;
-
     return (
       <View style={styles.emptyContainer}>
         <Text variant="headlineSmall" style={[styles.emptyTitle, { color: onSurfaceColor }]}>
@@ -169,102 +112,91 @@ export default function TransactionsScreen() {
         </Text>
         <Text variant="bodyMedium" style={[styles.emptySubtitle, { color: onSurfaceVariantColor }]}>
           {filterType === 'all'
-            ? 'Adicione sua primeira transação para começar'
+            ? 'Adicione uma transação para começar'
             : 'Nenhuma transação encontrada com este filtro'}
         </Text>
+        {allTransactions?.length === 0 &&
+          <View style={styles.emptyStateFAB}>
+            {renderAddTransactionButton()}
+          </View>
+        }
       </View>
     );
-  }, [loading, onSurfaceColor, onSurfaceVariantColor, filterType]);
+  }, [loading, filterType]);
 
   const handleLoadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      loadMoreTransactions();
-    }
-  }, [loading, hasMore, loadMoreTransactions]);
+    if (!loading && hasMore) loadMoreTransactions();
+  }, [loading, hasMore]);
 
   const handleRefresh = useCallback(() => {
     refreshTransactions();
   }, [refreshTransactions]);
 
-  const renderHeader = useCallback(() => {
-    return (
-      <View style={styles.headerContainer}>
-        <View
-          style={[
-            styles.transactionsHeader,
-            { paddingHorizontal: screenMetrics.horizontalPadding },
-          ]}
-        >
-          <Text
-            variant={screenMetrics.isTablet ? 'headlineMedium' : 'labelLarge'}
-            style={[styles.transactionsTitle, { color: onSurfaceColor }]}
-          >
-            Adicionar Transação
-          </Text>
+  const dynamicStyles = useMemo(() => {
+    const tabBarHeight = 90 + Math.max(insets.bottom, 0) + 20;
+    return { listContent: { paddingBottom: tabBarHeight } };
+  }, [insets]);
 
-          <FAB
-            icon="plus"
-            size="small"
-            onPress={() => router.push('/register-transaction')}
-            style={[styles.headerFab, { backgroundColor: primaryColor }]}
-            color="white"
-          />
-        </View>
-
-        {/* Componente de Filtros */}
-        <TransactionFilters
-          filterType={filterType}
-          onFilterTypeChange={setFilterType}
-          onFilterChange={setAdvancedFilters}
-          activeFilters={advancedFilters}
-          resultsCount={transactions.length}
-          horizontalPadding={screenMetrics.horizontalPadding}
-          categories={transactionCategories}
-          methods={paymentMethods}
-        />
-      </View>
-    );
-  }, [screenMetrics, onSurfaceColor, primaryColor, router, filterType, advancedFilters, transactions.length]);
- 
-  const dynamicStyles = useMemo(
-    () => {
-      const tabBarHeight = 90 + Math.max(insets.bottom, 0) + 20;
-      return {
-        listContent: {
-          paddingBottom: tabBarHeight,
-        },
-      };
-    },
-    [insets],
-  );
+  const renderAddTransactionButton = () => (
+    <View>
+      <FAB
+        icon="plus"
+        size="small"
+        onPress={() => router.push('/create-transaction')}
+        style={[styles.headerFab, { backgroundColor: secondaryColor }]}
+        color="white"
+      />
+    </View>
+  )
 
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
-      <PageHeader title="Transações" showBackButton={false} showLogout={true} />
+      <PageHeader title="Transações" showBackButton />
+      {allTransactions.length > 0 &&
+        <View style={styles.headerSection}>
+          <View style={[styles.transactionsHeader, { paddingHorizontal: 16 }]}>
+            <Text variant="labelLarge" style={[styles.transactionsTitle, { color: onSurfaceColor }]}>
+              Adicionar Transação
+            </Text>
+            {renderAddTransactionButton()}
+          </View>
 
-      <FlatList
-        data={transactions}
-        renderItem={renderTransaction}
-        keyExtractor={keyExtractor}
-        getItemLayout={getItemLayout}
-        ListHeaderComponent={renderHeader}
-        removeClippedSubviews={true}
-        maxToRenderPerBatch={screenMetrics.isTablet ? 15 : 10}
-        windowSize={screenMetrics.isTablet ? 15 : 10}
-        initialNumToRender={screenMetrics.isTablet ? 20 : 15}
-        updateCellsBatchingPeriod={50}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
-        onRefresh={handleRefresh}
-        refreshing={loading}
-        ListEmptyComponent={renderEmpty}
-        ListFooterComponent={renderFooter} 
-        contentContainerStyle={[
-          dynamicStyles.listContent,
-          transactions.length === 0 && styles.emptyList,
-        ]}
-        showsVerticalScrollIndicator={false}
-      />
+          <TransactionFilters
+            filterType={filterType}
+            onFilterTypeChange={setFilterType}
+            onFilterChange={setAdvancedFilters}
+            activeFilters={advancedFilters}
+            resultsCount={transactions.length}
+            horizontalPadding={16}
+            categories={transactionCategories}
+            methods={paymentMethods}
+          />
+        </View>
+      }
+
+      <View style={[styles.card, { backgroundColor: surfaceColor }]}>
+        <FlatList
+          data={transactions}
+          renderItem={renderTransaction}
+          keyExtractor={keyExtractor}
+          removeClippedSubviews
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          initialNumToRender={15}
+          updateCellsBatchingPeriod={50}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          onRefresh={handleRefresh}
+          refreshing={loading}
+          ListEmptyComponent={renderEmpty}
+          ListFooterComponent={renderFooter}
+          contentContainerStyle={[
+            dynamicStyles.listContent,
+            transactions.length === 0 && styles.emptyList,
+          ]}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
 
       <Snackbar
         visible={!!error}
@@ -281,33 +213,19 @@ export default function TransactionsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerContainer: { marginBottom: 8 },
-  transactionsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingTop: 24,
-  },
-  transactionsTitle: { fontWeight: 'bold', marginRight: 8,},
+  headerSection: { marginBottom: 0 },
+  transactionsHeader: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', paddingVertical: 16, paddingTop: 8 },
+  transactionsTitle: { fontWeight: 'bold', marginRight: 8 },
   headerFab: { marginLeft: 12, elevation: 4 },
+  card: { flex: 1, borderTopLeftRadius: 40, borderTopRightRadius: 40, marginVertical: 0, paddingTop: 16, marginTop: 20 },
   emptyList: { flexGrow: 1 },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 32,
-  },
+  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60, paddingHorizontal: 32 },
   emptyTitle: { textAlign: 'center', marginBottom: 8, fontWeight: '600' },
   emptySubtitle: { textAlign: 'center', opacity: 0.7 },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-  },
+  footer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 20, paddingHorizontal: 16 },
   footerText: { marginLeft: 8, opacity: 0.7 },
   errorSnackbar: { backgroundColor: '#F44336' },
+  emptyStateFAB: {
+    marginTop: 30,
+  }
 });
