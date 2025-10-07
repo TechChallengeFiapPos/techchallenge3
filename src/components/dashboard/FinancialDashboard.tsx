@@ -1,13 +1,9 @@
-// src/components/dashboard/FinancialDashboard.tsx - COM ANIMAÇÕES
-
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { useTransactions } from '@src/contexts/TransactionsContext';
 import { useEffect, useRef } from 'react';
-import { Animated, Dimensions, StyleSheet, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
 import { ProgressBar, Surface, Text } from 'react-native-paper';
-
-const { width: screenWidth } = Dimensions.get('window');
 
 export function FinancialDashboard() {
   const { totalIncome, totalExpenses, balance } = useTransactions();
@@ -19,36 +15,14 @@ export function FinancialDashboard() {
   const cardSlideAnim = useRef(new Animated.Value(20)).current;
 
   useEffect(() => {
-    // Anima o card principal
     Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        friction: 8,
-        tension: 40,
-        useNativeDriver: true,
-      }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+      Animated.spring(slideAnim, { toValue: 0, friction: 8, tension: 40, useNativeDriver: true }),
     ]).start();
 
-    // Anima os cards secundários com delay
     Animated.parallel([
-      Animated.timing(cardFadeAnim, {
-        toValue: 1,
-        duration: 600,
-        delay: 200,
-        useNativeDriver: true,
-      }),
-      Animated.spring(cardSlideAnim, {
-        toValue: 0,
-        friction: 8,
-        tension: 40,
-        delay: 200,
-        useNativeDriver: true,
-      }),
+      Animated.timing(cardFadeAnim, { toValue: 1, duration: 600, delay: 200, useNativeDriver: true }),
+      Animated.spring(cardSlideAnim, { toValue: 0, friction: 8, tension: 40, delay: 200, useNativeDriver: true }),
     ]).start();
   }, []);
 
@@ -60,23 +34,9 @@ export function FinancialDashboard() {
   const secondary = useThemeColor({}, 'secondary');
   const error = useThemeColor({}, 'error');
 
-  const isLandscape = screenWidth > 600;
-
-  const dynamicStyles = {
-    cardsContainer: {
-      flexDirection: isLandscape ? ('row' as const) : ('column' as const),
-    },
-    card: {
-      flex: isLandscape ? 1 : undefined,
-    },
-  };
-
   const formatCurrency = (valueInCents: number): string => {
     const reais = valueInCents / 100;
-    return reais.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    });
+    return reais.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
 
   const expensePercentage = totalIncome > 0 ? (totalExpenses / totalIncome) * 100 : 0;
@@ -95,20 +55,12 @@ export function FinancialDashboard() {
   return (
     <View>
       {/* Card Principal - ANIMADO */}
-      <Animated.View
-        style={{
-          opacity: fadeAnim,
-          transform: [{ translateY: slideAnim }],
-        }}
-      >
+      <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
         <Surface style={[styles.mainCard, { backgroundColor }]}>
           <View style={styles.balanceItem}>
             <View style={styles.balanceHeader}>
               <Ionicons name="wallet" size={16} color={onSurfaceVariantColor} />
-              <Text
-                variant="bodySmall"
-                style={[styles.balanceLabel, { color: onSurfaceVariantColor }]}
-              >
+              <Text variant="bodySmall" style={[styles.balanceLabel, { color: onSurfaceVariantColor }]}>
                 Saldo Total
               </Text>
             </View>
@@ -122,10 +74,7 @@ export function FinancialDashboard() {
           <View style={styles.balanceItem}>
             <View style={styles.balanceHeader}>
               <Ionicons name="trending-down" size={16} color={onSurfaceVariantColor} />
-              <Text
-                variant="bodySmall"
-                style={[styles.balanceLabel, { color: onSurfaceVariantColor }]}
-              >
+              <Text variant="bodySmall" style={[styles.balanceLabel, { color: onSurfaceVariantColor }]}>
                 Total de Despesas
               </Text>
             </View>
@@ -137,14 +86,9 @@ export function FinancialDashboard() {
       </Animated.View>
 
       {/* Cards Secundários - ANIMADOS */}
-      <Animated.View
-        style={{
-          opacity: cardFadeAnim,
-          transform: [{ translateY: cardSlideAnim }],
-        }}
-      >
-        <View style={[styles.cardsContainer, dynamicStyles.cardsContainer]}>
-          <Surface style={[styles.card, dynamicStyles.card, { backgroundColor: surfaceColor }]}>
+      <Animated.View style={{ opacity: cardFadeAnim, transform: [{ translateY: cardSlideAnim }] }}>
+        <View style={styles.cardsContainer}>
+          <Surface style={[styles.card, { backgroundColor: surfaceColor }]}>
             <View style={styles.cardContent}>
               <View style={[styles.iconContainer, { backgroundColor: primaryColor }]}>
                 <Ionicons name="arrow-down" size={24} color="white" />
@@ -160,7 +104,7 @@ export function FinancialDashboard() {
             </View>
           </Surface>
 
-          <Surface style={[styles.card, dynamicStyles.card, { backgroundColor: surfaceColor }]}>
+          <Surface style={[styles.card, { backgroundColor: surfaceColor }]}>
             <View style={styles.cardContent}>
               <View style={[styles.iconContainer, { backgroundColor: error }]}>
                 <Ionicons name="arrow-up" size={24} color="white" />
@@ -179,14 +123,9 @@ export function FinancialDashboard() {
           <View>
             <View style={styles.progressLabels}>
               <Text variant="bodySmall" style={[styles.progressLabel, { color: onSurfaceColor }]}>
-                {expensePercentage < 0.01
-                  ? '<0,01%'
-                  : `${expensePercentage.toFixed(2).replace('.', ',')}%`}
+                {expensePercentage < 0.01 ? '<0,01%' : `${expensePercentage.toFixed(2).replace('.', ',')}%`}
               </Text>
-              <Text
-                variant="bodySmall"
-                style={[styles.progressTarget, { color: onSurfaceVariantColor }]}
-              >
+              <Text variant="bodySmall" style={[styles.progressTarget, { color: onSurfaceVariantColor }]}>
                 {formatCurrency(totalIncome)}
               </Text>
             </View>

@@ -267,7 +267,7 @@ const expensesByCategory = useMemo(() => {
               Evolução (Últimos 6 Meses)
             </Text>
             <View style={{ width: screenWidth * 0.85, alignSelf: 'center' }}>
-              <VictoryChart domainPadding={20} padding={{ left: 60, right: 45, top: 40, bottom: 40 }} width={screenWidth * 0.85}>
+              <VictoryChart domainPadding={20} padding={{ left: 70, right: 45, top: 40, bottom: 40 }} width={screenWidth * 0.85}>
                 <VictoryAxis
                   tickValues={monthlyTrend.labels}
                   style={{ tickLabels: { fill: onSurfaceColor }, axis: { stroke: onSurfaceColor } }}
@@ -314,7 +314,7 @@ const expensesByCategory = useMemo(() => {
               Comparativo Mensal
             </Text>
             <View style={{ width: screenWidth * 0.85, alignSelf: 'center' }}>
-              <VictoryChart domainPadding={20} padding={{ left: 60, right: 30, top: 40, bottom: 40 }} width={screenWidth * 0.85}>
+              <VictoryChart domainPadding={20} padding={{ left: 70, right: 30, top: 40, bottom: 40 }} width={screenWidth * 0.85}>
                 <VictoryAxis
                   tickValues={monthlyComparison.map((m) => m.month)}
                   style={{
