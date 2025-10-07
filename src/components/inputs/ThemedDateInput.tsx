@@ -1,6 +1,4 @@
-// src/components/input/ThemedDateInput.tsx
 import { useThemeColor } from '@hooks/useThemeColor';
-import React from 'react';
 import { StyleSheet } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { DatePickerInput } from 'react-native-paper-dates';

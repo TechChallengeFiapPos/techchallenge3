@@ -26,7 +26,6 @@ export default function EditTransactionScreen() {
   const backgroundColor = useThemeColor({}, 'background');
   const { updateTransaction, loading, error, clearError, allTransactions } = useTransactions();
 
-  // Buscar transação pelo ID
   useEffect(() => {
     const found = allTransactions.find((t) => t.id === id);
     if (found) {

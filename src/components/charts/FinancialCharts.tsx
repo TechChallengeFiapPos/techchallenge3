@@ -51,7 +51,6 @@ function AnimatedSection({ delay = 0, children }: { delay?: number; children: Re
 export function FinancialCharts({ transactions }: FinancialChartsProps) {
   const primaryColor = useThemeColor({}, 'primary');
   const secondaryColor = useThemeColor({}, 'secondary');
-  const tertiaryColor = useThemeColor({}, 'onSurfaceVariant');
   const surfaceColor = useThemeColor({}, 'surface');
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const errorColor = useThemeColor({}, 'error');
@@ -89,7 +88,7 @@ const expensesByCategory = useMemo(() => {
     .map(([category, value]) => ({
       name: getCategoryLabel(category),
       value: value / 100,
-      color: getCategoryColor(category), // USA A COR FIXA DA CATEGORIA!
+      color: getCategoryColor(category),
     }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 5);
@@ -97,7 +96,7 @@ const expensesByCategory = useMemo(() => {
   return result;
 }, [transactions]);
 
-  // 2. Evolução últimos 6 meses
+  //  Evolução últimos 6 meses
   const monthlyTrend = useMemo(() => {
     const last6Months = Array.from({ length: 6 }, (_, i) => {
       const date = new Date();
@@ -140,7 +139,7 @@ const expensesByCategory = useMemo(() => {
     };
   }, [transactions]);
 
-  // 3. Comparativo Mensal
+  // Comparativo Mensal
   const monthlyComparison = useMemo(() => {
     const current = new Date();
     const lastMonth = new Date();

@@ -115,7 +115,7 @@ export default function LoginAndRegister({ lightColor, darkColor }: ThemedProps)
             type={isLogin ? 'login' : 'register'}
             onSubmit={handleSubmit}
             disabled={loading}
-            errors={fieldErrors} // passa os erros para o formulário
+            errors={fieldErrors} // passa os erros para o form
           />
 
           {message && (

@@ -1,5 +1,5 @@
 import { useThemeColor } from '@hooks/useThemeColor';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { TextInput, useTheme } from 'react-native-paper';
 
@@ -121,7 +121,7 @@ export const ThemedInput = <T extends string = string>({
         roundness: 50,
         colors: {
           ...theme.colors,
-          background: backgroundColor, // fix global: ERA PRA EVITAR fundo amarelo do autofill :(
+          background: backgroundColor, // fix global: PRA EVITAR fundo amarelo do autofill 
           onSurfaceVariant: labelColor, // aplica cor à label
         },
       }}

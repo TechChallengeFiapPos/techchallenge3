@@ -26,7 +26,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
         styles.container,
         {
           backgroundColor: themeColors.inverseSurface,
-          paddingBottom: insets.bottom, // Adiciona padding para safe area
+          paddingBottom: insets.bottom,
         },
       ]}
     >
@@ -98,22 +98,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     position: 'absolute',
-    bottom: 0, // Mudou de 2 para 0
+    bottom: 0,
     left: 0,
     right: 0,
     borderTopLeftRadius: 70,
     borderTopRightRadius: 70,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-    minHeight: 90, // Mudou de height para minHeight
+    minHeight: 90,
     alignItems: 'center',
     elevation: 5,
-    zIndex: 1000, // Adiciona z-index alto
+    zIndex: 1000,
   },
   tab: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 10, // Adiciona padding vertical
+    paddingVertical: 10,
   },
   iconWrapper: {
     width: 50,

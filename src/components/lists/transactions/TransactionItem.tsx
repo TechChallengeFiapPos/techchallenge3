@@ -39,7 +39,7 @@ export const TransactionItem = React.memo<TransactionItemProps>(
 
     const title = getCategoryLabel(transaction.categoryId) || 'Transação';
     const subtitle = `${transaction.type === 'expense' ? '-' : '+'}${formatCurrency(transaction.value)}`;
-    const centerText = formatDateTime(transaction.date); // data 
+    const centerText = formatDateTime(transaction.date);
     const rightText = '';
     const iconName = getCategoryIcon(transaction.categoryId);
     const colors = getTransactionColors();
