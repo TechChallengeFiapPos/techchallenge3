@@ -76,7 +76,7 @@ Saldo = Receitas - Despesas
 
 ### 2. Clone o repositório
 ```bash
-git clone https://github.com/seu-usuario/techchallenge3.git
+git@github.com:TechChallengeFiapPos/techchallenge3.git
 cd techchallenge3
 ``` 
 
