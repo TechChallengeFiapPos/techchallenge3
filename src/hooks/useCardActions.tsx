@@ -6,14 +6,12 @@ export const useCardActions = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Criar novo cartão
   const createCard = async (cardData: CreateCardData) => {
     setLoading(true);
     setError(null);
 
     try {
       const result = await cardAPI.createCard(cardData);
-      console.log(result, 'resultado do createCard');
 
       if (!result.success) {
         setError(result.error || 'Erro ao criar cartão');
@@ -29,7 +27,6 @@ export const useCardActions = () => {
     }
   };
 
-  //editar cartao
    const updateCard = async (cardId: string, cardData: cardAPI.UpdateCardData) => {
     setLoading(true);
     setError(null);
@@ -51,14 +48,12 @@ export const useCardActions = () => {
     }
   };
 
-  // Deletar cartão
   const deleteCard = async (cardId: string) => {
     setLoading(true);
     setError(null);
 
     try {
       const result = await cardAPI.deleteCard(cardId);
-      console.log(result, 'resultado do deleteCard');
 
       if (!result.success) {
         setError(result.error || 'Erro ao deletar cartão');
@@ -74,14 +69,12 @@ export const useCardActions = () => {
     }
   };
 
-  // Verificar se cartão existe
   const checkCardExists = async (cardNumber: string, excludeCardId?: string) => {
     setLoading(true);
     setError(null);
 
     try {
       const result = await cardAPI.checkCardExists(cardNumber, excludeCardId);
-      console.log(result, 'resultado do checkCardExists');
 
       if (!result.success) {
         setError(result.error || 'Erro ao verificar cartão');

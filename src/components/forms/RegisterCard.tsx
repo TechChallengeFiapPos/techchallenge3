@@ -1,4 +1,3 @@
-// CardRegisterForm corrigido
 import { CardFormData, CardFormField, CardFormProps, SelectOption } from '@src/models/card';
 import { useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
@@ -71,12 +70,8 @@ export function CardRegisterForm({ onSubmit, disabled, errors, initialData }: Ca
       ...initialData,
     },
   });
-  console.log('🚀 FORMULÁRIO CARREGOU!');
 
   const renderField = (field: CardFormField) => {
-    // Debug log para acompanhar renders
-    console.log('🔄 Renderizando campo:', field.name, 'tipo:', field.type);
-
     const defaultProps = {
       control,
       name: field.name,
@@ -99,17 +94,6 @@ export function CardRegisterForm({ onSubmit, disabled, errors, initialData }: Ca
     };
 
     if (field.type === 'select') {
-      // Debug logs para selects
-      console.log('📋 Opções para', field.name, ':', (field.options || []).length, 'itens');
-      console.log('📋 Primeira opção:', (field.options || [])[0]);
-      console.log('📋 Props do select:', {
-        name: defaultProps.name,
-        label: defaultProps.label,
-        optionsCount: (field.options || []).length,
-        placeholder: field.placeholder,
-        multiple: false,
-      });
-
       return (
         <View key={field.name} style={styles.fieldContainer}>
           <SelectController
@@ -128,23 +112,6 @@ export function CardRegisterForm({ onSubmit, disabled, errors, initialData }: Ca
     }
 
     if (field.type === 'multiselect') {
-      // Debug logs para multiselects
-      console.log(
-        '📋 Opções para multiselect',
-        field.name,
-        ':',
-        (field.options || []).length,
-        'itens',
-      );
-      console.log('📋 Primeira opção multiselect:', (field.options || [])[0]);
-      console.log('📋 Props do multiselect:', {
-        name: defaultProps.name,
-        label: defaultProps.label,
-        optionsCount: (field.options || []).length,
-        placeholder: field.placeholder,
-        multiple: true,
-      });
-
       return (
         <View key={field.name} style={styles.fieldContainer}>
           <SelectController
@@ -163,7 +130,6 @@ export function CardRegisterForm({ onSubmit, disabled, errors, initialData }: Ca
     }
 
     // Campo de texto
-    console.log('📝 Campo de texto:', field.name);
     return (
       <View key={field.name} style={styles.fieldContainer}>
         <InputController

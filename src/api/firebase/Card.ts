@@ -119,7 +119,6 @@ export const getUserCards = async () => {
 export const getCardById = async (cardId: string) => {
   try {
     const currentUser = getCurrentUser();
-    // cardId
     const cardDoc = doc(db, 'users', currentUser.uid, 'cards', cardId);
     const docSnap = await getDoc(cardDoc);
 
@@ -135,7 +134,6 @@ export const getCardById = async (cardId: string) => {
       ...docSnap.data(),
     } as CardData;
 
-    console.log(`✅ Cartão encontrado: ${cardId}`, card);
 
     return {
       success: true,
@@ -165,8 +163,6 @@ export const deleteCard = async (cardId: string) => {
 
     await deleteDoc(cardDoc);
 
-    console.log(`Cartão deletado: ${cardId}`);
-
     return {
       success: true,
       message: 'Cartão deletado com sucesso',
@@ -185,8 +181,6 @@ export const checkCardExists = async (cardNumber: string, excludeCardId?: string
   try {
     const currentUser = getCurrentUser();
     const cardsCollection = getUserCardsCollection(currentUser.uid);
-
-    // Remove espaços do número fornecido
     const cleanNumber = cardNumber.replace(/\s/g, '');
 
     const q = query(cardsCollection, where('number', '==', cleanNumber));

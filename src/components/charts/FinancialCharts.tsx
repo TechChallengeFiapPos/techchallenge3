@@ -48,7 +48,6 @@ function AnimatedSection({ delay = 0, children }: { delay?: number; children: Re
   );
 }
 
-
 export function FinancialCharts({ transactions }: FinancialChartsProps) {
   const primaryColor = useThemeColor({}, 'primary');
   const secondaryColor = useThemeColor({}, 'secondary');
@@ -90,13 +89,13 @@ const expensesByCategory = useMemo(() => {
     .map(([category, value]) => ({
       name: getCategoryLabel(category),
       value: value / 100,
-      color: getCategoryColor(category), // USA A COR FIXA DA CATEGORIA
+      color: getCategoryColor(category), // USA A COR FIXA DA CATEGORIA!
     }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 5);
 
   return result;
-}, [transactions]); // primaryColor etc não precisam estar aqui
+}, [transactions]);
 
   // 2. Evolução últimos 6 meses
   const monthlyTrend = useMemo(() => {
@@ -109,8 +108,6 @@ const expensesByCategory = useMemo(() => {
         monthIndex: date.getMonth(),
       };
     });
-
-    console.log('📈 LINHA - Meses analisados:', last6Months.map(m => `${m.label}/${m.year}`));
 
     const incomeData = last6Months.map(({ year, monthIndex }) => {
       const value = transactions
@@ -135,9 +132,6 @@ const expensesByCategory = useMemo(() => {
         .reduce((sum, t) => sum + t.value, 0) / 100;
       return value;
     });
-
-    console.log('📈 LINHA - Receitas por mês (em reais):', incomeData.map((v, i) => `${last6Months[i].label}: ${formatValue(v)}`));
-    console.log('📈 LINHA - Despesas por mês (em reais):', expenseData.map((v, i) => `${last6Months[i].label}: ${formatValue(v)}`));
 
     return {
       labels: last6Months.map((m) => m.label),
@@ -177,25 +171,7 @@ const expensesByCategory = useMemo(() => {
       },
     ];
 
-    console.log('📊 BARRAS - Comparativo mensal:');
-    console.log(`   Mês Passado (${lastMonth.getMonth() + 1}/${lastMonth.getFullYear()}):`);
-    console.log(`      Receitas: ${formatValue(result[0].income)}`);
-    console.log(`      Despesas: ${formatValue(result[0].expense)}`);
-    console.log(`   Mês Atual (${current.getMonth() + 1}/${current.getFullYear()}):`);
-    console.log(`      Receitas: ${formatValue(result[1].income)}`);
-    console.log(`      Despesas: ${formatValue(result[1].expense)}`);
-
     return result;
-  }, [transactions]);
-
-  // LOG: Resumo geral
-  useEffect(() => {
-    console.log('═══════════════════════════════════════');
-    console.log('📊 RESUMO DOS GRÁFICOS');
-    console.log(`Total de transações carregadas: ${transactions.length}`);
-    console.log(`Receitas: ${transactions.filter(t => t.type === 'income').length}`);
-    console.log(`Despesas: ${transactions.filter(t => t.type === 'expense').length}`);
-    console.log('═══════════════════════════════════════');
   }, [transactions]);
 
   if (transactions.length === 0) {
@@ -212,7 +188,6 @@ const expensesByCategory = useMemo(() => {
 
   return (
     <View style={styles.container}>
-      {/* Despesas por Categoria */}
       {expensesByCategory.length > 0 && (
         <AnimatedSection delay={100}>
           <Card style={[styles.card, { backgroundColor: surfaceColor }]}>
@@ -232,7 +207,6 @@ const expensesByCategory = useMemo(() => {
                 width={screenWidth * 0.85}
               />
 
-              {/* Legenda abaixo do gráfico */}
               <View style={{ marginTop: 16 }}>
                 {expensesByCategory.map((d) => (
                   <View
@@ -259,7 +233,6 @@ const expensesByCategory = useMemo(() => {
         </AnimatedSection>
       )}
 
-      {/* Evolução últimos 6 meses */}
       <AnimatedSection delay={300}>
         <Card style={[styles.card, { backgroundColor: surfaceColor }]}>
           <Card.Content>
@@ -306,7 +279,6 @@ const expensesByCategory = useMemo(() => {
         </Card>
       </AnimatedSection>
 
-      {/* Comparativo Mensal */}
       <AnimatedSection delay={500}>
         <Card style={[styles.card, { backgroundColor: surfaceColor }]}>
           <Card.Content>

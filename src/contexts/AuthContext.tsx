@@ -1,5 +1,3 @@
-// src/context/AuthContext.tsx - SEM navegação automática
-
 import { auth, db } from '@config/firebaseConfig';
 import { UserData } from '@src/models/user';
 import { User as FirebaseUser, onAuthStateChanged, signOut } from 'firebase/auth';
@@ -24,7 +22,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         if (firebaseUser) {
-          console.log('✅ Usuário autenticado:', firebaseUser.email);
           setUser(firebaseUser);
 
           const docRef = doc(db, 'users', firebaseUser.uid);
@@ -32,12 +29,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const userProfile = docSnap.exists() ? (docSnap.data() as UserData) : null;
           setProfile(userProfile);
         } else {
-          console.log('❌ Nenhum usuário logado');
           setUser(null);
           setProfile(null);
         }
       } catch (error) {
-        console.error('❌ Erro no onAuthStateChanged:', error);
+        console.error('Erro no onAuthStateChanged:', error);
         setUser(null);
         setProfile(null);
       } finally {
@@ -54,7 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       setProfile(null);
     } catch (error) {
-      console.error('❌ Erro no logout:', error);
+      console.error('Erro no logout:', error);
     }
   };
 
