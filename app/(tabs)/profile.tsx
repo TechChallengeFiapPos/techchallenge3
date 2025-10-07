@@ -9,7 +9,7 @@ import { Divider, List, Switch } from 'react-native-paper';
 
 
 export default function ProfileScreen() {
-  const { user, logout } = useAuth();
+  const { profile, logout } = useAuth();
   const { theme, setThemeMode } = useTheme();
 
   const isDarkMode = theme === 'dark';
@@ -18,7 +18,7 @@ export default function ProfileScreen() {
     setThemeMode(isDarkMode ? 'light' : 'dark');
   };
 
-    const backgroundColor = useThemeColor({}, 'background');
+  const backgroundColor = useThemeColor({}, 'background');
   const surfaceColor = useThemeColor({}, 'surface');
   const primaryColor = useThemeColor({}, 'primary');
   const danger = useThemeColor({}, 'error');
@@ -75,7 +75,7 @@ export default function ProfileScreen() {
               Nome
             </ThemedText>
             <ThemedText textType="bodyLarge" style={styles.infoValue}>
-              {user?.displayName || 'Não informado'}
+              {profile?.name || 'Não informado'}
             </ThemedText>
           </View>
 
@@ -86,7 +86,7 @@ export default function ProfileScreen() {
               Email
             </ThemedText>
             <ThemedText textType="bodyLarge" style={styles.infoValue}>
-              {user?.email}
+              {profile?.email}
             </ThemedText>
           </View>
         </View>

@@ -25,6 +25,7 @@ export default function TransactionsScreen() {
 
   const {
     transactions,
+    allTransactions,
     loading,
     error,
     hasMore,
@@ -45,7 +46,7 @@ export default function TransactionsScreen() {
 
   useEffect(() => {
     const filters: any = {};
-    
+
     if (filterType !== 'all') filters.type = filterType;
     if (advancedFilters.categoryId) filters.categoryId = advancedFilters.categoryId;
     if (advancedFilters.methodId) filters.methodId = advancedFilters.methodId;
@@ -111,9 +112,14 @@ export default function TransactionsScreen() {
         </Text>
         <Text variant="bodyMedium" style={[styles.emptySubtitle, { color: onSurfaceVariantColor }]}>
           {filterType === 'all'
-            ? 'Adicione sua primeira transação para começar'
+            ? 'Adicione uma transação para começar'
             : 'Nenhuma transação encontrada com este filtro'}
         </Text>
+        {allTransactions?.length === 0 &&
+          <View style={styles.emptyStateFAB}>
+            {renderAddTransactionButton()}
+          </View>
+        }
       </View>
     );
   }, [loading, filterType]);
@@ -131,36 +137,42 @@ export default function TransactionsScreen() {
     return { listContent: { paddingBottom: tabBarHeight } };
   }, [insets]);
 
+  const renderAddTransactionButton = () => (
+    <View>
+      <FAB
+        icon="plus"
+        size="small"
+        onPress={() => router.push('/create-transaction')}
+        style={[styles.headerFab, { backgroundColor: secondaryColor }]}
+        color="white"
+      />
+    </View>
+  )
+
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
       <PageHeader title="Transações" showBackButton />
+      {allTransactions.length > 0 &&
+        <View style={styles.headerSection}>
+          <View style={[styles.transactionsHeader, { paddingHorizontal: 16 }]}>
+            <Text variant="labelLarge" style={[styles.transactionsTitle, { color: onSurfaceColor }]}>
+              Adicionar Transação
+            </Text>
+            {renderAddTransactionButton()}
+          </View>
 
-      <View style={styles.headerSection}>
-        <View style={[styles.transactionsHeader, { paddingHorizontal: 16 }]}>
-          <Text variant="labelLarge" style={[styles.transactionsTitle, { color: onSurfaceColor }]}>
-            Adicionar Transação
-          </Text>
-
-          <FAB
-            icon="plus"
-            size="small"
-            onPress={() => router.push('/create-transaction')}
-            style={[styles.headerFab, { backgroundColor: secondaryColor }]}
-            color="white"
+          <TransactionFilters
+            filterType={filterType}
+            onFilterTypeChange={setFilterType}
+            onFilterChange={setAdvancedFilters}
+            activeFilters={advancedFilters}
+            resultsCount={transactions.length}
+            horizontalPadding={16}
+            categories={transactionCategories}
+            methods={paymentMethods}
           />
         </View>
-
-        <TransactionFilters
-          filterType={filterType}
-          onFilterTypeChange={setFilterType}
-          onFilterChange={setAdvancedFilters}
-          activeFilters={advancedFilters}
-          resultsCount={transactions.length}
-          horizontalPadding={16}
-          categories={transactionCategories}
-          methods={paymentMethods}
-        />
-      </View>
+      }
 
       <View style={[styles.card, { backgroundColor: surfaceColor }]}>
         <FlatList
@@ -205,7 +217,7 @@ const styles = StyleSheet.create({
   transactionsHeader: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', paddingVertical: 16, paddingTop: 8 },
   transactionsTitle: { fontWeight: 'bold', marginRight: 8 },
   headerFab: { marginLeft: 12, elevation: 4 },
-  card: { flex: 1, borderTopLeftRadius: 40, borderTopRightRadius: 40, marginVertical: 0, paddingTop: 16 },
+  card: { flex: 1, borderTopLeftRadius: 40, borderTopRightRadius: 40, marginVertical: 0, paddingTop: 16, marginTop: 20 },
   emptyList: { flexGrow: 1 },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60, paddingHorizontal: 32 },
   emptyTitle: { textAlign: 'center', marginBottom: 8, fontWeight: '600' },
@@ -213,4 +225,7 @@ const styles = StyleSheet.create({
   footer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 20, paddingHorizontal: 16 },
   footerText: { marginLeft: 8, opacity: 0.7 },
   errorSnackbar: { backgroundColor: '#F44336' },
+  emptyStateFAB: {
+    marginTop: 30,
+  }
 });
