@@ -176,7 +176,7 @@ export const deleteCard = async (cardId: string) => {
   }
 };
 
-// Verificar se cartão já existe
+// fn p/ Verificar se cartão já existe
 export const checkCardExists = async (cardNumber: string, excludeCardId?: string) => {
   try {
     const currentUser = getCurrentUser();
@@ -290,7 +290,7 @@ export const updateCard = async (cardId: string, cardData: UpdateCardData) => {
       };
     }
 
-    // Se estiver atualizando o número, verifica núemro existente SEM MASCARA
+    // Se estiver atualizando o número, verifica núemro existente SEM MASCARA!
     if (cardData.number) {
       const existsResult = await checkCardExists(cardData.number, cardId);
       if (existsResult.exists) {

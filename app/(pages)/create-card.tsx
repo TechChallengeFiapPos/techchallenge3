@@ -1,5 +1,3 @@
-// app/register-card.tsx - COM ALERT E RESET DO FORMULÁRIO
-
 import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { CreateCardData } from '@src/api/firebase/Card';
@@ -7,7 +5,7 @@ import { CardRegisterForm } from '@src/components/forms';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedText } from '@src/components/ThemedText';
 import { useCardActions } from '@src/hooks/useCardActions';
-import { useRouter } from 'expo-router'; // ADICIONE IMPORT
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 import {
@@ -31,7 +29,7 @@ export default function CreateCardScreen({ lightColor, darkColor }: ThemedProps)
   const [message, setMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formKey, setFormKey] = useState(0);
-  const router = useRouter(); // ADICIONE useRouter
+  const router = useRouter();
 
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const surfaceColor = useThemeColor({}, 'surface');
@@ -63,7 +61,7 @@ export default function CreateCardScreen({ lightColor, darkColor }: ThemedProps)
           text: 'Novo cartão',
           onPress: () => {
             setMessage(null);
-            setFormKey(prev => prev + 1); // RESETA O FORMULÁRIO
+            setFormKey(prev => prev + 1);
           },
         },
       ]);
@@ -93,7 +91,6 @@ export default function CreateCardScreen({ lightColor, darkColor }: ThemedProps)
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            {/* ADICIONE A KEY AQUI */}
             <CardRegisterForm 
               key={formKey}
               onSubmit={handleSubmit} 

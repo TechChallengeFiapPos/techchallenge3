@@ -8,7 +8,6 @@ import { ProgressBar, Surface, Text } from 'react-native-paper';
 export function FinancialDashboard() {
   const { totalIncome, totalExpenses, balance } = useTransactions();
 
-  // Animações
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
   const cardFadeAnim = useRef(new Animated.Value(0)).current;
@@ -54,7 +53,6 @@ export function FinancialDashboard() {
 
   return (
     <View>
-      {/* Card Principal - ANIMADO */}
       <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
         <Surface style={[styles.mainCard, { backgroundColor }]}>
           <View style={styles.balanceItem}>
@@ -85,7 +83,6 @@ export function FinancialDashboard() {
         </Surface>
       </Animated.View>
 
-      {/* Cards Secundários - ANIMADOS */}
       <Animated.View style={{ opacity: cardFadeAnim, transform: [{ translateY: cardSlideAnim }] }}>
         <View style={styles.cardsContainer}>
           <Surface style={[styles.card, { backgroundColor: surfaceColor }]}>

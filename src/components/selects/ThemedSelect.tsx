@@ -1,5 +1,5 @@
 import { useThemeColor } from '@hooks/useThemeColor';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FlatList, Modal, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Chip, Divider, Text, TextInput, useTheme } from 'react-native-paper';
 import { SelectOption } from './SelectController';
@@ -151,7 +151,6 @@ export function ThemedSelect({
         />
       </TouchableOpacity>
 
-      {/* Modal com opções pois a listagem normal estava bugando */}
       <Modal visible={visible} transparent animationType="fade" onRequestClose={closeModal}>
         <Pressable style={styles.overlay} onPress={closeModal}>
           <View style={[styles.modalContent, { backgroundColor: surfaceColor }]}>
@@ -175,7 +174,6 @@ export function ThemedSelect({
         </Pressable>
       </Modal>
 
-      {/* Chips para seleção múltipla */}
       {multiple && getSelectedOptions().length > 0 && (
         <View style={styles.chipsContainer}>
           {getSelectedOptions().map((option) => (

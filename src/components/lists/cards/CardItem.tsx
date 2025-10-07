@@ -1,5 +1,3 @@
-// src/components/lists/cards/CardItem.tsx - COM CORES POR CATEGORIA
-
 import { CardData } from '@src/api/firebase/Card';
 import { maskCardNumber } from '@src/utils/cards';
 import React from 'react';
@@ -25,9 +23,9 @@ export const CardItem = React.memo<CardItemProps>(
 
     const getCategoryColor = (category: string): string => {
       const colors: Record<string, string> = {
-        platinum: '#0EA5E9', // Azul
-        gold: '#F59E0B',     // Dourado
-        black: '#6B7280',    // Cinza escuro
+        platinum: '#0EA5E9',
+        gold: '#F59E0B',
+        black: '#6B7280',
       };
       return colors[category] || '#0EA5E9';
     };

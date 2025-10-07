@@ -123,8 +123,7 @@ export default function CardsScreen() {
     <ThemedView style={[styles.container, { backgroundColor }]}>
       <PageHeader title="Cartões" showBackButton={true} />
 
-      {/* USE cards.length (TODOS) ao invés de filteredCards.length */}
-      {cards.length > 0 && (
+      {cards?.length > 0 && (
         <View style={styles.addSection}>
           <Text variant="labelLarge" style={{ color: onSurfaceColor, fontWeight: 'bold' }}>
             Adicionar Cartão
@@ -133,7 +132,7 @@ export default function CardsScreen() {
         </View>
       )}
 
-      {cards.length > 0 && (
+      {cards?.length > 0 && (
         <View style={[styles.filterCard, { backgroundColor: surfaceColor }]}>
           <View style={styles.filterRow}>
             <Chip

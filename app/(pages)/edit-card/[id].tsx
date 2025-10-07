@@ -1,5 +1,3 @@
-// app/(pages)/edit-card/[id].tsx
-
 import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { UpdateCardData } from '@src/api/firebase/Card';
@@ -13,13 +11,13 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
 } from 'react-native';
 
 export default function EditCardScreen() {
@@ -78,7 +76,7 @@ export default function EditCardScreen() {
   if (!cardData) {
     return (
       <ThemedView style={[styles.container, { backgroundColor }]}>
-        <PageHeader title="Editar Cartão" showBackButton={true} showLogout={true} />
+        <PageHeader title="Editar Cartão" showBackButton={true} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" />
         </View>
@@ -92,7 +90,7 @@ export default function EditCardScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ThemedView style={[styles.container, { backgroundColor }]}>
-        <PageHeader title="Editar Cartão" showBackButton={true} showLogout={true} />
+        <PageHeader title="Editar Cartão" showBackButton={true}/>
 
         <ScrollView
           contentContainerStyle={styles.scrollContainer}

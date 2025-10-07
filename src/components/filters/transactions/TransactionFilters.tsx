@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Chip, Divider, Menu, Modal, Portal, Text } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
