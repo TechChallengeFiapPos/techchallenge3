@@ -1,5 +1,3 @@
-// src/contexts/TransactionsContext.tsx - CÓDIGO COMPLETO
-
 import { StorageAPI } from '@src/api/firebase/Storage';
 import { TransactionAPI } from '@src/api/firebase/Transactions';
 import { useAuth } from '@src/contexts/AuthContext';
@@ -171,7 +169,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
 
       try {
-        // 1. Criar transação primeiro
+        // Criar transação primeiro
         const result = await TransactionAPI.create(user.uid, data);
 
         if (!result.success || !result.data) {
@@ -179,7 +177,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
           return { success: false, error: result.error };
         }
 
-        // 2. Se tem attachment com temp_, mover para caminho definitivo
+        // Se tem attachment com temp_, mover para caminho definitivo
         if (data.attachment && data.attachment.url.includes('temp_')) {
           const moveResult = await StorageAPI.moveAttachmentFromTemp(
             user.uid,
@@ -188,7 +186,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
           );
 
           if (moveResult.success && moveResult.data) {
-            // 3. Atualizar transação com novo URL
+            // Atualizar transação com novo URL
             await TransactionAPI.update(user.uid, result.data.id, {
               attachment: moveResult.data
             });
@@ -197,7 +195,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
           }
         }
 
-        // 4. Recarregar transações
+        // Recarregar transações
         await Promise.all([refreshTransactions(), loadAllTransactions()]);
         return { success: true };
         
@@ -224,7 +222,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
 
         if (result.success) {
           await Promise.all([refreshTransactions(), loadAllTransactions()]);
-          return { success: true };
+          return { success: true }
         } else {
           setError(result.error || 'Erro ao atualizar transação');
           return { success: false, error: result.error };
