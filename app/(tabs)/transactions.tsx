@@ -54,7 +54,7 @@ export default function TransactionsScreen() {
     if (advancedFilters.endDate) filters.endDate = advancedFilters.endDate;
 
     loadTransactions(filters);
-  }, [filterType, advancedFilters]);
+  }, [filterType, advancedFilters, loadTransactions]);
 
   const handleEdit = (transaction: Transaction) => {
     router.push(`/(pages)/edit-transaction/${transaction.id}`);
@@ -70,12 +70,10 @@ export default function TransactionsScreen() {
           text: 'Deletar',
           style: 'destructive',
           onPress: async () => {
-            const result = await deleteTransaction(transaction.id);
-            if (result.success) {
-              Alert.alert('Sucesso', 'Transação deletada com sucesso!');
-            } else {
-              Alert.alert('Erro', result.error || 'Erro ao deletar transação');
-            }
+          const result = await deleteTransaction(transaction.id);
+          if (!result.success) {
+            Alert.alert('Erro', result.error || 'Erro ao deletar transação');
+          }
           },
         },
       ],
