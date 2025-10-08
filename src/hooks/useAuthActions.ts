@@ -3,13 +3,11 @@ import { createUserProfile } from '@src/api/firebase/User';
 import { useAuth } from '@src/contexts/AuthContext';
 
 export const useAuthActions = () => {
-  // Não temos mais setUser/setProfile
+  // Não tem mais setUser/setProfile
   const { user, profile } = useAuth();
 
   const loginUser = async (email: string, password: string) => {
     const result = await authAPI.login(email, password);
-    // aqui não chamamos setUser/setProfile
-    // o AuthContext será atualizado automaticamente via onAuthStateChanged
     return result;
   };
 
@@ -19,7 +17,6 @@ export const useAuthActions = () => {
     if (result.success && result.user) {
       await createUserProfile(result.user, { name });
     }
-    // novamente, AuthContext será atualizado via onAuthStateChanged
     return result;
   };
 

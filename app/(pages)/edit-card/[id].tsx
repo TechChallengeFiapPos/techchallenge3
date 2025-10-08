@@ -1,4 +1,3 @@
-
 import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { UpdateCardData } from '@src/api/firebase/Card';

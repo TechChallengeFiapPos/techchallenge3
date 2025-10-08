@@ -1,6 +1,6 @@
 import { storage } from '@src/config/firebaseConfig';
 import { TransactionAttachment } from '@src/models/transactions';
-import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors'; // ADICIONE
+import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import {
   deleteObject,
   getDownloadURL,

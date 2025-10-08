@@ -1,5 +1,3 @@
-// src/components/forms/TransactionRegisterForm.tsx - CÓDIGO COMPLETO
-
 import { getUserCards } from '@src/api/firebase/Card';
 import { useAuth } from '@src/contexts/AuthContext';
 import {
@@ -151,7 +149,7 @@ export function TransactionRegisterForm({
     // Se tem cartões disponíveis, não mostra alert
     if (userCards.length > 0) return;
 
-    // APENAS AGORA mostra o alert
+    // senao mostra o alert
     Alert.alert(
       'Nenhum cartão cadastrado',
       'Você precisa cadastrar um cartão antes de usar este método de pagamento.',
