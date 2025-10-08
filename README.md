@@ -70,7 +70,7 @@ Saldo = Receitas - Despesas
 - npm ou yarn
 - Expo CLI
 - Conta no Firebase
-- Android Studio
+- Android Studio usando SDM
 - Expo CLI
 - Expo GO 
 
