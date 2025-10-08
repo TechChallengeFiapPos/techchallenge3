@@ -118,6 +118,10 @@ export function TransactionRegisterForm({
   const watchedCard = watch('cardId');
 
   useEffect(() => {
+    setValue('categoryId', '');
+  }, [watchedType, setValue]);
+
+  useEffect(() => {
     const loadUserCards = async () => {
       if (!user) return;
 
@@ -228,19 +232,19 @@ export function TransactionRegisterForm({
               required: 'Valor é obrigatório',
               validate: (value: any) => {
                 const numValue = typeof value === 'string' ? parseInt(value) : value;
-                
+
                 if (!numValue || numValue === 0) {
                   return 'Valor é obrigatório';
                 }
-                
+
                 if (numValue <= 0) {
                   return 'Valor deve ser maior que zero';
                 }
-                
+
                 if (numValue > 99999999) {
                   return 'Valor máximo: R$ 999.999,99';
                 }
-                
+
                 return true;
               },
             }}
@@ -266,14 +270,14 @@ export function TransactionRegisterForm({
               required: 'Data é obrigatória',
               validate: (value: Date) => {
                 if (!value) return 'Data é obrigatória';
-                
+
                 const today = new Date();
                 today.setHours(23, 59, 59, 999);
-                
+
                 if (value > today) {
                   return 'Data não pode ser futura';
                 }
-                
+
                 return true;
               },
             }}
