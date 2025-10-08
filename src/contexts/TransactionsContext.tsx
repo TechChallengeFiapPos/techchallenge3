@@ -1,3 +1,5 @@
+// src/contexts/TransactionsContext.tsx - CÓDIGO COMPLETO
+
 import { StorageAPI } from '@src/api/firebase/Storage';
 import { TransactionAPI } from '@src/api/firebase/Transactions';
 import { useAuth } from '@src/contexts/AuthContext';
@@ -79,13 +81,16 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         setBalance(bal);
       }
     } catch (err: any) {
-      console.error('Erro ao carregar todas transações:', err);
+      // Não loga erro se for permission denied (esperado no logout)
+      if (err.code !== 'permission-denied') {
+        console.error('Erro ao carregar todas transações:', err);
+      }
     }
   }, [user]);
 
   const loadTransactions = useCallback(
     async (filters?: TransactionFilters) => {
-      if (!user || loading) return;
+      if (!user) return;
 
       setLoading(true);
       setError(null);
@@ -99,15 +104,21 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
           setLastDoc(result.lastDoc);
           setHasMore(result.hasMore || false);
         } else {
-          setError(result.error || 'Erro ao carregar transações');
+          // Não seta erro se for permission denied
+          if (result.error !== 'Sem permissão para acessar transações') {
+            setError(result.error || 'Erro ao carregar transações');
+          }
         }
       } catch (err: any) {
-        setError('Erro inesperado ao carregar transações');
+        // Não seta erro se for permission denied
+        if (err.code !== 'permission-denied') {
+          setError('Erro inesperado ao carregar transações');
+        }
       } finally {
         setLoading(false);
       }
     },
-    [user, loading],
+    [user],
   );
 
   // Scroll infinito
@@ -128,10 +139,14 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         setLastDoc(result.lastDoc);
         setHasMore(result.hasMore || false);
       } else {
-        setError(result.error || 'Erro ao carregar mais transações');
+        if (result.error !== 'Sem permissão para acessar transações') {
+          setError(result.error || 'Erro ao carregar mais transações');
+        }
       }
     } catch (err: any) {
-      setError('Erro ao carregar mais transações');
+      if (err.code !== 'permission-denied') {
+        setError('Erro ao carregar mais transações');
+      }
     } finally {
       setLoading(false);
     }
@@ -156,15 +171,36 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
 
       try {
+        // 1. Criar transação primeiro
         const result = await TransactionAPI.create(user.uid, data);
 
-        if (result.success) {
-          await Promise.all([refreshTransactions(), loadAllTransactions()]);
-          return { success: true };
-        } else {
+        if (!result.success || !result.data) {
           setError(result.error || 'Erro ao criar transação');
           return { success: false, error: result.error };
         }
+
+        // 2. Se tem attachment com temp_, mover para caminho definitivo
+        if (data.attachment && data.attachment.url.includes('temp_')) {
+          const moveResult = await StorageAPI.moveAttachmentFromTemp(
+            user.uid,
+            result.data.id,
+            data.attachment.url
+          );
+
+          if (moveResult.success && moveResult.data) {
+            // 3. Atualizar transação com novo URL
+            await TransactionAPI.update(user.uid, result.data.id, {
+              attachment: moveResult.data
+            });
+          } else {
+            console.warn('Não foi possível mover arquivo temporário:', moveResult.error);
+          }
+        }
+
+        // 4. Recarregar transações
+        await Promise.all([refreshTransactions(), loadAllTransactions()]);
+        return { success: true };
+        
       } catch (err: any) {
         const friendlyError = getFirebaseErrorMessage(err);
         return { success: false, error: friendlyError };
@@ -172,10 +208,10 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     },
-    [user, refreshTransactions, loadAllTransactions],
+    [user, loadAllTransactions],
   );
 
-  // Atualizar (precisa do userId agora)
+  // Atualizar
   const updateTransaction = useCallback(
     async (id: string, data: UpdateTransactionData) => {
       if (!user) return { success: false, error: 'Usuário não autenticado' };
@@ -200,10 +236,10 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     },
-    [user, refreshTransactions, loadAllTransactions],
+    [user, loadAllTransactions],
   );
 
-  // Deletar (precisa do userId agora)
+  // Deletar
   const deleteTransaction = useCallback(
     async (id: string) => {
       if (!user) return { success: false, error: 'Usuário não autenticado' };
@@ -233,7 +269,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     },
-    [user, allTransactions, refreshTransactions, loadAllTransactions],
+    [user, allTransactions, loadAllTransactions],
   );
 
   useEffect(() => {
@@ -251,6 +287,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       setTotalExpenses(0);
       setBalance(0);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const value: TransactionContextType = {

@@ -1,7 +1,7 @@
 import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { TransactionRegisterForm } from '@src/components/forms';
-import { ThemedCard } from '@src/components/ThemedCard';
+import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedText } from '@src/components/ThemedText';
 import { useTransactions } from '@src/contexts/TransactionsContext';
 import { Transaction, UpdateTransactionData } from '@src/models/transactions';
@@ -24,6 +24,8 @@ export default function EditTransactionScreen() {
   const router = useRouter();
 
   const backgroundColor = useThemeColor({}, 'background');
+  const surfaceColor = useThemeColor({}, 'surface');
+  
   const { updateTransaction, loading, error, clearError, allTransactions } = useTransactions();
 
   useEffect(() => {
@@ -77,66 +79,56 @@ export default function EditTransactionScreen() {
       enabled={Platform.OS === 'ios'}
     >
       <ThemedView style={[styles.container, { backgroundColor }]}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          bounces={false}
-        >
-          <View style={styles.headerContainer}>
-            <ThemedText style={styles.title} colorName="onSurfaceVariant" textType="titleSmall">
-              Editar Transação
-            </ThemedText>
-            <ThemedText style={styles.subtitle} colorName="onSurfaceVariant" textType="bodyMedium">
-              Atualize os dados da transação
-            </ThemedText>
-          </View>
+        <PageHeader title="Editar Transação" showBackButton={true} />
 
-          <View style={styles.cardWrapper}>
-            <ThemedCard style={styles.card}>
-              <TransactionRegisterForm
-                onSubmit={handleSubmit}
-                disabled={loading}
-                initialData={{
-                  type: transaction.type,
-                  value: transaction.value,
-                  categoryId: transaction.categoryId,
-                  methodId: transaction.methodId,
-                  cardId: transaction.cardId,
-                  description: transaction.description,
-                  date: transaction.date,
-                  attachment: transaction.attachment,
-                }}
-                mode="edit"
-              />
+        <View style={[styles.card, { backgroundColor: surfaceColor }]}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <TransactionRegisterForm
+              onSubmit={handleSubmit}
+              disabled={loading}
+              initialData={{
+                type: transaction.type,
+                value: transaction.value,
+                categoryId: transaction.categoryId,
+                methodId: transaction.methodId,
+                cardId: transaction.cardId,
+                description: transaction.description,
+                date: transaction.date,
+                attachment: transaction.attachment,
+              }}
+              mode="edit"
+            />
 
-              {message && (
-                <ThemedText
-                  style={styles.message}
-                  textType="default"
-                  colorName={message.startsWith('Erro') ? 'error' : 'primary'}
-                >
-                  {message}
-                </ThemedText>
-              )}
-
-              {error && !message && (
-                <ThemedText style={styles.message} textType="default" colorName="error">
-                  {error}
-                </ThemedText>
-              )}
-            </ThemedCard>
-
-            {loading && (
-              <View style={styles.overlay}>
-                <ActivityIndicator size="large" />
-                <ThemedText style={styles.loadingText} textType="default">
-                  Atualizando transação...
-                </ThemedText>
-              </View>
+            {message && (
+              <ThemedText
+                style={styles.message}
+                textType="default"
+                colorName={message.startsWith('Erro') ? 'error' : 'primary'}
+              >
+                {message}
+              </ThemedText>
             )}
-          </View>
-        </ScrollView>
+
+            {error && !message && (
+              <ThemedText style={styles.message} textType="default" colorName="error">
+                {error}
+              </ThemedText>
+            )}
+          </ScrollView>
+
+          {loading && (
+            <View style={styles.overlay}>
+              <ActivityIndicator size="large" color="#fff" />
+              <ThemedText style={styles.loadingText} textType="default">
+                Atualizando transação...
+              </ThemedText>
+            </View>
+          )}
+        </View>
       </ThemedView>
     </KeyboardAvoidingView>
   );
@@ -146,37 +138,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContainer: {
-    flexGrow: 1,
-  },
-  headerContainer: {
-    paddingTop: 60,
-    paddingBottom: 40,
-    alignItems: 'center',
-    minHeight: 140,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    opacity: 0.7,
-  },
-  cardWrapper: {
-    width: '100%',
-    flex: 1,
-    position: 'relative',
-  },
   card: {
     flex: 1,
-    width: '100%',
-    borderTopLeftRadius: 80,
-    borderTopRightRadius: 80,
-    padding: 25,
-    justifyContent: 'flex-start',
-    minHeight: 600,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    paddingTop: 24,
+    paddingHorizontal: 16,
+    marginVertical: 0,
+    marginTop: 42,
+  },
+  scrollContent: {
+    paddingBottom: 100,
+    paddingTop: 16,
   },
   message: {
     marginTop: 16,
@@ -186,11 +159,11 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderTopLeftRadius: 80,
-    borderTopRightRadius: 80,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
   },
   loadingText: {
     marginTop: 10,

@@ -1,9 +1,7 @@
-// src/hooks/useTransactionAnalytics.ts
 import { Transaction } from '@src/models/transactions';
 import { getCategoryLabel } from '@src/utils/transactions';
 import { useMemo } from 'react';
 
-// Interfaces para análises
 export interface CategorySummary {
   categoryId: string;
   categoryLabel: string;
@@ -21,7 +19,6 @@ export interface MonthSummary {
   count: number;
 }
 
-// Agrupar transações por categoria com totais
 export const groupByCategory = (transactions: Transaction[]): CategorySummary[] => {
   const groups: { [key: string]: { total: number; count: number } } = {};
   const totalAmount = transactions.reduce((sum, t) => sum + t.value, 0);
@@ -46,7 +43,6 @@ export const groupByCategory = (transactions: Transaction[]): CategorySummary[] 
     .sort((a, b) => b.total - a.total);
 };
 
-// Agrupar transações por mês
 export const groupByMonth = (transactions: Transaction[]): MonthSummary[] => {
   const groups: { [key: string]: MonthSummary } = {};
 

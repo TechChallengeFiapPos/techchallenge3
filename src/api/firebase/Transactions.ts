@@ -13,6 +13,7 @@ import {
   addDoc,
   collection,
   deleteDoc,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -60,7 +61,6 @@ export class TransactionAPI {
     } catch (error: any) {
       console.error('Erro ao criar transação:', error);
       
-      // Mantém erro customizado para permission-denied, usa fallback para outros
       if (error.code === 'permission-denied') {
         return { success: false, error: 'Sem permissão para criar transação' };
       }
@@ -257,12 +257,21 @@ export class TransactionAPI {
     try {
       const { attachment, date, ...restData } = data;
 
-      const updateData = {
+      let updateData: Record<string, any> = {
         ...restData,
-        ...(date && { date: Timestamp.fromDate(date) }),
-        ...(attachment !== undefined && { attachment }),
         updatedAt: serverTimestamp(),
       };
+
+      if (date) {
+        updateData.date = Timestamp.fromDate(date);
+      }
+
+      // Tratar attachment corretamente
+      if (attachment === undefined) {
+        updateData.attachment = deleteField(); // Remove do Firestore
+      } else if (attachment !== null) {
+        updateData.attachment = attachment; // Atualiza
+      }
 
       const docRef = doc(db, 'users', userId, 'transactions', transactionId);
       await updateDoc(docRef, updateData);

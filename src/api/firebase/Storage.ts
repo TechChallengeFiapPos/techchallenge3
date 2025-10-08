@@ -4,6 +4,7 @@ import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors'; // ADICIONE
 import {
   deleteObject,
   getDownloadURL,
+  getMetadata,
   ref,
   uploadBytes,
   uploadBytesResumable,
@@ -23,7 +24,7 @@ export class StorageAPI {
 
       const fileExtension = fileName.split('.').pop();
       const storagePath = `receipts/${userId}/${transactionId}/${Date.now()}.${fileExtension}`;
-      
+
       const storageRef = ref(storage, storagePath);
 
       const metadata = {
@@ -68,7 +69,7 @@ export class StorageAPI {
 
         const fileExtension = fileName.split('.').pop();
         const storagePath = `receipts/${userId}/${transactionId}/${Date.now()}.${fileExtension}`;
-        
+
         const storageRef = ref(storage, storagePath);
 
         const metadata = {
@@ -112,6 +113,68 @@ export class StorageAPI {
       }
     });
   }
+  
+  static async moveAttachmentFromTemp(
+    userId: string,
+    transactionId: string,
+    tempUrl: string
+  ): Promise<{ success: boolean; data?: TransactionAttachment; error?: string }> {
+    try {
+      // Referência ao arquivo temporário
+      const tempRef = ref(storage, tempUrl);
+
+      // Baixar arquivo temporário
+      const downloadUrl = await getDownloadURL(tempRef);
+      const response = await fetch(downloadUrl);
+      const blob = await response.blob();
+
+      // Obter metadata do arquivo
+      const metadata = await getMetadata(tempRef);
+      const fileName = metadata.customMetadata?.originalName || 'file';
+      const mimeType = metadata.contentType || 'application/octet-stream';
+
+      // Upload para caminho definitivo
+      const fileExtension = fileName.split('.').pop();
+      const finalPath = `receipts/${userId}/${transactionId}/${Date.now()}.${fileExtension}`;
+      const finalRef = ref(storage, finalPath);
+
+      await uploadBytes(finalRef, blob, {
+        contentType: mimeType,
+        customMetadata: {
+          userId,
+          transactionId,
+          originalName: fileName,
+        },
+      });
+
+      const finalUrl = await getDownloadURL(finalRef);
+
+      // Deletar arquivo temporário
+      try {
+        await deleteObject(tempRef);
+      } catch (deleteError: any) {
+        if (deleteError.code !== 'storage/object-not-found') {
+          console.warn('Erro ao deletar temp:', deleteError);
+        }
+      }
+
+      //Retornar attachment com novo URL
+      return {
+        success: true,
+        data: {
+          url: finalUrl,
+          name: fileName,
+          type: mimeType,
+          size: blob.size,
+          uploadedAt: Date.now(),
+        },
+      };
+    } catch (error: any) {
+      console.error('Erro ao mover arquivo:', error);
+      return { success: false, error: getFirebaseErrorMessage(error) };
+    }
+  }
+
 
   static async deleteAttachment(
     attachmentUrl: string

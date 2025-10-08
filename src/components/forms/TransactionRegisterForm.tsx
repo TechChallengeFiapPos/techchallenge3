@@ -1,3 +1,5 @@
+// src/components/forms/TransactionRegisterForm.tsx - CÓDIGO COMPLETO
+
 import { getUserCards } from '@src/api/firebase/Card';
 import { useAuth } from '@src/contexts/AuthContext';
 import {
@@ -13,9 +15,10 @@ import {
   paymentMethods,
   transactionTypeOptions,
 } from '@src/utils/transactions';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { DateController, InputController } from '../inputs';
 import { CurrencyInputController } from '../inputs/CurrencyInputController';
 import { SelectController } from '../selects/SelectController';
@@ -86,15 +89,17 @@ export function TransactionRegisterForm({
   mode = 'create',
 }: TransactionFormProps) {
   const { user } = useAuth();
+  const router = useRouter();
   const [userCards, setUserCards] = useState<{ label: string; value: string }[]>([]);
   const [attachment, setAttachment] = useState<TransactionAttachment | undefined>(
     initialData?.attachment
-  ); 
+  );
 
   const {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors: formErrors },
   } = useForm<TransactionFormData>({
     mode: 'onBlur',
@@ -111,6 +116,8 @@ export function TransactionRegisterForm({
   });
 
   const watchedType = watch('type');
+  const watchedMethod = watch('methodId');
+  const watchedCard = watch('cardId');
 
   useEffect(() => {
     const loadUserCards = async () => {
@@ -132,6 +139,39 @@ export function TransactionRegisterForm({
 
     loadUserCards();
   }, [user]);
+
+  // Validação de cartão - Só valida se não houver cartão selecionado
+  useEffect(() => {
+    // Se método não requer cartão, não faz nada
+    if (!methodRequiresCard(watchedMethod)) return;
+
+    // Se está editando E já tem um cartão selecionado, não valida
+    if (mode === 'edit' && watchedCard) return;
+
+    // Se tem cartões disponíveis, não mostra alert
+    if (userCards.length > 0) return;
+
+    // APENAS AGORA mostra o alert
+    Alert.alert(
+      'Nenhum cartão cadastrado',
+      'Você precisa cadastrar um cartão antes de usar este método de pagamento.',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+          onPress: () => {
+            setValue('methodId', '');
+          },
+        },
+        {
+          text: 'Cadastrar Cartão',
+          onPress: () => {
+            router.push('/create-card');
+          },
+        },
+      ]
+    );
+  }, [watchedMethod, userCards, mode, watchedCard]);
 
   const renderField = (field: TransactionFormField) => {
     if (field.conditional) {

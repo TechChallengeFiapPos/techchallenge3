@@ -1,9 +1,9 @@
+
 import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { UpdateCardData } from '@src/api/firebase/Card';
 import { CardRegisterForm } from '@src/components/forms';
 import { PageHeader } from '@src/components/navigation/PageHeader';
-import { ThemedCard } from '@src/components/ThemedCard';
 import { ThemedText } from '@src/components/ThemedText';
 import { useCardActions } from '@src/hooks/useCardActions';
 import { useCards } from '@src/hooks/useCards';
@@ -24,6 +24,7 @@ export default function EditCardScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const backgroundColor = useThemeColor({}, 'background');
+  const surfaceColor = useThemeColor({}, 'surface');
 
   const [message, setMessage] = useState<string | null>(null);
   const [cardData, setCardData] = useState<any>(null);
@@ -65,7 +66,7 @@ export default function EditCardScreen() {
       Alert.alert('Sucesso!', 'Cartão atualizado!', [
         {
           text: 'OK',
-          onPress: () => router.back(),
+          onPress: () => router.push('/(tabs)/cards'),
         },
       ]);
     } else {
@@ -88,75 +89,98 @@ export default function EditCardScreen() {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      enabled={Platform.OS === 'ios'}
     >
       <ThemedView style={[styles.container, { backgroundColor }]}>
-        <PageHeader title="Editar Cartão" showBackButton={true}/>
+        <PageHeader title="Editar Cartão" showBackButton={true} />
 
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.headerContainer}>
-            <ThemedText style={styles.title} colorName="onSurfaceVariant" textType="titleSmall">
-              Edição de cartão
-            </ThemedText>
-          </View>
+        <View style={styles.headerContainer}>
+          <ThemedText style={styles.subtitle} colorName="onSurfaceVariant" textType="bodyMedium">
+            Atualize as informações do cartão
+          </ThemedText>
+        </View>
 
-          <View style={styles.cardWrapper}>
-            <ThemedCard style={styles.card}>
-              <CardRegisterForm
-                onSubmit={handleSubmit}
-                disabled={loading}
-                initialData={cardData}
-              />
+        <View style={[styles.card, { backgroundColor: surfaceColor }]}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <CardRegisterForm
+              onSubmit={handleSubmit}
+              disabled={loading}
+              initialData={cardData}
+            />
 
-              {message && (
-                <ThemedText style={styles.message} textType="default" colorName="error">
-                  ❌ {message}
-                </ThemedText>
-              )}
-            </ThemedCard>
-
-            {loading && (
-              <View style={styles.overlay}>
-                <ActivityIndicator size="large" />
-                <ThemedText style={styles.loadingText} textType="default">
-                  Atualizando...
-                </ThemedText>
-              </View>
+            {message && (
+              <ThemedText style={styles.message} textType="default" colorName="error">
+                {message}
+              </ThemedText>
             )}
-          </View>
-        </ScrollView>
+          </ScrollView>
+
+          {loading && (
+            <View style={styles.overlay}>
+              <ActivityIndicator size="large" color="#fff" />
+              <ThemedText style={styles.loadingText} textType="default">
+                Atualizando cartão...
+              </ThemedText>
+            </View>
+          )}
+        </View>
       </ThemedView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  scrollContainer: { flexGrow: 1 },
-  headerContainer: { paddingTop: 120, paddingBottom: 60, minHeight: 200 },
-  title: { alignSelf: 'center', fontSize: 28, fontWeight: 'bold' },
-  cardWrapper: { width: '100%', flex: 1, position: 'relative' },
+  container: {
+    flex: 1,
+  },
+  headerContainer: {
+    paddingTop: 60,
+    paddingBottom: 40,
+    alignItems: 'center',
+    minHeight: 140,
+  },
+  subtitle: {
+    fontSize: 16,
+    opacity: 0.7,
+  },
   card: {
     flex: 1,
-    width: '100%',
-    borderTopLeftRadius: 80,
-    borderTopRightRadius: 80,
-    padding: 25,
-    justifyContent: 'flex-start',
-    minHeight: 500,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    paddingTop: 32,
+    paddingHorizontal: 16,
+    marginTop: 32,
   },
-  message: { marginTop: 16, fontSize: 14, textAlign: 'center', fontWeight: '500' },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  message: {
+    marginTop: 16,
+    fontSize: 14,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderTopLeftRadius: 80,
-    borderTopRightRadius: 80,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
   },
-  loadingText: { marginTop: 10, fontSize: 16, textAlign: 'center', color: '#fff' },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
