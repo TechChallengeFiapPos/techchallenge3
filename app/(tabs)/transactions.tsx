@@ -3,6 +3,7 @@ import { TransactionFilters } from '@src/components/filters/transactions/Transac
 import { TransactionItem } from '@src/components/lists/transactions/TransactionItem';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedView } from '@src/components/ThemedView';
+import { useAuth } from '@src/contexts/AuthContext';
 import { useTransactions } from '@src/contexts/TransactionsContext';
 import { Transaction } from '@src/models/transactions';
 import { formatCurrency, paymentMethods, transactionCategories } from '@src/utils/transactions';
@@ -35,6 +36,7 @@ export default function TransactionsScreen() {
     clearError,
     deleteTransaction
   } = useTransactions();
+  const { user } = useAuth();
 
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [advancedFilters, setAdvancedFilters] = useState<{
@@ -45,6 +47,8 @@ export default function TransactionsScreen() {
   }>({});
 
   useEffect(() => {
+    if (!user) return;
+
     const filters: any = {};
 
     if (filterType !== 'all') filters.type = filterType;
