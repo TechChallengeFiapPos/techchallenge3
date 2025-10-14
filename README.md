@@ -140,6 +140,7 @@ npx expo start -c
 
 - Pressione A no terminal pra abrir o projeto no emulador
 - Configuração do device no emulador: 1080 x 2400 (default)
+- Crie um usuário na tela de registro e logue na plataforma usando seu login e senha cadastrados.
 
 ## 🎨 Temas
 O aplicativo suporta tema claro e tema escuro que se adapta automaticamente às preferências do sistema operacional.
