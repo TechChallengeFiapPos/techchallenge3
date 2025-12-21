@@ -1,12 +1,8 @@
 import { StorageAPI } from '@src/api/firebase/Storage';
 import { TransactionAPI } from '@src/api/firebase/Transactions';
 import { useAuth } from '@src/contexts/AuthContext';
-import {
-  CreateTransactionData,
-  Transaction,
-  TransactionFilters,
-  UpdateTransactionData,
-} from '@src/models/transactions';
+import { CreateTransactionData, Transaction, UpdateTransactionData } from '@src/domain/entities/Transaction';
+import { TransactionFilters } from '@src/presentation/types/TransactionFormTypes';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import { calculateBalance, calculateExpenses, calculateIncome } from '@src/utils/transactions';
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';

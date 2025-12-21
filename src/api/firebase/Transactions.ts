@@ -2,9 +2,9 @@ import { db } from '@config/firebaseConfig';
 import {
   CreateTransactionData,
   Transaction,
-  TransactionFilters,
   UpdateTransactionData,
-} from '@src/models/transactions';
+} from '@src/domain/entities/Transaction';
+import { TransactionFilters } from '@src/models/transactions';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import {
   DocumentData,

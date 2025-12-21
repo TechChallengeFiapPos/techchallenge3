@@ -1,5 +1,5 @@
-import { SelectOption } from '@src/models/card';
-import { Transaction } from '@src/models/transactions';
+import { Transaction } from '@src/domain/entities/Transaction';
+import { SelectOption } from '@src/presentation/types/CommonFormTypes';
 
 // Tipos de transação
 export const transactionTypeOptions: SelectOption[] = [

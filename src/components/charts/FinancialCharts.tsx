@@ -1,5 +1,5 @@
 import { useThemeColor } from '@hooks/useThemeColor';
-import { Transaction } from '@src/models/transactions';
+import { Transaction } from '@src/domain/entities/Transaction';
 import { getCategoryLabel } from '@src/utils/transactions';
 import { useEffect, useMemo, useRef } from 'react';
 import { Animated, Dimensions, StyleSheet, View } from 'react-native';

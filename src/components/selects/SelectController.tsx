@@ -1,10 +1,6 @@
+import { SelectOption } from '@src/presentation/types/CommonFormTypes';
 import { Controller, ControllerProps, FieldPath, FieldValues } from 'react-hook-form';
 import { ThemedSelect } from './ThemedSelect';
-
-export interface SelectOption {
-  label: string;
-  value: string;
-}
 
 interface SelectControllerProps<
   TFieldValues extends FieldValues = FieldValues,

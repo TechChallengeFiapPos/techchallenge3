@@ -1,5 +1,5 @@
 import { useThemeColor } from '@hooks/useThemeColor';
-import { Transaction } from '@src/models/transactions';
+import { Transaction } from '@src/domain/entities/Transaction';
 import { formatCurrency, getCategoryIcon, getCategoryLabel } from '@src/utils/transactions';
 import React from 'react';
 import { ThemedListItem } from '../ThemedListItem';

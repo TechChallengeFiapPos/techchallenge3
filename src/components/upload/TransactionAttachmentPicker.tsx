@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { StorageAPI } from '@src/api/firebase/Storage';
 import { useAuth } from '@src/contexts/AuthContext';
-import { TransactionAttachment } from '@src/models/transactions';
+import { TransactionAttachment } from '@src/domain/entities/Transaction';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';

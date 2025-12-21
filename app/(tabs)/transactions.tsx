@@ -5,7 +5,7 @@ import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedView } from '@src/components/ThemedView';
 import { useAuth } from '@src/contexts/AuthContext';
 import { useTransactions } from '@src/contexts/TransactionsContext';
-import { Transaction } from '@src/models/transactions';
+import { Transaction } from '@src/domain/entities/Transaction';
 import { formatCurrency, paymentMethods, transactionCategories } from '@src/utils/transactions';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';

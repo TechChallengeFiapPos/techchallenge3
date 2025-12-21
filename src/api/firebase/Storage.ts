@@ -1,5 +1,5 @@
 import { storage } from '@src/config/firebaseConfig';
-import { TransactionAttachment } from '@src/models/transactions';
+import { TransactionAttachment } from '@src/domain/entities/Transaction';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import {
   deleteObject,
