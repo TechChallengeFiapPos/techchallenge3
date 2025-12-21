@@ -1,6 +1,6 @@
-import { StorageAPI } from '@src/api/firebase/Storage';
-import { TransactionAPI } from '@src/api/firebase/Transactions';
 import { useAuth } from '@src/contexts/AuthContext';
+import { StorageRepository } from '@src/data/repositories/StorageRepository';
+import { TransactionRepository } from '@src/data/repositories/TransactionRepository';
 import { CreateTransactionData, Transaction, UpdateTransactionData } from '@src/domain/entities/Transaction';
 import { TransactionFilters } from '@src/presentation/types/TransactionFormTypes';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
@@ -59,7 +59,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return;
 
     try {
-      const result = await TransactionAPI.getAllByUser(user.uid);
+      const result = await TransactionRepository.getAllByUser(user.uid);
 
       if (result.success && result.data) {
         const all = result.data;
@@ -91,7 +91,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       setActiveFilters(filters || {});
 
       try {
-        const result = await TransactionAPI.getByUser(user.uid, filters || {}, 12);
+        const result = await TransactionRepository.getByUser(user.uid, filters || {}, 12);
 
         if (result.success && result.data) {
           setTransactions(result.data);
@@ -122,7 +122,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
 
     try {
-      const result = await TransactionAPI.getByUser(user.uid, activeFilters, 12, lastDoc);
+      const result = await TransactionRepository.getByUser(user.uid, activeFilters, 12, lastDoc);
 
       if (result.success && result.data) {
         setTransactions((prev) => {
@@ -166,7 +166,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
 
       try {
         // Criar transação primeiro
-        const result = await TransactionAPI.create(user.uid, data);
+        const result = await TransactionRepository.create(user.uid, data);
 
         if (!result.success || !result.data) {
           setError(result.error || 'Erro ao criar transação');
@@ -175,7 +175,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
 
         // Se tem attachment com temp_, mover para caminho definitivo
         if (data.attachment && data.attachment.url.includes('temp_')) {
-          const moveResult = await StorageAPI.moveAttachmentFromTemp(
+          const moveResult = await StorageRepository.moveAttachmentFromTemp(
             user.uid,
             result.data.id,
             data.attachment.url
@@ -183,7 +183,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
 
           if (moveResult.success && moveResult.data) {
             // Atualizar transação com novo URL
-            await TransactionAPI.update(user.uid, result.data.id, {
+            await TransactionRepository.update(user.uid, result.data.id, {
               attachment: moveResult.data
             });
           } else {
@@ -214,7 +214,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
 
       try {
-        const result = await TransactionAPI.update(user.uid, id, data);
+        const result = await TransactionRepository.update(user.uid, id, data);
 
         if (result.success) {
           await Promise.all([refreshTransactions(), loadAllTransactions()]);
@@ -244,10 +244,10 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       try {
         const transaction = allTransactions.find(t => t.id === id);
         if (transaction?.attachment?.url) {
-          await StorageAPI.deleteAttachment(transaction.attachment.url);
+          await StorageRepository.deleteAttachment(transaction.attachment.url);
         }
 
-        const result = await TransactionAPI.delete(user.uid, id);
+        const result = await TransactionRepository.delete(user.uid, id);
 
         if (result.success) {
           await Promise.all([refreshTransactions(), loadAllTransactions()]);

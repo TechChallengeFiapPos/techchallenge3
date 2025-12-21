@@ -1,36 +1,36 @@
 import { db } from '@config/firebaseConfig';
 import {
-  CreateTransactionData,
-  Transaction,
-  UpdateTransactionData,
+    CreateTransactionData,
+    Transaction,
+    UpdateTransactionData,
 } from '@src/domain/entities/Transaction';
 import { TransactionFilters } from '@src/presentation/types/TransactionFormTypes';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import {
-  DocumentData,
-  QueryDocumentSnapshot,
-  Timestamp,
-  addDoc,
-  collection,
-  deleteDoc,
-  deleteField,
-  doc,
-  getDoc,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-  serverTimestamp,
-  startAfter,
-  updateDoc,
-  where,
+    DocumentData,
+    QueryDocumentSnapshot,
+    Timestamp,
+    addDoc,
+    collection,
+    deleteDoc,
+    deleteField,
+    doc,
+    getDoc,
+    getDocs,
+    limit,
+    orderBy,
+    query,
+    serverTimestamp,
+    startAfter,
+    updateDoc,
+    where,
 } from 'firebase/firestore';
 
 const getUserTransactionsCollection = (userId: string) => {
   return collection(db, 'users', userId, 'transactions');
 };
 
-export class TransactionAPI {
+export class TransactionRepository {
   static async create(
     userId: string,
     data: CreateTransactionData,

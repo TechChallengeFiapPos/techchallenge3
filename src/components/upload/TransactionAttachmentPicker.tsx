@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
-import { StorageAPI } from '@src/api/firebase/Storage';
 import { useAuth } from '@src/contexts/AuthContext';
+import { StorageRepository } from '@src/data/repositories/StorageRepository';
 import { TransactionAttachment } from '@src/domain/entities/Transaction';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -45,7 +45,7 @@ export function AttachmentPicker({
       // Gerar ID temporário se não houver transactionId (novaa transacao)
       const tempId = transactionId || `temp_${Date.now()}`;
 
-      const result = await StorageAPI.uploadWithProgress(
+      const result = await StorageRepository.uploadWithProgress(
         user.uid,
         tempId,
         uri,
@@ -150,7 +150,7 @@ export function AttachmentPicker({
           onPress: async () => {
             // Deletar no Firebase Storage
             if (attachment?.url) {
-              await StorageAPI.deleteAttachment(attachment.url);
+              await StorageRepository.deleteAttachment(attachment.url);
             }
             onAttachmentChange(undefined);
           },
