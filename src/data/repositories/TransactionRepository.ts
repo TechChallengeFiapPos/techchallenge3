@@ -1,29 +1,29 @@
 import { db } from '@config/firebaseConfig';
 import {
-    CreateTransactionData,
-    Transaction,
-    UpdateTransactionData,
+  CreateTransactionData,
+  Transaction,
+  UpdateTransactionData,
 } from '@src/domain/entities/Transaction';
 import { TransactionFilters } from '@src/presentation/types/TransactionFormTypes';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import {
-    DocumentData,
-    QueryDocumentSnapshot,
-    Timestamp,
-    addDoc,
-    collection,
-    deleteDoc,
-    deleteField,
-    doc,
-    getDoc,
-    getDocs,
-    limit,
-    orderBy,
-    query,
-    serverTimestamp,
-    startAfter,
-    updateDoc,
-    where,
+  DocumentData,
+  QueryDocumentSnapshot,
+  Timestamp,
+  addDoc,
+  collection,
+  deleteDoc,
+  deleteField,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  serverTimestamp,
+  startAfter,
+  updateDoc,
+  where,
 } from 'firebase/firestore';
 
 const getUserTransactionsCollection = (userId: string) => {
@@ -31,6 +31,7 @@ const getUserTransactionsCollection = (userId: string) => {
 };
 
 export class TransactionRepository {
+  
   static async create(
     userId: string,
     data: CreateTransactionData,
@@ -93,6 +94,7 @@ export class TransactionRepository {
       return { success: true, data: transaction };
     } catch (error: any) {
       console.error('Erro ao buscar transação:', error);
+      console.log('Erro ao buscar transação:', error);
       return { success: false, error: getFirebaseErrorMessage(error) };
     }
   }
