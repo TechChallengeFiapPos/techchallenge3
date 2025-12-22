@@ -1,16 +1,16 @@
 import { storage } from '@src/config/firebaseConfig';
-import { TransactionAttachment } from '@src/models/transactions';
+import { TransactionAttachment } from '@src/domain/entities/Transaction';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import {
-  deleteObject,
-  getDownloadURL,
-  getMetadata,
-  ref,
-  uploadBytes,
-  uploadBytesResumable,
+    deleteObject,
+    getDownloadURL,
+    getMetadata,
+    ref,
+    uploadBytes,
+    uploadBytesResumable,
 } from 'firebase/storage';
 
-export class StorageAPI {
+export class StorageRepository {
   static async uploadAttachment(
     userId: string,
     transactionId: string,

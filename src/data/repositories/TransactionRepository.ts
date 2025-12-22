@@ -2,9 +2,9 @@ import { db } from '@config/firebaseConfig';
 import {
   CreateTransactionData,
   Transaction,
-  TransactionFilters,
   UpdateTransactionData,
-} from '@src/models/transactions';
+} from '@src/domain/entities/Transaction';
+import { TransactionFilters } from '@src/presentation/types/TransactionFormTypes';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import {
   DocumentData,
@@ -30,7 +30,8 @@ const getUserTransactionsCollection = (userId: string) => {
   return collection(db, 'users', userId, 'transactions');
 };
 
-export class TransactionAPI {
+export class TransactionRepository {
+  
   static async create(
     userId: string,
     data: CreateTransactionData,
@@ -93,6 +94,7 @@ export class TransactionAPI {
       return { success: true, data: transaction };
     } catch (error: any) {
       console.error('Erro ao buscar transação:', error);
+      console.log('Erro ao buscar transação:', error);
       return { success: false, error: getFirebaseErrorMessage(error) };
     }
   }

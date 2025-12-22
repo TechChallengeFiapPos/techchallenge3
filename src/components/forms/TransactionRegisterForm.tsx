@@ -1,11 +1,11 @@
 import { getUserCards } from '@src/api/firebase/Card';
 import { useAuth } from '@src/contexts/AuthContext';
+import { TransactionAttachment } from '@src/domain/entities/Transaction';
 import {
-  TransactionAttachment,
   TransactionFormData,
   TransactionFormField,
   TransactionFormProps,
-} from '@src/models/transactions';
+} from '@src/presentation/types/TransactionFormTypes';
 import { maskCardNumber } from '@src/utils/cards';
 import {
   getCategoriesByType,

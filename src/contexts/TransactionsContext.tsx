@@ -1,12 +1,8 @@
-import { StorageAPI } from '@src/api/firebase/Storage';
-import { TransactionAPI } from '@src/api/firebase/Transactions';
 import { useAuth } from '@src/contexts/AuthContext';
-import {
-  CreateTransactionData,
-  Transaction,
-  TransactionFilters,
-  UpdateTransactionData,
-} from '@src/models/transactions';
+import { TransactionRepository } from '@src/data/repositories/TransactionRepository';
+import { CreateTransactionData, Transaction, UpdateTransactionData } from '@src/domain/entities/Transaction';
+import { CreateTransactionUseCase, DeleteTransactionUseCase, UpdateTransactionUseCase } from '@src/domain/useCases/transaction';
+import { TransactionFilters } from '@src/presentation/types/TransactionFormTypes';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import { calculateBalance, calculateExpenses, calculateIncome } from '@src/utils/transactions';
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
@@ -14,7 +10,7 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useState 
 
 type TransactionContextType = {
   transactions: Transaction[];
-  allTransactions: Transaction[]; 
+  allTransactions: Transaction[];
   loading: boolean;
   error: string | null;
   totalIncome: number;
@@ -52,7 +48,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | undefined>();
   const [activeFilters, setActiveFilters] = useState<TransactionFilters>({});
 
-  // Totais
+  // Totais (Filtros da listagem)
   const [totalIncome, setTotalIncome] = useState(0);
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [balance, setBalance] = useState(0);
@@ -63,7 +59,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return;
 
     try {
-      const result = await TransactionAPI.getAllByUser(user.uid);
+      const result = await TransactionRepository.getAllByUser(user.uid);
 
       if (result.success && result.data) {
         const all = result.data;
@@ -95,7 +91,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       setActiveFilters(filters || {});
 
       try {
-        const result = await TransactionAPI.getByUser(user.uid, filters || {}, 12);
+        const result = await TransactionRepository.getByUser(user.uid, filters || {}, 12);
 
         if (result.success && result.data) {
           setTransactions(result.data);
@@ -126,7 +122,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
 
     try {
-      const result = await TransactionAPI.getByUser(user.uid, activeFilters, 12, lastDoc);
+      const result = await TransactionRepository.getByUser(user.uid, activeFilters, 12, lastDoc);
 
       if (result.success && result.data) {
         setTransactions((prev) => {
@@ -160,7 +156,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     ]);
   }, [loadTransactions, loadAllTransactions, activeFilters]);
 
-  // Criar
+  // CRIAR TRANSAÇÃO
   const createTransaction = useCallback(
     async (data: CreateTransactionData) => {
       if (!user) return { success: false, error: 'Usuário não autenticado' };
@@ -169,47 +165,29 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
 
       try {
-        // Criar transação primeiro
-        const result = await TransactionAPI.create(user.uid, data);
+        const result = await CreateTransactionUseCase(user.uid, data);
 
-        if (!result.success || !result.data) {
+        if (!result.success) {
           setError(result.error || 'Erro ao criar transação');
           return { success: false, error: result.error };
-        }
-
-        // Se tem attachment com temp_, mover para caminho definitivo
-        if (data.attachment && data.attachment.url.includes('temp_')) {
-          const moveResult = await StorageAPI.moveAttachmentFromTemp(
-            user.uid,
-            result.data.id,
-            data.attachment.url
-          );
-
-          if (moveResult.success && moveResult.data) {
-            // Atualizar transação com novo URL
-            await TransactionAPI.update(user.uid, result.data.id, {
-              attachment: moveResult.data
-            });
-          } else {
-            console.warn('Não foi possível mover arquivo temporário:', moveResult.error);
-          }
         }
 
         // Recarregar transações
         await Promise.all([refreshTransactions(), loadAllTransactions()]);
         return { success: true };
-        
+
       } catch (err: any) {
         const friendlyError = getFirebaseErrorMessage(err);
+        setError(friendlyError);
         return { success: false, error: friendlyError };
       } finally {
         setLoading(false);
       }
     },
-    [user, loadAllTransactions],
+    [user, refreshTransactions, loadAllTransactions],
   );
 
-  // Atualizar
+  // EDITAR TRANSAÇÃO
   const updateTransaction = useCallback(
     async (id: string, data: UpdateTransactionData) => {
       if (!user) return { success: false, error: 'Usuário não autenticado' };
@@ -218,11 +196,11 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
 
       try {
-        const result = await TransactionAPI.update(user.uid, id, data);
+        const result = await UpdateTransactionUseCase(user.uid, id, data);
 
         if (result.success) {
           await Promise.all([refreshTransactions(), loadAllTransactions()]);
-          return { success: true }
+          return { success: true };
         } else {
           setError(result.error || 'Erro ao atualizar transação');
           return { success: false, error: result.error };
@@ -234,10 +212,10 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     },
-    [user, loadAllTransactions],
+    [user, refreshTransactions, loadAllTransactions],
   );
 
-  // Deletar
+  //  DELETAR
   const deleteTransaction = useCallback(
     async (id: string) => {
       if (!user) return { success: false, error: 'Usuário não autenticado' };
@@ -247,11 +225,12 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
 
       try {
         const transaction = allTransactions.find(t => t.id === id);
-        if (transaction?.attachment?.url) {
-          await StorageAPI.deleteAttachment(transaction.attachment.url);
-        }
 
-        const result = await TransactionAPI.delete(user.uid, id);
+        const result = await DeleteTransactionUseCase(
+          user.uid,
+          id,
+          transaction?.attachment?.url
+        );
 
         if (result.success) {
           await Promise.all([refreshTransactions(), loadAllTransactions()]);
@@ -267,7 +246,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     },
-    [user, allTransactions, loadAllTransactions],
+    [user, allTransactions, refreshTransactions, loadAllTransactions],
   );
 
   useEffect(() => {
@@ -290,7 +269,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
 
   const value: TransactionContextType = {
     transactions,
-    allTransactions, 
+    allTransactions,
     loading,
     error,
     totalIncome,

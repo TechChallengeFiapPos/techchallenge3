@@ -1,8 +1,8 @@
 import { useThemeColor } from '@hooks/useThemeColor';
+import { SelectOption } from '@src/presentation/types/CommonFormTypes';
 import { useState } from 'react';
 import { FlatList, Modal, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Chip, Divider, Text, TextInput, useTheme } from 'react-native-paper';
-import { SelectOption } from './SelectController';
 
 interface ThemedSelectProps {
   label: string;

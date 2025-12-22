@@ -4,7 +4,7 @@ import { TransactionRegisterForm } from '@src/components/forms';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedText } from '@src/components/ThemedText';
 import { useTransactions } from '@src/contexts/TransactionsContext';
-import { Transaction, UpdateTransactionData } from '@src/models/transactions';
+import { Transaction, UpdateTransactionData } from '@src/domain/entities/Transaction';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
