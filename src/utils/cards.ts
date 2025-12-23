@@ -8,5 +8,3 @@
   }
   return cleanNumber;
 };
-
-// label: `${card.category} - **** ${card.number.slice(-4)}`,

@@ -1,9 +1,9 @@
 import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
-import { CreateCardData } from '@src/api/firebase/Card';
 import { CardRegisterForm } from '@src/components/forms';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedText } from '@src/components/ThemedText';
+import { CreateCardData } from '@src/domain/entities/Card';
 import { useCardActions } from '@src/presentation/hooks/card/useCardActions';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';

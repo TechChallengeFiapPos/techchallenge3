@@ -1,23 +1,20 @@
-// src/data/repositories/CardRepository.ts
-
 import { auth, db } from '@config/firebaseConfig';
 import { Card, CreateCardData, UpdateCardData } from '@src/domain/entities/Card';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import {
-    addDoc,
-    collection,
-    deleteDoc,
-    doc,
-    getDoc,
-    getDocs,
-    orderBy,
-    query,
-    serverTimestamp,
-    updateDoc,
-    where,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where,
 } from 'firebase/firestore';
 
-// ✅ COPIAR helpers (igual)
 const getCurrentUser = () => {
   const currentUser = auth.currentUser;
   if (!currentUser) {
@@ -30,7 +27,6 @@ const getUserCardsCollection = (userId: string) => {
   return collection(db, 'users', userId, 'cards');
 };
 
-// ✅ COPIAR funções (SEM transformar em classe)
 export const createCard = async (cardData: CreateCardData) => {
   try {
     const currentUser = getCurrentUser();
@@ -225,7 +221,7 @@ export const getCardsByFunction = async (functionType: string) => {
     const cardsCollection = getUserCardsCollection(currentUser.uid);
     const q = query(
       cardsCollection,
-      where('functions', 'array-contains', functionType), // ← CORRIGIDO
+      where('functions', 'array-contains', functionType),
       orderBy('createdAt', 'desc'),
     );
 

@@ -1,9 +1,9 @@
 import { useThemeColor } from '@hooks/useThemeColor';
 import { useFocusEffect } from '@react-navigation/native';
-import { CardData } from '@src/api/firebase/Card';
 import { CardItem } from '@src/components/lists/cards/CardItem';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedView } from '@src/components/ThemedView';
+import { Card } from '@src/domain/entities/Card';
 import { useCardActions } from '@src/presentation/hooks/card/useCardActions';
 import { useCards } from '@src/presentation/hooks/card/useCards';
 import { useRouter } from 'expo-router';
@@ -49,11 +49,11 @@ export default function CardsScreen() {
     });
   }, [cards, filterType, categoryFilter]);
 
-  const handleEdit = (card: CardData) => {
+  const handleEdit = (card: Card) => {
     router.push(`/(pages)/edit-card/${card.id}`);
   };
 
-  const handleDelete = (card: CardData) => {
+  const handleDelete = (card: Card) => {
     Alert.alert(
       'Deletar Cartão',
       `Deseja deletar o cartão **** ${card.number.slice(-4)}?`,
@@ -77,7 +77,7 @@ export default function CardsScreen() {
   };
 
   const renderCard = useCallback(
-    ({ item }: { item: CardData }) => (
+    ({ item }: { item: Card }) => (
       <CardItem
         card={item}
         onDelete={handleDelete}

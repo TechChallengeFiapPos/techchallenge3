@@ -1,4 +1,4 @@
-import { CardFormData, CardFormField, CardFormProps } from '@src/models/card';
+import { CardFormData, CardFormField, CardFormProps } from '@src/presentation/types/CardFormTypes';
 import { SelectOption } from '@src/presentation/types/CommonFormTypes';
 import { useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
