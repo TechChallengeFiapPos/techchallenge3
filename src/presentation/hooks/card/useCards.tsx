@@ -1,13 +1,13 @@
-import * as cardAPI from '@src/api/firebase/Card';
-import { CardData } from '@src/api/firebase/Card';
-import { useAuth } from '@src/contexts/AuthContext';
+import * as CardRepository from '@src/data/repositories/CardRepository';
+import { Card } from '@src/domain/entities/Card';
 import { useCallback, useEffect, useState } from 'react';
+import { useAuthActions } from '../auth/useAuthActions';
 
 export const useCards = () => {
-  const [cards, setCards] = useState<CardData[]>([]);
+  const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user } = useAuthActions();
 
   const loadCards = useCallback(async () => {
     if (!user) {
@@ -19,7 +19,7 @@ export const useCards = () => {
     setError(null);
 
     try {
-      const result = await cardAPI.getUserCards();
+      const result = await CardRepository.getUserCards();
 
       if (result.success) {
         setCards(result.cards || []);
@@ -40,17 +40,17 @@ export const useCards = () => {
   }, [loadCards]);
 
   const getCard = useCallback(async (cardId: string) => {
-    const result = await cardAPI.getCardById(cardId);
+    const result = await CardRepository.getCardById(cardId);
     return result;
   }, []);
 
   const getCardsByCategory = useCallback(async (category: string) => {
-    const result = await cardAPI.getCardsByCategory(category);
+    const result = await CardRepository.getCardsByCategory(category);
     return result;
   }, []);
 
   const getCardsByFunction = useCallback(async (functionType: string) => {
-    const result = await cardAPI.getCardsByFunction(functionType);
+    const result = await CardRepository.getCardsByFunction(functionType);
     return result;
   }, []);
 

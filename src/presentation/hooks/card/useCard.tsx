@@ -1,9 +1,9 @@
-import * as cardAPI from '@src/api/firebase/Card';
-import { CardData } from '@src/api/firebase/Card';
+import * as CardRepository from '@src/data/repositories/CardRepository';
+import { Card } from '@src/domain/entities/Card';
 import { useEffect, useState } from 'react';
 
 export const useCard = (cardId?: string) => {
-  const [card, setCard] = useState<CardData | null>(null);
+  const [card, setCard] = useState<Card | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,7 +18,7 @@ export const useCard = (cardId?: string) => {
       setError(null);
 
       try {
-        const result = await cardAPI.getCardById(cardId);
+        const result = await CardRepository.getCardById(cardId);
 
         if (result.success) {
           setCard(result.card || null);

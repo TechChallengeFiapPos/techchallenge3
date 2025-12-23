@@ -1,21 +1,23 @@
+// src/data/repositories/CardRepository.ts
+
 import { auth, db } from '@config/firebaseConfig';
 import { Card, CreateCardData, UpdateCardData } from '@src/domain/entities/Card';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  orderBy,
-  query,
-  serverTimestamp,
-  updateDoc,
-  where,
+    addDoc,
+    collection,
+    deleteDoc,
+    doc,
+    getDoc,
+    getDocs,
+    orderBy,
+    query,
+    serverTimestamp,
+    updateDoc,
+    where,
 } from 'firebase/firestore';
 
-// user está autenticado?
+// ✅ COPIAR helpers (igual)
 const getCurrentUser = () => {
   const currentUser = auth.currentUser;
   if (!currentUser) {
@@ -24,18 +26,16 @@ const getCurrentUser = () => {
   return currentUser;
 };
 
-// todos os cartoes
 const getUserCardsCollection = (userId: string) => {
   return collection(db, 'users', userId, 'cards');
 };
 
-// novo cartão
+// ✅ COPIAR funções (SEM transformar em classe)
 export const createCard = async (cardData: CreateCardData) => {
   try {
     const currentUser = getCurrentUser();
     const cardsCollection = getUserCardsCollection(currentUser.uid);
 
-    // cartão já existe?
     const existsResult = await checkCardExists(cardData.number);
     if (existsResult.exists) {
       return {
@@ -96,7 +96,6 @@ export const getUserCards = async () => {
   }
 };
 
-// Buscar cartão por ID
 export const getCardById = async (cardId: string) => {
   try {
     const currentUser = getCurrentUser();
@@ -156,7 +155,6 @@ export const deleteCard = async (cardId: string) => {
   }
 };
 
-// fn p/ Verificar se cartão já existe
 export const checkCardExists = async (cardNumber: string, excludeCardId?: string) => {
   try {
     const currentUser = getCurrentUser();
@@ -188,7 +186,6 @@ export const checkCardExists = async (cardNumber: string, excludeCardId?: string
   }
 };
 
-// Buscar cartões por categoria
 export const getCardsByCategory = async (category: string) => {
   try {
     const currentUser = getCurrentUser();
@@ -222,14 +219,13 @@ export const getCardsByCategory = async (category: string) => {
   }
 };
 
-// Buscar cartões por função
 export const getCardsByFunction = async (functionType: string) => {
   try {
     const currentUser = getCurrentUser();
     const cardsCollection = getUserCardsCollection(currentUser.uid);
     const q = query(
       cardsCollection,
-      where('function', 'array-contains', functionType),
+      where('functions', 'array-contains', functionType), // ← CORRIGIDO
       orderBy('createdAt', 'desc'),
     );
 
@@ -256,7 +252,6 @@ export const getCardsByFunction = async (functionType: string) => {
   }
 };
 
-//editar cartao
 export const updateCard = async (cardId: string, cardData: UpdateCardData) => {
   try {
     const currentUser = getCurrentUser();
@@ -270,7 +265,6 @@ export const updateCard = async (cardId: string, cardData: UpdateCardData) => {
       };
     }
 
-    // Se estiver atualizando o número, verifica núemro existente SEM MASCARA!
     if (cardData.number) {
       const existsResult = await checkCardExists(cardData.number, cardId);
       if (existsResult.exists) {

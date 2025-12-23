@@ -4,7 +4,7 @@ import { CreateCardData } from '@src/api/firebase/Card';
 import { CardRegisterForm } from '@src/components/forms';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedText } from '@src/components/ThemedText';
-import { useCardActions } from '@src/hooks/useCardActions';
+import { useCardActions } from '@src/presentation/hooks/card/useCardActions';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { FieldValues } from 'react-hook-form';
