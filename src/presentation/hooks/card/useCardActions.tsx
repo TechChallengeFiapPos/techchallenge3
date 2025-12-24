@@ -1,5 +1,6 @@
-import * as cardAPI from '@src/api/firebase/Card';
-import { CreateCardData } from '@src/api/firebase/Card';
+import * as CardRepository from '@src/data/repositories/CardRepository';
+import { CreateCardData, UpdateCardData } from '@src/domain/entities/Card';
+import { CreateCardUseCase, DeleteCardUseCase, UpdateCardUseCase } from '@src/domain/useCases/card';
 import { useState } from 'react';
 
 export const useCardActions = () => {
@@ -11,38 +12,38 @@ export const useCardActions = () => {
     setError(null);
 
     try {
-      const result = await cardAPI.createCard(cardData);
+      const result = await CreateCardUseCase(cardData);
 
       if (!result.success) {
         setError(result.error || 'Erro ao criar cartão');
-        return result;
       }
 
       return result;
     } catch (error: any) {
-      setError(error.message || 'Erro inesperado');
-      return { success: false, error: error.message };
+      const errorMsg = error.message || 'Erro inesperado';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
     } finally {
       setLoading(false);
     }
   };
 
-   const updateCard = async (cardId: string, cardData: cardAPI.UpdateCardData) => {
+  const updateCard = async (cardId: string, cardData: UpdateCardData) => {
     setLoading(true);
     setError(null);
 
     try {
-      const result = await cardAPI.updateCard(cardId, cardData);
+      const result = await UpdateCardUseCase(cardId, cardData);
 
       if (!result.success) {
         setError(result.error || 'Erro ao atualizar cartão');
-        return result;
       }
 
       return result;
     } catch (error: any) {
-      setError(error.message || 'Erro inesperado');
-      return { success: false, error: error.message };
+      const errorMsg = error.message || 'Erro inesperado';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
     } finally {
       setLoading(false);
     }
@@ -53,17 +54,17 @@ export const useCardActions = () => {
     setError(null);
 
     try {
-      const result = await cardAPI.deleteCard(cardId);
+      const result = await DeleteCardUseCase(cardId);
 
       if (!result.success) {
         setError(result.error || 'Erro ao deletar cartão');
-        return result;
       }
 
       return result;
     } catch (error: any) {
-      setError(error.message || 'Erro inesperado');
-      return { success: false, error: error.message };
+      const errorMsg = error.message || 'Erro inesperado';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
     } finally {
       setLoading(false);
     }
@@ -74,17 +75,17 @@ export const useCardActions = () => {
     setError(null);
 
     try {
-      const result = await cardAPI.checkCardExists(cardNumber, excludeCardId);
+      const result = await CardRepository.checkCardExists(cardNumber, excludeCardId);
 
       if (!result.success) {
         setError(result.error || 'Erro ao verificar cartão');
-        return result;
       }
 
       return result;
     } catch (error: any) {
-      setError(error.message || 'Erro inesperado');
-      return { success: false, error: error.message, exists: false };
+      const errorMsg = error.message || 'Erro inesperado';
+      setError(errorMsg);
+      return { success: false, error: errorMsg, exists: false };
     } finally {
       setLoading(false);
     }
@@ -92,8 +93,8 @@ export const useCardActions = () => {
 
   return {
     createCard,
-    deleteCard,
     updateCard,
+    deleteCard,
     checkCardExists,
     loading,
     error,

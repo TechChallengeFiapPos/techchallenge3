@@ -1,25 +1,11 @@
 import { SelectOption } from "@src/presentation/types/CommonFormTypes";
 
-// Tipos para os dados do cartão
-export type CardData = {
-  userId: string;
-  number: string;
-  functions: string[];
-  category: string;
-};
-
 export type CardFormData = {
   number: string;
   functions: string[];
   category: string;
   expiryDate?: string;
 };
-
-// Tipos para as options dos selects
-// export type SelectOption = {
-//   label: string;
-//   value: string;
-// };
 
 // Tipos para os campos do formulário
 export type CardFormField = {
