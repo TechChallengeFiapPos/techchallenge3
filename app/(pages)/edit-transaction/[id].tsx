@@ -3,6 +3,7 @@ import { useThemeColor } from '@hooks/useThemeColor';
 import { TransactionRegisterForm } from '@src/components/forms';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedText } from '@src/components/ThemedText';
+import { useAuth } from '@src/contexts/AuthContext';
 import { useTransactions } from '@src/contexts/TransactionsContext';
 import { Transaction, UpdateTransactionData } from '@src/domain/entities/Transaction';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -22,6 +23,7 @@ export default function EditTransactionScreen() {
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
+  const { user } = useAuth()
 
   const backgroundColor = useThemeColor({}, 'background');
   const surfaceColor = useThemeColor({}, 'surface');
@@ -29,15 +31,20 @@ export default function EditTransactionScreen() {
   const { updateTransaction, loading, error, clearError, allTransactions } = useTransactions();
 
   useEffect(() => {
+    if (!user) return; 
+    if (!id) return;
+    if (allTransactions.length === 0) return;
+
     const found = allTransactions.find((t) => t.id === id);
+
     if (found) {
       setTransaction(found);
     } else {
-      Alert.alert('Erro', 'Transação não encontrada', [
+      Alert.alert('Erro ao editar transação', 'Transação não encontrada', [
         { text: 'Voltar', onPress: () => router.back() },
       ]);
     }
-  }, [id, allTransactions]);
+  }, [id, allTransactions, user]);
 
   const handleSubmit = async (data: UpdateTransactionData) => {
     if (!transaction) return;

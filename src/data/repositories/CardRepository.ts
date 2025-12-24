@@ -1,4 +1,4 @@
-import { auth, db } from '@config/firebaseConfig';
+import { db } from '@config/firebaseConfig';
 import { Card, CreateCardData, UpdateCardData } from '@src/domain/entities/Card';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import {
@@ -15,24 +15,16 @@ import {
   where,
 } from 'firebase/firestore';
 
-const getCurrentUser = () => {
-  const currentUser = auth.currentUser;
-  if (!currentUser) {
-    throw new Error('Usuário não autenticado');
-  }
-  return currentUser;
-};
 
 const getUserCardsCollection = (userId: string) => {
   return collection(db, 'users', userId, 'cards');
 };
 
-export const createCard = async (cardData: CreateCardData) => {
-  try {
-    const currentUser = getCurrentUser();
-    const cardsCollection = getUserCardsCollection(currentUser.uid);
 
-    const existsResult = await checkCardExists(cardData.number);
+export const createCard = async (userId: string, cardData: CreateCardData) => {
+  try {
+    // Verifica se já existe
+    const existsResult = await checkCardExists(userId, cardData.number);
     if (existsResult.exists) {
       return {
         success: false,
@@ -40,19 +32,19 @@ export const createCard = async (cardData: CreateCardData) => {
       };
     }
 
-    const cardWithMetadata: Omit<Card, 'id'> = {
+    const data = {
       ...cardData,
-      userId: currentUser.uid,
+      userId,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
 
-    const docRef = await addDoc(cardsCollection, cardWithMetadata);
+    const docRef = await addDoc(getUserCardsCollection(userId), data);
 
     return {
       success: true,
       cardId: docRef.id,
-      card: { ...cardWithMetadata, id: docRef.id },
+      card: { ...data, id: docRef.id },
     };
   } catch (error: any) {
     console.error('Erro ao criar cartão:', error);
@@ -63,10 +55,10 @@ export const createCard = async (cardData: CreateCardData) => {
   }
 };
 
-export const getUserCards = async () => {
+// Busca todos os cartões do usuário
+export const getUserCards = async (userId: string) => {
   try {
-    const currentUser = getCurrentUser();
-    const cardsCollection = getUserCardsCollection(currentUser.uid);
+    const cardsCollection = getUserCardsCollection(userId);
     const q = query(cardsCollection, orderBy('createdAt', 'desc'));
 
     const querySnapshot = await getDocs(q);
@@ -92,10 +84,10 @@ export const getUserCards = async () => {
   }
 };
 
-export const getCardById = async (cardId: string) => {
+//Busca cartão por ID
+export const getCardById = async (userId: string, cardId: string) => {
   try {
-    const currentUser = getCurrentUser();
-    const cardDoc = doc(db, 'users', currentUser.uid, 'cards', cardId);
+    const cardDoc = doc(db, 'users', userId, 'cards', cardId);
     const docSnap = await getDoc(cardDoc);
 
     if (!docSnap.exists()) {
@@ -123,10 +115,10 @@ export const getCardById = async (cardId: string) => {
   }
 };
 
-export const deleteCard = async (cardId: string) => {
+//Deleta cartão
+export const deleteCard = async (userId: string, cardId: string) => {
   try {
-    const currentUser = getCurrentUser();
-    const cardDoc = doc(db, 'users', currentUser.uid, 'cards', cardId);
+    const cardDoc = doc(db, 'users', userId, 'cards', cardId);
 
     const docSnap = await getDoc(cardDoc);
     if (!docSnap.exists()) {
@@ -151,10 +143,14 @@ export const deleteCard = async (cardId: string) => {
   }
 };
 
-export const checkCardExists = async (cardNumber: string, excludeCardId?: string) => {
+
+export const checkCardExists = async (
+  userId: string,
+  cardNumber: string,
+  excludeCardId?: string
+) => {
   try {
-    const currentUser = getCurrentUser();
-    const cardsCollection = getUserCardsCollection(currentUser.uid);
+    const cardsCollection = getUserCardsCollection(userId);
     const cleanNumber = cardNumber.replace(/\s/g, '');
 
     const q = query(cardsCollection, where('number', '==', cleanNumber));
@@ -182,10 +178,10 @@ export const checkCardExists = async (cardNumber: string, excludeCardId?: string
   }
 };
 
-export const getCardsByCategory = async (category: string) => {
+
+export const getCardsByCategory = async (userId: string, category: string) => {
   try {
-    const currentUser = getCurrentUser();
-    const cardsCollection = getUserCardsCollection(currentUser.uid);
+    const cardsCollection = getUserCardsCollection(userId);
     const q = query(
       cardsCollection,
       where('category', '==', category),
@@ -215,10 +211,9 @@ export const getCardsByCategory = async (category: string) => {
   }
 };
 
-export const getCardsByFunction = async (functionType: string) => {
+export const getCardsByFunction = async (userId: string, functionType: string) => {
   try {
-    const currentUser = getCurrentUser();
-    const cardsCollection = getUserCardsCollection(currentUser.uid);
+    const cardsCollection = getUserCardsCollection(userId);
     const q = query(
       cardsCollection,
       where('functions', 'array-contains', functionType),
@@ -248,10 +243,10 @@ export const getCardsByFunction = async (functionType: string) => {
   }
 };
 
-export const updateCard = async (cardId: string, cardData: UpdateCardData) => {
+//Atualiza cartão
+export const updateCard = async (userId: string, cardId: string, cardData: UpdateCardData) => {
   try {
-    const currentUser = getCurrentUser();
-    const cardDoc = doc(db, 'users', currentUser.uid, 'cards', cardId);
+    const cardDoc = doc(db, 'users', userId, 'cards', cardId);
 
     const docSnap = await getDoc(cardDoc);
     if (!docSnap.exists()) {
@@ -262,7 +257,7 @@ export const updateCard = async (cardId: string, cardData: UpdateCardData) => {
     }
 
     if (cardData.number) {
-      const existsResult = await checkCardExists(cardData.number, cardId);
+      const existsResult = await checkCardExists(userId, cardData.number, cardId);
       if (existsResult.exists) {
         return {
           success: false,

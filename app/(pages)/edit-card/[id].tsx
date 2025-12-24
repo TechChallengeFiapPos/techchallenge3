@@ -42,7 +42,7 @@ export default function EditCardScreen() {
     if (result.success && result.card) {
       setCardData(result.card);
     } else {
-      Alert.alert('Erro', 'Cartão não encontrado');
+      Alert.alert('Erro ao editar cartão', 'Cartão não encontrado');
       router.back();
     }
   };

@@ -1,6 +1,6 @@
-import { getUserCards } from '@src/api/firebase/Card';
 import { useAuth } from '@src/contexts/AuthContext';
 import { TransactionAttachment } from '@src/domain/entities/Transaction';
+import { useCards } from '@src/presentation/hooks/card/useCards';
 import {
   TransactionFormData,
   TransactionFormField,
@@ -14,7 +14,7 @@ import {
   transactionTypeOptions,
 } from '@src/utils/transactions';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Alert, StyleSheet, View } from 'react-native';
 import { DateController, InputController } from '../inputs';
@@ -88,10 +88,19 @@ export function TransactionRegisterForm({
 }: TransactionFormProps) {
   const { user } = useAuth();
   const router = useRouter();
-  const [userCards, setUserCards] = useState<{ label: string; value: string }[]>([]);
+  
+  const { cards } = useCards();
+  
   const [attachment, setAttachment] = useState<TransactionAttachment | undefined>(
     initialData?.attachment
   );
+
+  const cardOptions = useMemo(() => {
+    return cards.map((card) => ({
+      label: `${card.category} - ${maskCardNumber(card.number)}`,
+      value: card.id!,
+    }));
+  }, [cards]);
 
   const {
     control,
@@ -121,39 +130,12 @@ export function TransactionRegisterForm({
     setValue('categoryId', '');
   }, [watchedType, setValue]);
 
+  // Validação de cartão
   useEffect(() => {
-    const loadUserCards = async () => {
-      if (!user) return;
-
-      try {
-        const result = await getUserCards();
-        if (result.success && result.cards) {
-          const cardOptions = result.cards.map((card) => ({
-            label: `${card.category} - ${maskCardNumber(card.number)}`,
-            value: card.id!,
-          }));
-          setUserCards(cardOptions);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar cartões:', error);
-      }
-    };
-
-    loadUserCards();
-  }, [user]);
-
-  // Validação de cartão - Só valida se não houver cartão selecionado
-  useEffect(() => {
-    // Se método não requer cartão, não faz nada
     if (!methodRequiresCard(watchedMethod)) return;
-
-    // Se está editando E já tem um cartão selecionado, não valida
     if (mode === 'edit' && watchedCard) return;
+    if (cardOptions.length > 0) return;
 
-    // Se tem cartões disponíveis, não mostra alert
-    if (userCards.length > 0) return;
-
-    // senao mostra o alert
     Alert.alert(
       'Nenhum cartão cadastrado',
       'Você precisa cadastrar um cartão antes de usar este método de pagamento.',
@@ -173,7 +155,7 @@ export function TransactionRegisterForm({
         },
       ]
     );
-  }, [watchedMethod, userCards, mode, watchedCard]);
+  }, [watchedMethod, cardOptions, mode, watchedCard]);
 
   const renderField = (field: TransactionFormField) => {
     if (field.conditional) {
@@ -197,7 +179,7 @@ export function TransactionRegisterForm({
       } else if (field.name === 'methodId') {
         options = paymentMethods;
       } else if (field.name === 'cardId') {
-        options = userCards;
+        options = cardOptions;
       }
 
       return (
@@ -314,7 +296,7 @@ export function TransactionRegisterForm({
         {(formErrors[field.name] || errors?.[field.name]) && (
           <ThemedText textType="default" colorName="error" style={styles.errorText}>
             {formErrors[field.name]?.message || errors?.[field.name]}
-          </ThemedText>
+            </ThemedText>
         )}
       </View>
     );
