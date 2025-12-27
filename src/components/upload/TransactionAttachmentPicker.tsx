@@ -1,8 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
-import { useAuth } from '@src/contexts/AuthContext';
-import { StorageRepository } from '@src/data/repositories/StorageRepository';
 import { TransactionAttachment } from '@src/domain/entities/Transaction';
+import { useAttachment } from '@src/presentation/hooks/storage/useAttachment';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
@@ -13,7 +12,7 @@ interface AttachmentPickerProps {
   attachment?: TransactionAttachment;
   onAttachmentChange: (attachment?: TransactionAttachment) => void;
   disabled?: boolean;
-  transactionId?: string; 
+  transactionId?: string;
 }
 
 export function AttachmentPicker({
@@ -22,51 +21,30 @@ export function AttachmentPicker({
   disabled = false,
   transactionId,
 }: AttachmentPickerProps) {
-  const { user } = useAuth();
+  const { uploadAttachment, deleteAttachment, uploading, uploadProgress } = useAttachment();
+
   const [menuVisible, setMenuVisible] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
 
   const primaryColor = useThemeColor({}, 'primary');
   const surfaceColor = useThemeColor({}, 'surface');
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const errorColor = useThemeColor({}, 'error');
 
-  const handleFileUpload = async (uri: string, fileName: string, mimeType: string) => {
-    if (!user) {
-      Alert.alert('Erro', 'Usuário não autenticado');
-      return;
-    }
+  const handleFileUpload = async ( 
+    uri: string, 
+    fileName: string, 
+    mimeType: string) => {
 
-    setUploading(true);
-    setUploadProgress(0);
+    // Gera ID temporário se não houver transactionId
+    const tempId = transactionId || `temp_${Date.now()}`;
 
-    try {
-      // Gerar ID temporário se não houver transactionId (novaa transacao)
-      const tempId = transactionId || `temp_${Date.now()}`;
+    const result = await uploadAttachment(tempId, uri, fileName, mimeType);
 
-      const result = await StorageRepository.uploadWithProgress(
-        user.uid,
-        tempId,
-        uri,
-        fileName,
-        mimeType,
-        (progress) => {
-          setUploadProgress(progress);
-        }
-      );
-
-      if (result.success && result.data) {
-        onAttachmentChange(result.data);
-        Alert.alert('Sucesso', 'Arquivo enviado com sucesso!');
-      } else {
-        Alert.alert('Erro', result.error || 'Falha ao enviar arquivo');
-      }
-    } catch (error: any) {
-      Alert.alert('Erro', error.message || 'Erro ao enviar arquivo');
-    } finally {
-      setUploading(false);
-      setUploadProgress(0);
+    if (result.success && result.data) {
+      onAttachmentChange(result.data);
+      Alert.alert('Sucesso', 'Arquivo enviado com sucesso!');
+    } else {
+      Alert.alert('Erro', result.error || 'Falha ao enviar arquivo');
     }
   };
 
@@ -88,10 +66,9 @@ export function AttachmentPicker({
     if (!result.canceled && result.assets[0]) {
       const asset = result.assets[0];
       await handleFileUpload(
-        asset.uri,
-        `receipt_${Date.now()}.jpg`,
-        'image/jpeg'
-      );
+        asset.uri, 
+        `receipt_${Date.now()}.jpg`, 
+        'image/jpeg');
     }
   };
 
@@ -131,32 +108,26 @@ export function AttachmentPicker({
     if (!result.canceled && result.assets[0]) {
       const asset = result.assets[0];
       await handleFileUpload(
-        asset.uri,
-        asset.name,
-        asset.mimeType || 'application/pdf'
-      );
+        asset.uri, 
+        asset.name, 
+        asset.mimeType || 'application/pdf');
     }
   };
 
   const removeAttachment = () => {
-    Alert.alert(
-      'Remover anexo',
-      'Tem certeza que deseja remover este anexo?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Remover',
-          style: 'destructive',
-          onPress: async () => {
-            // Deletar no Firebase Storage
-            if (attachment?.url) {
-              await StorageRepository.deleteAttachment(attachment.url);
-            }
-            onAttachmentChange(undefined);
-          },
+    Alert.alert('Remover anexo', 'Tem certeza que deseja remover este anexo?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Remover',
+        style: 'destructive',
+        onPress: async () => {
+          if (attachment?.url) {
+            await deleteAttachment(attachment.url);
+          }
+          onAttachmentChange(undefined);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const viewAttachment = () => {
@@ -193,11 +164,7 @@ export function AttachmentPicker({
             </Button>
           }
         >
-          <Menu.Item
-            onPress={pickFromCamera}
-            title="Tirar Foto"
-            leadingIcon="camera"
-          />
+          <Menu.Item onPress={pickFromCamera} title="Tirar Foto" leadingIcon="camera" />
           <Menu.Item
             onPress={pickFromGallery}
             title="Escolher da Galeria"
