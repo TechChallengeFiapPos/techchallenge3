@@ -1,13 +1,13 @@
+import { useAuth } from '@src/contexts/AuthContext';
 import * as CardRepository from '@src/data/repositories/CardRepository';
 import { Card } from '@src/domain/entities/Card';
 import { useCallback, useEffect, useState } from 'react';
-import { useAuthActions } from '../auth/useAuthActions';
 
 export const useCards = () => {
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuthActions();
+  const { user } = useAuth();
 
   const loadCards = useCallback(async () => {
     if (!user) {
@@ -19,7 +19,7 @@ export const useCards = () => {
     setError(null);
 
     try {
-      const result = await CardRepository.getUserCards();
+      const result = await CardRepository.getUserCards(user.uid);
 
       if (result.success) {
         setCards(result.cards || []);
@@ -39,20 +39,35 @@ export const useCards = () => {
     loadCards();
   }, [loadCards]);
 
-  const getCard = useCallback(async (cardId: string) => {
-    const result = await CardRepository.getCardById(cardId);
-    return result;
-  }, []);
+  const getCard = useCallback(
+    async (cardId: string) => {
+      if (!user) return { success: false, error: 'Usuário não autenticado' };
 
-  const getCardsByCategory = useCallback(async (category: string) => {
-    const result = await CardRepository.getCardsByCategory(category);
-    return result;
-  }, []);
+      const result = await CardRepository.getCardById(user.uid, cardId);
+      return result;
+    },
+    [user]
+  );
 
-  const getCardsByFunction = useCallback(async (functionType: string) => {
-    const result = await CardRepository.getCardsByFunction(functionType);
-    return result;
-  }, []);
+  const getCardsByCategory = useCallback(
+    async (category: string) => {
+      if (!user) return { success: false, cards: [] };
+
+      const result = await CardRepository.getCardsByCategory(user.uid, category);
+      return result;
+    },
+    [user]
+  );
+
+  const getCardsByFunction = useCallback(
+    async (functionType: string) => {
+      if (!user) return { success: false, cards: [] };
+
+      const result = await CardRepository.getCardsByFunction(user.uid, functionType);
+      return result;
+    },
+    [user]
+  );
 
   const refetch = useCallback(() => {
     loadCards();

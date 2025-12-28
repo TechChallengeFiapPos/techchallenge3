@@ -1,23 +1,15 @@
-import * as authAPI from '@src/api/firebase/Auth';
-import { createUserProfile } from '@src/api/firebase/User';
 import { useAuth } from '@src/contexts/AuthContext';
+import { loginUseCase, signUpUseCase } from '@src/domain/useCases/auth';
 
 export const useAuthActions = () => {
-  // Não tem mais setUser/setProfile
   const { user, profile } = useAuth();
 
   const loginUser = async (email: string, password: string) => {
-    const result = await authAPI.login(email, password);
-    return result;
+    return await loginUseCase(email, password);
   };
 
   const registerUser = async (email: string, password: string, name: string) => {
-    const result = await authAPI.register(email, password, name);
-
-    if (result.success && result.user) {
-      await createUserProfile(result.user, { name });
-    }
-    return result;
+    return await signUpUseCase(email, password, name);
   };
 
   return { loginUser, registerUser, user, profile };

@@ -1,6 +1,7 @@
 import { auth, db } from '@config/firebaseConfig';
-import { UserData } from '@src/models/user';
-import { User as FirebaseUser, onAuthStateChanged, signOut } from 'firebase/auth';
+import { UserData } from '@src/domain/entities/User';
+import { logoutUseCase } from '@src/domain/useCases/auth';
+import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
@@ -46,9 +47,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      await signOut(auth);
-      setUser(null);
-      setProfile(null);
+      const result = await logoutUseCase();
+      
+      if (result.success) {
+        setUser(null);
+        setProfile(null);
+      } else {
+        console.error('Erro no logout:', result.error);
+      }
     } catch (error) {
       console.error('Erro no logout:', error);
     }

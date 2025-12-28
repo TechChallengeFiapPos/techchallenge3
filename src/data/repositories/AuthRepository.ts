@@ -1,16 +1,18 @@
-import { auth, db } from '@config/firebaseConfig.js';
+import { auth, db } from '@config/firebaseConfig';
+import { UserData } from '@src/presentation/types/UserTypes';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut
+} from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-
-type UserData = { uid: string; email: string; name?: string };
 
 export const register = async (email: string, password: string, name: string) => {
   try {
     const res = await createUserWithEmailAndPassword(auth, email, password);
     const user = res.user;
 
-    // Salva dados adicionais no Firestore (do user)
     const data: UserData = { uid: user.uid, email, name: name };
     await setDoc(doc(db, 'users', user.uid), data);
 
@@ -30,6 +32,16 @@ export const login = async (email: string, password: string) => {
 
     return { success: true, user };
   } catch (error: any) {
+    return { success: false, error: getFirebaseErrorMessage(error) };
+  }
+};
+
+export const logout = async () => {
+  try {
+    await signOut(auth);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Erro no logout:', error);
     return { success: false, error: getFirebaseErrorMessage(error) };
   }
 };

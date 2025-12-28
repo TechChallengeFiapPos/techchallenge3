@@ -1,5 +1,5 @@
 import { db } from '@src/config/firebaseConfig';
-import { UserData } from '@src/models/user';
+import { UserData } from '@src/domain/entities/User';
 import { User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
