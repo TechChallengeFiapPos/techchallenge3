@@ -44,3 +44,33 @@ Detalhamento:
  LOG     9. [1:47:37 PM] NAVIGATION: App → Dashboard
  LOG     10. [1:47:37 PM] NAVIGATION: App → Dashboard
  ```
+
+ ````
+
+
+ LOG  📊 RELATÓRIO DE MÉTRICAS - DEPOIS REACT QUERY EM TRANSACTIONS
+ LOG  ==========================================
+ LOG  ⏱️  Duração da Sessão: 77.5s
+ LOG  🔥 Total de Requests Firebase: 13
+ LOG  💾 Cache Hits: 0
+ LOG  ❌ Cache Misses: 13
+ LOG  📈 Taxa de Cache Hit: 0%
+ LOG  
+⏱️  TEMPOS DE CARREGAMENTO:
+ LOG     - Total de telas carregadas: 0
+ LOG     - Tempo médio: 0ms
+ LOG     - Tempo mínimo: 0ms
+ LOG     - Tempo máximo: 0ms
+ LOG  
+📋 EVENTOS (últimos 10):
+ LOG     1. [4:47:52 PM] REQUEST: TransactionRepository.getAllByUser
+ LOG     2. [4:47:54 PM] REQUEST: TransactionRepository.getAllByUser
+ LOG     3. [4:47:54 PM] REQUEST: CardRepository.getUserCards
+ LOG     4. [4:47:58 PM] REQUEST: TransactionRepository.update
+ LOG     5. [4:47:58 PM] REQUEST: TransactionRepository.getByUser
+ LOG     6. [4:47:58 PM] REQUEST: TransactionRepository.getAllByUser
+ LOG     7. [4:47:58 PM] REQUEST: TransactionRepository.getAllByUser
+ LOG     8. [4:47:59 PM] NAVIGATION: Previous → Transactions
+ LOG     9. [4:48:01 PM] REQUEST: TransactionRepository.getByUser
+ LOG     10. [4:48:03 PM] REQUEST: TransactionRepository.getByUser
+```
