@@ -119,16 +119,26 @@ export default function ProfileScreen() {
           />
         </View>
 
-      {/* ✅ REMOVER DEPOIS - ADICIONADO TEMPORARIAMENTE */}
+      {/* REMOVER DEPOIS - ADICIONADO TEMPORARIAMENTE PARA MENSURAR MÉTRICAS */}
        {__DEV__ && (
-        <View style={{ padding: 16 }}>
+        <>
+        <View style={{ padding: 10 }}>
           <Button 
             onPress={() => {
               const report = (global as any).metrics.printReport();
               console.log('📄 Relatório gerado!');
             }} 
           >Ver Métricas</Button>
+
+
+          <Button 
+            onPress={() => {
+              const report = (global as any).metrics.reset();
+              console.log('📄 Relatório resetado!');
+            }} 
+          >Resetar Métricas</Button>
         </View>
+        </>
       )}
       </ScrollView>
     </ThemedView>

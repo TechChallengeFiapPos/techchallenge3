@@ -1,11 +1,15 @@
 import { useThemeColor } from '@hooks/useThemeColor';
-import { TransactionFilters } from '@src/components/filters/transactions/TransactionFilters';
+import { TransactionFilters as TransactionFiltersComponent } from '@src/components/filters/transactions/TransactionFilters';
 import { TransactionItem } from '@src/components/lists/transactions/TransactionItem';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedView } from '@src/components/ThemedView';
 import { useAuth } from '@src/contexts/AuthContext';
-import { useTransactions } from '@src/contexts/TransactionsContext';
 import { Transaction } from '@src/domain/entities/Transaction';
+import {
+  useAllTransactions,
+  useDeleteTransaction,
+  useTransactions
+} from '@src/presentation/hooks/transaction';
 import { metrics } from '@src/utils/metrics';
 import { formatCurrency, paymentMethods, transactionCategories } from '@src/utils/transactions';
 import { useRouter } from 'expo-router';
@@ -25,20 +29,10 @@ export default function TransactionsScreen() {
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
 
-  const {
-    transactions,
-    allTransactions,
-    loading,
-    error,
-    hasMore,
-    loadTransactions,
-    loadMoreTransactions,
-    refreshTransactions,
-    clearError,
-    deleteTransaction
-  } = useTransactions();
   const { user } = useAuth();
   const [loadStart] = useState(Date.now());
+  const { mutate: deleteTransaction } = useDeleteTransaction();
+  const { data: allTransactions = [] } = useAllTransactions();
 
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [advancedFilters, setAdvancedFilters] = useState<{
@@ -48,24 +42,45 @@ export default function TransactionsScreen() {
     endDate?: Date;
   }>({});
 
+  // Montar filtros para React Query
+  const filters = useMemo(() => {
+    const f: any = {};
+    
+    if (filterType !== 'all') {
+      f.type = filterType;
+    }
+    
+    if (advancedFilters.categoryId) {
+      f.categoryId = advancedFilters.categoryId;
+    }
+    
+    if (advancedFilters.methodId) {
+      f.methodId = advancedFilters.methodId;
+    }
+    
+    if (advancedFilters.startDate) {
+      f.startDate = advancedFilters.startDate;
+    }
+    
+    if (advancedFilters.endDate) {
+      f.endDate = advancedFilters.endDate;
+    }
+    
+    return Object.keys(f).length > 0 ? f : undefined;
+  }, [filterType, advancedFilters]);
+
+  const { data: transactions = [], isLoading,error, refetch } = useTransactions(filters);
+
+  // Métricas
   useEffect(() => {
     if (!user) return;
     metrics.logNavigation('Previous', 'Transactions');
 
-    const filters: any = {};
-
-    if (filterType !== 'all') filters.type = filterType;
-    if (advancedFilters.categoryId) filters.categoryId = advancedFilters.categoryId;
-    if (advancedFilters.methodId) filters.methodId = advancedFilters.methodId;
-    if (advancedFilters.startDate) filters.startDate = advancedFilters.startDate;
-    if (advancedFilters.endDate) filters.endDate = advancedFilters.endDate;
-
-    loadTransactions(filters);
     return () => {
       const loadTime = Date.now() - loadStart;
       metrics.logLoadTime('Transactions', loadTime);
     };
-  }, [filterType, advancedFilters, loadTransactions]);
+  }, []);
 
   const handleEdit = (transaction: Transaction) => {
     router.push(`/(pages)/edit-transaction/${transaction.id}`);
@@ -80,11 +95,15 @@ export default function TransactionsScreen() {
         {
           text: 'Deletar',
           style: 'destructive',
-          onPress: async () => {
-          const result = await deleteTransaction(transaction.id);
-          if (!result.success) {
-            Alert.alert('Erro', result.error || 'Erro ao deletar transação');
-          }
+          onPress: () => {
+            deleteTransaction(transaction.id, {
+              onSuccess: () => {
+                console.info('Transação deletada com sucesso');
+              },
+              onError: (error: any) => {
+                Alert.alert('Erro', error.message || 'Erro ao deletar transação');
+              },
+            });
           },
         },
       ],
@@ -101,45 +120,43 @@ export default function TransactionsScreen() {
   const keyExtractor = useCallback((item: Transaction) => item.id, []);
 
   const renderFooter = useCallback(() => {
-    if (!loading || !hasMore) return null;
+    if (!isLoading) return null;
     return (
       <View style={styles.footer}>
         <ActivityIndicator animating size="small" color={primaryColor} />
         <Text variant="bodySmall" style={[styles.footerText, { color: onSurfaceVariantColor }]}>
-          Carregando mais transações...
+          Carregando transações...
         </Text>
       </View>
     );
-  }, [loading, hasMore]);
+  }, [isLoading]);
 
   const renderEmpty = useCallback(() => {
-    if (loading) return null;
+    if (isLoading) return null;
+    
+    const hasAnyTransactions = allTransactions.length > 0;
+    
     return (
       <View style={styles.emptyContainer}>
         <Text variant="headlineSmall" style={[styles.emptyTitle, { color: onSurfaceColor }]}>
           Nenhuma transação encontrada
         </Text>
         <Text variant="bodyMedium" style={[styles.emptySubtitle, { color: onSurfaceVariantColor }]}>
-          {filterType === 'all'
-            ? 'Adicione uma transação para começar'
-            : 'Nenhuma transação encontrada com este filtro'}
+          {hasAnyTransactions
+            ? 'Nenhuma transação encontrada com este filtro'
+            : 'Adicione uma transação para começar'}
         </Text>
-        {allTransactions?.length === 0 &&
-          <View style={styles.emptyStateFAB}>
-            {renderAddTransactionButton()}
-          </View>
-        }
+        
+        {!hasAnyTransactions && (
+          <View style={styles.emptyStateFAB}>{renderAddTransactionButton()}</View>
+        )}
       </View>
     );
-  }, [loading, filterType]);
-
-  const handleLoadMore = useCallback(() => {
-    if (!loading && hasMore) loadMoreTransactions();
-  }, [loading, hasMore]);
+  }, [isLoading, allTransactions.length]);
 
   const handleRefresh = useCallback(() => {
-    refreshTransactions();
-  }, [refreshTransactions]);
+    refetch();
+  }, [refetch]);
 
   const dynamicStyles = useMemo(() => {
     const tabBarHeight = 90 + Math.max(insets.bottom, 0) + 20;
@@ -156,12 +173,13 @@ export default function TransactionsScreen() {
         color="white"
       />
     </View>
-  )
+  );
 
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
       <PageHeader title="Transações" showBackButton />
-      {allTransactions.length > 0 &&
+      
+      {allTransactions.length > 0 && (
         <View style={styles.headerSection}>
           <View style={[styles.transactionsHeader, { paddingHorizontal: 16 }]}>
             <Text variant="labelLarge" style={[styles.transactionsTitle, { color: onSurfaceColor }]}>
@@ -170,7 +188,7 @@ export default function TransactionsScreen() {
             {renderAddTransactionButton()}
           </View>
 
-          <TransactionFilters
+          <TransactionFiltersComponent
             filterType={filterType}
             onFilterTypeChange={setFilterType}
             onFilterChange={setAdvancedFilters}
@@ -181,7 +199,7 @@ export default function TransactionsScreen() {
             methods={paymentMethods}
           />
         </View>
-      }
+      )}
 
       <View style={[styles.card, { backgroundColor: surfaceColor }]}>
         <FlatList
@@ -193,10 +211,8 @@ export default function TransactionsScreen() {
           windowSize={10}
           initialNumToRender={15}
           updateCellsBatchingPeriod={50}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
           onRefresh={handleRefresh}
-          refreshing={loading}
+          refreshing={isLoading}
           ListEmptyComponent={renderEmpty}
           ListFooterComponent={renderFooter}
           contentContainerStyle={[
@@ -209,12 +225,12 @@ export default function TransactionsScreen() {
 
       <Snackbar
         visible={!!error}
-        onDismiss={clearError}
+        onDismiss={() => {}}
         duration={4000}
-        action={{ label: 'OK', onPress: clearError }}
+        action={{ label: 'OK', onPress: () => {} }}
         style={[styles.errorSnackbar, { bottom: Math.max(insets.bottom, 60) }]}
       >
-        {error}
+        {error?.message || 'Erro ao carregar transações'}
       </Snackbar>
     </ThemedView>
   );
@@ -223,18 +239,43 @@ export default function TransactionsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   headerSection: { marginBottom: 0 },
-  transactionsHeader: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', paddingVertical: 16, paddingTop: 8 },
+  transactionsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingTop: 8,
+  },
   transactionsTitle: { fontWeight: 'bold', marginRight: 8 },
   headerFab: { marginLeft: 12, elevation: 4 },
-  card: { flex: 1, borderTopLeftRadius: 40, borderTopRightRadius: 40, marginVertical: 0, paddingTop: 16, marginTop: 20 },
+  card: {
+    flex: 1,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    marginVertical: 0,
+    paddingTop: 16,
+    marginTop: 20,
+  },
   emptyList: { flexGrow: 1 },
-  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60, paddingHorizontal: 32 },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 32,
+  },
   emptyTitle: { textAlign: 'center', marginBottom: 8, fontWeight: '600' },
   emptySubtitle: { textAlign: 'center', opacity: 0.7 },
-  footer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 20, paddingHorizontal: 16 },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+  },
   footerText: { marginLeft: 8, opacity: 0.7 },
   errorSnackbar: { backgroundColor: '#F44336' },
   emptyStateFAB: {
     marginTop: 30,
-  }
+  },
 });

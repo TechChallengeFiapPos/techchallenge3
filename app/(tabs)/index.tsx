@@ -4,24 +4,25 @@ import { FinancialDashboard } from '@src/components/dashboard/FinancialDashboard
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedView } from '@src/components/ThemedView';
 import { useAuth } from '@src/contexts/AuthContext';
-import { useTransactions } from '@src/contexts/TransactionsContext';
+import { useAllTransactions } from '@src/presentation/hooks/transaction';
 import { metrics } from '@src/utils/metrics';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Animated, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+
   const backgroundColor = useThemeColor({}, 'background');
   const primaryColor = useThemeColor({}, 'primary');
   const surfaceColor = useThemeColor({}, 'surface');
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const negative = useThemeColor({}, 'error');
 
-  const { allTransactions } = useTransactions();
+  const { data: allTransactions = [], isLoading, error } = useAllTransactions();
   const { profile } = useAuth();
   const [loadStart] = useState(Date.now());
 
@@ -52,6 +53,31 @@ export default function HomeScreen() {
     return allTransactions.slice(0, 3);
   }, [allTransactions]);
 
+  if (isLoading) {
+    return (
+      <ThemedView style={[styles.container, { backgroundColor }]}>
+        <PageHeader title="Dashboard" showBackButton={false} />
+        <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+          <ActivityIndicator size="large" color={primaryColor} />
+          <Text style={{ color: onSurfaceColor, marginTop: 16 }}>Carregando...</Text>
+        </View>
+      </ThemedView>
+    );
+  }
+
+  if (error) {
+    return (
+      <ThemedView style={[styles.container, { backgroundColor }]}>
+        <PageHeader title="Dashboard" showBackButton={false} />
+        <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 32 }]}>
+          <Text style={{ color: negative, textAlign: 'center' }}>
+            {error.message || 'Erro ao carregar dados'}
+          </Text>
+        </View>
+      </ThemedView>
+    );
+  }
+
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
       <PageHeader title="Dashboard" showBackButton={false} />
@@ -69,6 +95,7 @@ export default function HomeScreen() {
             Olá, {profile?.name || 'Usuário'}!
           </Text>
         </View>
+        
         <FinancialDashboard />
 
         <Animated.View

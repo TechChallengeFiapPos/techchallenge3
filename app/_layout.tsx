@@ -1,7 +1,9 @@
 import { darkTheme, lightTheme } from '@config/theme';
+import { queryClient } from '@src/config/queryClient';
 import { AuthProvider, useAuth } from '@src/contexts/AuthContext';
 import { ThemeProvider, useTheme } from '@src/contexts/ThemeContext';
 import { TransactionProvider } from '@src/contexts/TransactionsContext';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { useKeepAwake } from 'expo-keep-awake';
 import { Stack, usePathname, useRouter } from 'expo-router';
@@ -80,7 +82,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <ProtectedLayout />
+        <QueryClientProvider client={queryClient}>
+          <ProtectedLayout />
+        </QueryClientProvider>
       </AuthProvider>
     </ThemeProvider>
   );
