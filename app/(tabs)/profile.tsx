@@ -5,7 +5,7 @@ import { ThemedText } from '@src/components/ThemedText';
 import { useAuth } from '@src/contexts/AuthContext';
 import { useTheme } from '@src/contexts/ThemeContext';
 import { Alert, Image, ScrollView, StyleSheet, View } from 'react-native';
-import { Divider, List, Switch } from 'react-native-paper';
+import { Button, Divider, List, Switch } from 'react-native-paper';
 
 
 export default function ProfileScreen() {
@@ -118,6 +118,18 @@ export default function ProfileScreen() {
             onPress={handleLogout}
           />
         </View>
+
+      {/* ✅ REMOVER DEPOIS - ADICIONADO TEMPORARIAMENTE */}
+       {__DEV__ && (
+        <View style={{ padding: 16 }}>
+          <Button 
+            onPress={() => {
+              const report = (global as any).metrics.printReport();
+              console.log('📄 Relatório gerado!');
+            }} 
+          >Ver Métricas</Button>
+        </View>
+      )}
       </ScrollView>
     </ThemedView>
   );

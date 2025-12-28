@@ -5,8 +5,9 @@ import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedView } from '@src/components/ThemedView';
 import { useAuth } from '@src/contexts/AuthContext';
 import { useTransactions } from '@src/contexts/TransactionsContext';
+import { metrics } from '@src/utils/metrics';
 import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,11 +23,13 @@ export default function HomeScreen() {
 
   const { allTransactions } = useTransactions();
   const { profile } = useAuth();
+  const [loadStart] = useState(Date.now());
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
 
   useEffect(() => {
+    metrics.logNavigation('App', 'Dashboard');
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -39,6 +42,10 @@ export default function HomeScreen() {
         useNativeDriver: true,
       }),
     ]).start();
+    return () => {
+      const loadTime = Date.now() - loadStart;
+      metrics.logLoadTime('Dashboard', loadTime);
+    };
   }, []);
 
   const recentTransactions = useMemo(() => {

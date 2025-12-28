@@ -6,6 +6,7 @@ import { ThemedView } from '@src/components/ThemedView';
 import { useAuth } from '@src/contexts/AuthContext';
 import { useTransactions } from '@src/contexts/TransactionsContext';
 import { Transaction } from '@src/domain/entities/Transaction';
+import { metrics } from '@src/utils/metrics';
 import { formatCurrency, paymentMethods, transactionCategories } from '@src/utils/transactions';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -37,6 +38,7 @@ export default function TransactionsScreen() {
     deleteTransaction
   } = useTransactions();
   const { user } = useAuth();
+  const [loadStart] = useState(Date.now());
 
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [advancedFilters, setAdvancedFilters] = useState<{
@@ -48,6 +50,7 @@ export default function TransactionsScreen() {
 
   useEffect(() => {
     if (!user) return;
+    metrics.logNavigation('Previous', 'Transactions');
 
     const filters: any = {};
 
@@ -58,6 +61,10 @@ export default function TransactionsScreen() {
     if (advancedFilters.endDate) filters.endDate = advancedFilters.endDate;
 
     loadTransactions(filters);
+    return () => {
+      const loadTime = Date.now() - loadStart;
+      metrics.logLoadTime('Transactions', loadTime);
+    };
   }, [filterType, advancedFilters, loadTransactions]);
 
   const handleEdit = (transaction: Transaction) => {

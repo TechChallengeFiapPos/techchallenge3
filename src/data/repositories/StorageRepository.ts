@@ -1,13 +1,14 @@
 import { storage } from '@src/config/firebaseConfig';
 import { TransactionAttachment } from '@src/domain/entities/Transaction';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
+import { metrics } from '@src/utils/metrics';
 import {
-    deleteObject,
-    getDownloadURL,
-    getMetadata,
-    ref,
-    uploadBytes,
-    uploadBytesResumable,
+  deleteObject,
+  getDownloadURL,
+  getMetadata,
+  ref,
+  uploadBytes,
+  uploadBytesResumable,
 } from 'firebase/storage';
 
 export class StorageRepository {
@@ -63,6 +64,7 @@ export class StorageRepository {
     onProgress: (progress: number) => void
   ): Promise<{ success: boolean; data?: TransactionAttachment; error?: string }> {
     return new Promise(async (resolve) => {
+      metrics.logRequest('StorageRepository.upload', { fileName });
       try {
         const response = await fetch(fileUri);
         const blob = await response.blob();
@@ -179,6 +181,7 @@ export class StorageRepository {
   static async deleteAttachment(
     attachmentUrl: string
   ): Promise<{ success: boolean; error?: string }> {
+    metrics.logRequest('StorageRepository.delete', { attachmentUrl });
     try {
       const storageRef = ref(storage, attachmentUrl);
       await deleteObject(storageRef);
