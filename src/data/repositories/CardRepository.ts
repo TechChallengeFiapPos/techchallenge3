@@ -1,6 +1,7 @@
 import { db } from '@config/firebaseConfig';
 import { Card, CreateCardData, UpdateCardData } from '@src/domain/entities/Card';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
+import { metrics } from '@src/utils/metrics';
 import {
   addDoc,
   collection,
@@ -23,6 +24,7 @@ const getUserCardsCollection = (userId: string) => {
 
 export const createCard = async (userId: string, cardData: CreateCardData) => {
   try {
+    metrics.logRequest('CardRepository.createCard', { userId });
     // Verifica se já existe
     const existsResult = await checkCardExists(userId, cardData.number);
     if (existsResult.exists) {
@@ -57,6 +59,7 @@ export const createCard = async (userId: string, cardData: CreateCardData) => {
 
 // Busca todos os cartões do usuário
 export const getUserCards = async (userId: string) => {
+  metrics.logRequest('CardRepository.getUserCards', { userId });
   try {
     const cardsCollection = getUserCardsCollection(userId);
     const q = query(cardsCollection, orderBy('createdAt', 'desc'));

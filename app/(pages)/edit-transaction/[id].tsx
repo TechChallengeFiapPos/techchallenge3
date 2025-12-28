@@ -4,10 +4,10 @@ import { TransactionRegisterForm } from '@src/components/forms';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedText } from '@src/components/ThemedText';
 import { useAuth } from '@src/contexts/AuthContext';
-import { useTransactions } from '@src/contexts/TransactionsContext';
-import { Transaction, UpdateTransactionData } from '@src/domain/entities/Transaction';
+import { UpdateTransactionData } from '@src/domain/entities/Transaction';
+import { useTransaction, useUpdateTransaction } from '@src/presentation/hooks/transaction';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -20,61 +20,48 @@ import {
 
 export default function EditTransactionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [transaction, setTransaction] = useState<Transaction | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const { data: transaction,  isLoading: isLoadingTransaction, error: loadError } = useTransaction(id);
+  const { mutate: updateTransaction, isPending, error: updateError } = useUpdateTransaction();  
   const router = useRouter();
-  const { user } = useAuth()
+  const { user } = useAuth();
 
   const backgroundColor = useThemeColor({}, 'background');
   const surfaceColor = useThemeColor({}, 'surface');
-  
-  const { updateTransaction, loading, error, clearError, allTransactions } = useTransactions();
 
-  useEffect(() => {
-    if (!user) return; 
+  const handleSubmit = (data: UpdateTransactionData) => {
     if (!id) return;
-    if (allTransactions.length === 0) return;
 
-    const found = allTransactions.find((t) => t.id === id);
-
-    if (found) {
-      setTransaction(found);
-    } else {
-      Alert.alert('Erro ao editar transação', 'Transação não encontrada', [
-        { text: 'Voltar', onPress: () => router.back() },
-      ]);
-    }
-  }, [id, allTransactions, user]);
-
-  const handleSubmit = async (data: UpdateTransactionData) => {
-    if (!transaction) return;
-
-    setMessage(null);
-    clearError();
-
-    try {
-      const result = await updateTransaction(transaction.id, data);
-
-      if (result.success) {
-        setMessage('Transação atualizada com sucesso!');
-        Alert.alert('Sucesso!', 'Transação atualizada com sucesso!', [
-          {
-            text: 'Ver transações',
-            onPress: () => router.push('/(tabs)/transactions'),
-          },
-        ]);
-      } else {
-        setMessage(`Erro ao atualizar: ${result.error || 'Erro desconhecido'}`);
+    updateTransaction(
+      { id, data },
+      { onSuccess: () => {
+          Alert.alert('Sucesso!', 'Transação atualizada com sucesso!', [
+            {
+              text: 'Ver transações',
+              onPress: () => router.push('/(tabs)/transactions'),
+            },
+          ]);
+        },
+        onError: (error: any) => {
+          Alert.alert('Erro', error.message || 'Erro ao atualizar transação');
+        },
       }
-    } catch (err: any) {
-      setMessage(`Erro inesperado: ${err.message}`);
-    }
+    );
   };
 
-  if (!transaction) {
+  if (!user || isLoadingTransaction) {
     return (
       <View style={[styles.container, { backgroundColor, justifyContent: 'center' }]}>
         <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (loadError || !transaction) {
+    return (
+      <View style={[styles.container, { backgroundColor, justifyContent: 'center', padding: 32 }]}>
+        <ThemedText style={styles.message} textType="default" colorName="error">
+          {loadError?.message || 'Transação não encontrada'}
+        </ThemedText>
       </View>
     );
   }
@@ -96,7 +83,7 @@ export default function EditTransactionScreen() {
           >
             <TransactionRegisterForm
               onSubmit={handleSubmit}
-              disabled={loading}
+              disabled={isPending}
               initialData={{
                 type: transaction.type,
                 value: transaction.value,
@@ -110,24 +97,14 @@ export default function EditTransactionScreen() {
               mode="edit"
             />
 
-            {message && (
-              <ThemedText
-                style={styles.message}
-                textType="default"
-                colorName={message.startsWith('Erro') ? 'error' : 'primary'}
-              >
-                {message}
-              </ThemedText>
-            )}
-
-            {error && !message && (
+            {updateError && (
               <ThemedText style={styles.message} textType="default" colorName="error">
-                {error}
+                {updateError.message}
               </ThemedText>
             )}
           </ScrollView>
 
-          {loading && (
+          {isPending && (
             <View style={styles.overlay}>
               <ActivityIndicator size="large" color="#fff" />
               <ThemedText style={styles.loadingText} textType="default">

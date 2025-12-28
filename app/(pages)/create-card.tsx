@@ -4,7 +4,7 @@ import { CardRegisterForm } from '@src/components/forms';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedText } from '@src/components/ThemedText';
 import { CreateCardData } from '@src/domain/entities/Card';
-import { useCardActions } from '@src/presentation/hooks/card/useCardActions';
+import { useCreateCard } from '@src/presentation/hooks/card/mutations/useCardsMutations';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { FieldValues } from 'react-hook-form';
@@ -23,24 +23,20 @@ export type ThemedProps = {
   darkColor?: string;
 };
 
-type FieldErrors = Record<string, string>;
-
 export default function CreateCardScreen({ lightColor, darkColor }: ThemedProps) {
-  const [message, setMessage] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formKey, setFormKey] = useState(0);
   const router = useRouter();
 
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const surfaceColor = useThemeColor({}, 'surface');
 
-  const { createCard, loading, error, clearError } = useCardActions();
+  const { 
+    mutate: createCard, 
+    isPending,
+    error 
+  } = useCreateCard();
 
-  const handleSubmit = async (data: FieldValues) => {
-    setMessage(null);
-    setFieldErrors({});
-    clearError();
-
+  const handleSubmit = (data: FieldValues) => {
     const cardData: CreateCardData = {
       number: data.number,
       functions: data.functions || [],
@@ -48,26 +44,25 @@ export default function CreateCardScreen({ lightColor, darkColor }: ThemedProps)
       expiryDate: data.expiryDate,
     };
 
-    const result = await createCard(cardData);
-
-    if (result.success) {
-      setMessage('Cartão cadastrado com sucesso!');
-      Alert.alert('Sucesso!', 'Cartão cadastrado com sucesso!', [
-        {
-          text: 'Ver cartões',
-          onPress: () => router.push('/(tabs)/cards'),
-        },
-        {
-          text: 'Novo cartão',
-          onPress: () => {
-            setMessage(null);
-            setFormKey(prev => prev + 1);
+    createCard(cardData, {
+      onSuccess: () => {
+        Alert.alert('Sucesso!', 'Cartão cadastrado com sucesso!', [
+          {
+            text: 'Ver cartões',
+            onPress: () => router.push('/(tabs)/cards'),
           },
-        },
-      ]);
-    } else {
-      setMessage(result.error || 'Erro ao cadastrar cartão');
-    }
+          {
+            text: 'Novo cartão',
+            onPress: () => {
+              setFormKey((prev) => prev + 1);
+            },
+          },
+        ]);
+      },
+      onError: (error: any) => {
+        Alert.alert('Erro', error.message || 'Erro ao cadastrar cartão');
+      },
+    });
   };
 
   return (
@@ -94,28 +89,17 @@ export default function CreateCardScreen({ lightColor, darkColor }: ThemedProps)
             <CardRegisterForm 
               key={formKey}
               onSubmit={handleSubmit} 
-              disabled={loading} 
-              errors={fieldErrors} 
+              disabled={isPending}
             />
 
-            {message && (
-              <ThemedText
-                style={styles.message}
-                textType="default"
-                colorName={message.startsWith('❌') ? 'error' : 'primary'}
-              >
-                {message}
-              </ThemedText>
-            )}
-
-            {error && !message && (
+            {error && (
               <ThemedText style={styles.message} textType="default" colorName="error">
-                ❌ {error}
+                 {error.message}
               </ThemedText>
             )}
           </ScrollView>
 
-          {loading && (
+          {isPending && (
             <View style={styles.overlay}>
               <ActivityIndicator size="large" color="#fff" />
               <ThemedText style={styles.loadingText} textType="default">

@@ -1,6 +1,6 @@
 import { useAuth } from '@src/contexts/AuthContext';
 import { TransactionAttachment } from '@src/domain/entities/Transaction';
-import { useCards } from '@src/presentation/hooks/card/useCards';
+import { useCards } from '@src/presentation/hooks/card/queries/useCardsQueries';
 import {
   TransactionFormData,
   TransactionFormField,
@@ -89,7 +89,7 @@ export function TransactionRegisterForm({
   const { user } = useAuth();
   const router = useRouter();
   
-  const { cards } = useCards();
+  const { data: cards = [], isLoading: isLoadingCards } = useCards();
   
   const [attachment, setAttachment] = useState<TransactionAttachment | undefined>(
     initialData?.attachment
@@ -130,32 +130,42 @@ export function TransactionRegisterForm({
     setValue('categoryId', '');
   }, [watchedType, setValue]);
 
-  // Validação de cartão
-  useEffect(() => {
-    if (!methodRequiresCard(watchedMethod)) return;
-    if (mode === 'edit' && watchedCard) return;
-    if (cardOptions.length > 0) return;
+// Validação de cartão
+useEffect(() => {
+  if (!user) return;
+  
+  // Se método não requer cartão, não faz nada
+  if (!methodRequiresCard(watchedMethod)) return;
+  
+  // Se está editando e já tem cartão selecionado, não faz nada
+  if (mode === 'edit' && watchedCard) return;
+  
+  // Se está carregando cartões, espera
+  if (isLoadingCards) return;
+  
+  // Se tem cartões disponíveis, não faz nada
+  if (cardOptions.length > 0) return;
 
-    Alert.alert(
-      'Nenhum cartão cadastrado',
-      'Você precisa cadastrar um cartão antes de usar este método de pagamento.',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-          onPress: () => {
-            setValue('methodId', '');
-          },
+  Alert.alert(
+    'Nenhum cartão cadastrado',
+    'Você precisa cadastrar um cartão antes de usar este método de pagamento.',
+    [
+      {
+        text: 'Cancelar',
+        style: 'cancel',
+        onPress: () => {
+          setValue('methodId', '');
         },
-        {
-          text: 'Cadastrar Cartão',
-          onPress: () => {
-            router.push('/create-card');
-          },
+      },
+      {
+        text: 'Cadastrar Cartão',
+        onPress: () => {
+          router.push('/create-card');
         },
-      ]
-    );
-  }, [watchedMethod, cardOptions, mode, watchedCard]);
+      },
+    ]
+  );
+}, [user, watchedMethod, cardOptions, mode, watchedCard, isLoadingCards]);
 
   const renderField = (field: TransactionFormField) => {
     if (field.conditional) {
@@ -192,6 +202,7 @@ export function TransactionRegisterForm({
             options={options}
             placeholder={field.placeholder || 'Selecione uma opção'}
             multiple={false}
+            disabled={field.name === 'cardId' && isLoadingCards}
           />
           {(formErrors[field.name] || errors?.[field.name]) && (
             <ThemedText textType="default" colorName="error" style={styles.errorText}>
@@ -296,7 +307,7 @@ export function TransactionRegisterForm({
         {(formErrors[field.name] || errors?.[field.name]) && (
           <ThemedText textType="default" colorName="error" style={styles.errorText}>
             {formErrors[field.name]?.message || errors?.[field.name]}
-            </ThemedText>
+          </ThemedText>
         )}
       </View>
     );

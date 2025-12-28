@@ -4,10 +4,10 @@ import { CardRegisterForm } from '@src/components/forms';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedText } from '@src/components/ThemedText';
 import { UpdateCardData } from '@src/domain/entities/Card';
-import { useCardActions } from '@src/presentation/hooks/card/useCardActions';
-import { useCards } from '@src/presentation/hooks/card/useCards';
+import { useUpdateCard } from '@src/presentation/hooks/card/mutations/useCardsMutations';
+import { useCard } from '@src/presentation/hooks/card/queries/useCardsQueries';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { FieldValues } from 'react-hook-form';
 import {
   ActivityIndicator,
@@ -25,32 +25,20 @@ export default function EditCardScreen() {
   const backgroundColor = useThemeColor({}, 'background');
   const surfaceColor = useThemeColor({}, 'surface');
 
-  const [message, setMessage] = useState<string | null>(null);
-  const [cardData, setCardData] = useState<any>(null);
+  const { 
+    data: card, 
+    isLoading: isLoadingCard,
+    error: loadError 
+  } = useCard(id);
 
-  const { getCard } = useCards();
-  const { updateCard, loading } = useCardActions();
+  const { 
+    mutate: updateCard, 
+    isPending,
+    error: updateError 
+  } = useUpdateCard();
 
-  useEffect(() => {
-    loadCard();
-  }, [id]);
-
-  const loadCard = async () => {
+  const handleSubmit = (data: FieldValues) => {
     if (!id) return;
-
-    const result = await getCard(id);
-    if (result.success && result.card) {
-      setCardData(result.card);
-    } else {
-      Alert.alert('Erro ao editar cartão', 'Cartão não encontrado');
-      router.back();
-    }
-  };
-
-  const handleSubmit = async (data: FieldValues) => {
-    if (!id) return;
-
-    setMessage(null);
 
     const updateData: UpdateCardData = {
       number: data.number,
@@ -59,26 +47,43 @@ export default function EditCardScreen() {
       expiryDate: data.expiryDate,
     };
 
-    const result = await updateCard(id, updateData);
-
-    if (result.success) {
-      Alert.alert('Sucesso!', 'Cartão atualizado!', [
-        {
-          text: 'OK',
-          onPress: () => router.push('/(tabs)/cards'),
+    updateCard(
+      { id, data: updateData },
+      {
+        onSuccess: () => {
+          Alert.alert('Sucesso!', 'Cartão atualizado!', [
+            {
+              text: 'OK',
+              onPress: () => router.push('/(tabs)/cards'),
+            },
+          ]);
         },
-      ]);
-    } else {
-      setMessage(result.error || 'Erro ao atualizar cartão');
-    }
+        onError: (error: any) => {
+          Alert.alert('Erro', error.message || 'Erro ao atualizar cartão');
+        },
+      }
+    );
   };
 
-  if (!cardData) {
+  if (isLoadingCard) {
     return (
       <ThemedView style={[styles.container, { backgroundColor }]}>
         <PageHeader title="Editar Cartão" showBackButton={true} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" />
+        </View>
+      </ThemedView>
+    );
+  }
+
+  if (loadError || !card) {
+    return (
+      <ThemedView style={[styles.container, { backgroundColor }]}>
+        <PageHeader title="Editar Cartão" showBackButton={true} />
+        <View style={[styles.loadingContainer, { padding: 32 }]}>
+          <ThemedText style={styles.message} textType="default" colorName="error">
+            {loadError?.message || 'Cartão não encontrado'}
+          </ThemedText>
         </View>
       </ThemedView>
     );
@@ -107,18 +112,18 @@ export default function EditCardScreen() {
           >
             <CardRegisterForm
               onSubmit={handleSubmit}
-              disabled={loading}
-              initialData={cardData}
+              disabled={isPending}
+              initialData={card}
             />
 
-            {message && (
+            {updateError && (
               <ThemedText style={styles.message} textType="default" colorName="error">
-                {message}
+                {updateError.message}
               </ThemedText>
             )}
           </ScrollView>
 
-          {loading && (
+          {isPending && (
             <View style={styles.overlay}>
               <ActivityIndicator size="large" color="#fff" />
               <ThemedText style={styles.loadingText} textType="default">

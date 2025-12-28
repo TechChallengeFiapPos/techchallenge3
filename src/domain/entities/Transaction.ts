@@ -46,3 +46,11 @@ export interface UpdateTransactionData {
   tags?: string[];
   attachment?: TransactionAttachment; // upload
 }
+
+export interface TransactionFilters {
+  type?: 'income' | 'expense';
+  categoryId?: string;
+  methodId?: string;
+  startDate?: Date;
+  endDate?: Date;
+}
