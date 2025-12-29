@@ -8,7 +8,7 @@ import { Transaction } from '@src/domain/entities/Transaction';
 import {
   useAllTransactions,
   useDeleteTransaction,
-  useTransactions
+  useInfiniteTransactions,
 } from '@src/presentation/hooks/transaction';
 import { metrics } from '@src/utils/metrics';
 import { formatCurrency, paymentMethods, transactionCategories } from '@src/utils/transactions';
@@ -32,6 +32,8 @@ export default function TransactionsScreen() {
   const { user } = useAuth();
   const [loadStart] = useState(Date.now());
   const { mutate: deleteTransaction } = useDeleteTransaction();
+  
+  // verifica se existem transações (mostra/oculta filtros)
   const { data: allTransactions = [] } = useAllTransactions();
 
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
@@ -42,7 +44,7 @@ export default function TransactionsScreen() {
     endDate?: Date;
   }>({});
 
-  // Montar filtros para React Query
+  // filtros para React Query
   const filters = useMemo(() => {
     const f: any = {};
     
@@ -69,7 +71,21 @@ export default function TransactionsScreen() {
     return Object.keys(f).length > 0 ? f : undefined;
   }, [filterType, advancedFilters]);
 
-  const { data: transactions = [], isLoading,error, refetch } = useTransactions(filters);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    error,
+    refetch,
+  } = useInfiniteTransactions(filters);
+
+  // flatten páginas em array único
+  const transactions = useMemo(() => {
+    if (!data?.pages) return [];
+    return data.pages.flatMap((page: any) => page.transactions);
+  }, [data]);
 
   // Métricas
   useEffect(() => {
@@ -80,7 +96,7 @@ export default function TransactionsScreen() {
       const loadTime = Date.now() - loadStart;
       metrics.logLoadTime('Transactions', loadTime);
     };
-  }, []);
+  }, [user, loadStart]);
 
   const handleEdit = (transaction: Transaction) => {
     router.push(`/(pages)/edit-transaction/${transaction.id}`);
@@ -119,17 +135,19 @@ export default function TransactionsScreen() {
 
   const keyExtractor = useCallback((item: Transaction) => item.id, []);
 
+  //  mostra "Carregando mais..." quando busca próxima página
   const renderFooter = useCallback(() => {
-    if (!isLoading) return null;
+    if (!isFetchingNextPage) return null;
+    
     return (
       <View style={styles.footer}>
         <ActivityIndicator animating size="small" color={primaryColor} />
         <Text variant="bodySmall" style={[styles.footerText, { color: onSurfaceVariantColor }]}>
-          Carregando transações...
+          Carregando mais transações...
         </Text>
       </View>
     );
-  }, [isLoading]);
+  }, [isFetchingNextPage, primaryColor, onSurfaceVariantColor]);
 
   const renderEmpty = useCallback(() => {
     if (isLoading) return null;
@@ -152,7 +170,14 @@ export default function TransactionsScreen() {
         )}
       </View>
     );
-  }, [isLoading, allTransactions.length]);
+  }, [isLoading, allTransactions.length, onSurfaceColor, onSurfaceVariantColor]);
+
+  // carregando mais ao chegar no fim da lista
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleRefresh = useCallback(() => {
     refetch();
@@ -210,7 +235,9 @@ export default function TransactionsScreen() {
           maxToRenderPerBatch={10}
           windowSize={10}
           initialNumToRender={15}
-          updateCellsBatchingPeriod={50}
+          updateCellsBatchingPeriod={50}   
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
           onRefresh={handleRefresh}
           refreshing={isLoading}
           ListEmptyComponent={renderEmpty}
