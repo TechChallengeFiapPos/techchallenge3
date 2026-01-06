@@ -1,10 +1,10 @@
 import { useThemeColor } from '@hooks/useThemeColor';
-import { TransactionFilters as TransactionFiltersComponent } from '@src/components/filters/transactions/TransactionFilters';
-import { TransactionItem } from '@src/components/lists/transactions/TransactionItem';
-import { PageHeader } from '@src/components/navigation/PageHeader';
-import { ThemedView } from '@src/components/ThemedView';
 import { useAuth } from '@src/contexts/AuthContext';
 import { Transaction } from '@src/domain/entities/Transaction';
+import { TransactionFilters as TransactionFiltersComponent } from '@src/presentation/components/filters/transactions/TransactionFilters';
+import { TransactionItem } from '@src/presentation/components/lists/transactions/TransactionItem';
+import { PageHeader } from '@src/presentation/components/navigation/PageHeader';
+import { ThemedView } from '@src/presentation/components/ThemedView';
 import {
   useAllTransactions,
   useDeleteTransaction,

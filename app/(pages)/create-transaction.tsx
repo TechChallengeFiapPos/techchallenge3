@@ -1,9 +1,9 @@
-import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
-import { TransactionRegisterForm } from '@src/components/forms';
-import { PageHeader } from '@src/components/navigation/PageHeader';
-import { ThemedText } from '@src/components/ThemedText';
 import { CreateTransactionData } from '@src/domain/entities/Transaction';
+import { TransactionRegisterForm } from '@src/presentation/components//forms';
+import { PageHeader } from '@src/presentation/components/navigation/PageHeader';
+import { ThemedText } from '@src/presentation/components/ThemedText';
+import { ThemedView } from '@src/presentation/components/ThemedView';
 import { useCreateTransaction } from '@src/presentation/hooks/transaction';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';

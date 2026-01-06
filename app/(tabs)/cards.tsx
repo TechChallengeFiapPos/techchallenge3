@@ -1,9 +1,9 @@
 import { useThemeColor } from '@hooks/useThemeColor';
 import { useFocusEffect } from '@react-navigation/native';
-import { CardItem } from '@src/components/lists/cards/CardItem';
-import { PageHeader } from '@src/components/navigation/PageHeader';
-import { ThemedView } from '@src/components/ThemedView';
 import { Card } from '@src/domain/entities/Card';
+import { CardItem } from '@src/presentation/components/lists/cards/CardItem';
+import { PageHeader } from '@src/presentation/components/navigation/PageHeader';
+import { ThemedView } from '@src/presentation/components/ThemedView';
 import { useDeleteCard } from '@src/presentation/hooks/card/mutations/useCardsMutations';
 import { useCards } from '@src/presentation/hooks/card/queries/useCardsQueries';
 import { useRouter } from 'expo-router';

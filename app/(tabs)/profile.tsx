@@ -1,9 +1,9 @@
-import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
-import { PageHeader } from '@src/components/navigation/PageHeader';
-import { ThemedText } from '@src/components/ThemedText';
 import { useAuth } from '@src/contexts/AuthContext';
 import { useTheme } from '@src/contexts/ThemeContext';
+import { PageHeader } from '@src/presentation/components/navigation/PageHeader';
+import { ThemedText } from '@src/presentation/components/ThemedText';
+import { ThemedView } from '@src/presentation/components/ThemedView';
 import { Alert, Image, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Divider, List, Switch } from 'react-native-paper';
 

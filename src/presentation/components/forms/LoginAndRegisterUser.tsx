@@ -1,11 +1,11 @@
-import { ThemedButton } from '@src/components/ThemedButton';
-import { ThemedText } from '@src/components/ThemedText';
+import { ThemedButton } from '@src/presentation/components/ThemedButton';
+import { ThemedText } from '@src/presentation/components/ThemedText';
 import { FieldValues, useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
 import { InputController } from '../inputs/InputController';
 
 export type FormField = {
-  name: string;
+  name: string;   
   label: string;
   placeholder?: string;
   secureTextEntry?: boolean;

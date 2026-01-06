@@ -1,9 +1,9 @@
-import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
-import { CardRegisterForm } from '@src/components/forms';
-import { PageHeader } from '@src/components/navigation/PageHeader';
-import { ThemedText } from '@src/components/ThemedText';
 import { CreateCardData } from '@src/domain/entities/Card';
+import { CardRegisterForm } from '@src/presentation/components/forms';
+import { PageHeader } from '@src/presentation/components/navigation/PageHeader';
+import { ThemedText } from '@src/presentation/components/ThemedText';
+import { ThemedView } from '@src/presentation/components/ThemedView';
 import { useCreateCard } from '@src/presentation/hooks/card/mutations/useCardsMutations';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';

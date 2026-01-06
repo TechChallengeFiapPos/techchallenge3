@@ -1,9 +1,9 @@
-import { ThemedView } from '@components/ThemedView';
 import { auth, db } from '@config/firebaseConfig';
 import { useThemeColor } from '@hooks/useThemeColor';
-import { LoginRegisterUserForm } from '@src/components/forms';
-import { ThemedCard } from '@src/components/ThemedCard';
-import { ThemedText } from '@src/components/ThemedText';
+import { LoginRegisterUserForm } from '@src/presentation/components/forms';
+import { ThemedCard } from '@src/presentation/components/ThemedCard';
+import { ThemedText } from '@src/presentation/components/ThemedText';
+import { ThemedView } from '@src/presentation/components/ThemedView';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';

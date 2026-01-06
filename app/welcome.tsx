@@ -1,8 +1,8 @@
-import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
-import { ThemedButton } from '@src/components/ThemedButton';
-import { ThemedCard } from '@src/components/ThemedCard';
-import { ThemedText } from '@src/components/ThemedText';
+import { ThemedButton } from '@src/presentation/components/ThemedButton';
+import { ThemedCard } from '@src/presentation/components/ThemedCard';
+import { ThemedText } from '@src/presentation/components/ThemedText';
+import { ThemedView } from '@src/presentation/components/ThemedView';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Animated, Image, StyleSheet, View } from 'react-native';

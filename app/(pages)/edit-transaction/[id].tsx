@@ -1,10 +1,10 @@
-import { ThemedView } from '@components/ThemedView';
 import { useThemeColor } from '@hooks/useThemeColor';
-import { TransactionRegisterForm } from '@src/components/forms';
-import { PageHeader } from '@src/components/navigation/PageHeader';
-import { ThemedText } from '@src/components/ThemedText';
 import { useAuth } from '@src/contexts/AuthContext';
 import { UpdateTransactionData } from '@src/domain/entities/Transaction';
+import { TransactionRegisterForm } from '@src/presentation/components/forms';
+import { PageHeader } from '@src/presentation/components/navigation/PageHeader';
+import { ThemedText } from '@src/presentation/components/ThemedText';
+import { ThemedView } from '@src/presentation/components/ThemedView';
 import { useTransaction, useUpdateTransaction } from '@src/presentation/hooks/transaction';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
-import { ThemedText } from '@src/components/ThemedText';
+import { ThemedText } from '@src/presentation/components/ThemedText';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';

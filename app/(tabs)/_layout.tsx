@@ -1,7 +1,7 @@
-import { ThemedView } from '@components/ThemedView';
 import { Colors } from '@constants/Colors';
 import { useColorScheme } from '@hooks/useColorScheme';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { ThemedView } from '@src/presentation/components/ThemedView';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';

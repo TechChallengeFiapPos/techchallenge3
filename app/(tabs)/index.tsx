@@ -1,9 +1,9 @@
 import { useThemeColor } from '@hooks/useThemeColor';
-import { FinancialCharts } from '@src/components/charts/FinancialCharts';
-import { FinancialDashboard } from '@src/components/dashboard/FinancialDashboard';
-import { PageHeader } from '@src/components/navigation/PageHeader';
-import { ThemedView } from '@src/components/ThemedView';
 import { useAuth } from '@src/contexts/AuthContext';
+import { FinancialCharts } from '@src/presentation/components/charts/FinancialCharts';
+import { FinancialDashboard } from '@src/presentation/components/dashboard/FinancialDashboard';
+import { PageHeader } from '@src/presentation/components/navigation/PageHeader';
+import { ThemedView } from '@src/presentation/components/ThemedView';
 import { useAllTransactions } from '@src/presentation/hooks/transaction';
 import { metrics } from '@src/utils/metrics';
 import { useRouter } from 'expo-router';
