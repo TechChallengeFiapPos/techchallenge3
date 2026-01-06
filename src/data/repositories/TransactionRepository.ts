@@ -6,6 +6,7 @@ import {
 } from '@src/domain/entities/Transaction';
 import { TransactionFilters } from '@src/presentation/types/TransactionFormTypes';
 import { getFirebaseErrorMessage } from '@src/utils/firebaseErrors';
+import { metrics } from '@src/utils/metrics';
 import {
   DocumentData,
   QueryDocumentSnapshot,
@@ -36,6 +37,7 @@ export class TransactionRepository {
     userId: string,
     data: CreateTransactionData,
   ): Promise<{ success: boolean; data?: Transaction; error?: string }> {
+    metrics.logRequest('TransactionRepository.create', { userId });
     try {
       const { attachment, ...restData } = data;
     
@@ -111,6 +113,7 @@ export class TransactionRepository {
     hasMore?: boolean;
     error?: string;
   }> {
+    metrics.logRequest('TransactionRepository.getByUser', { userId, filters });
     try {
       let q = query(getUserTransactionsCollection(userId), orderBy('date', 'desc'));
 
@@ -184,6 +187,7 @@ export class TransactionRepository {
     userId: string,
     limitCount: number = 1000,
   ): Promise<{ success: boolean; data?: Transaction[]; error?: string }> {
+    metrics.logRequest('TransactionRepository.getAllByUser', { userId });
     try {
       const q = query(
         getUserTransactionsCollection(userId),
@@ -256,6 +260,7 @@ export class TransactionRepository {
     transactionId: string,
     data: UpdateTransactionData,
   ): Promise<{ success: boolean; error?: string }> {
+    metrics.logRequest('TransactionRepository.update', { userId, transactionId });
     try {
       const { attachment, date, ...restData } = data;
 
@@ -294,6 +299,7 @@ export class TransactionRepository {
     userId: string,
     transactionId: string
   ): Promise<{ success: boolean; error?: string }> {
+    metrics.logRequest('TransactionRepository.update', { userId, transactionId });
     try {
       const docRef = doc(db, 'users', userId, 'transactions', transactionId);
       await deleteDoc(docRef);

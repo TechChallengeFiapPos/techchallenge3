@@ -4,8 +4,8 @@ import { CardItem } from '@src/components/lists/cards/CardItem';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedView } from '@src/components/ThemedView';
 import { Card } from '@src/domain/entities/Card';
-import { useCardActions } from '@src/presentation/hooks/card/useCardActions';
-import { useCards } from '@src/presentation/hooks/card/useCards';
+import { useDeleteCard } from '@src/presentation/hooks/card/mutations/useCardsMutations';
+import { useCards } from '@src/presentation/hooks/card/queries/useCardsQueries';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
@@ -23,8 +23,13 @@ export default function CardsScreen() {
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
 
-  const { cards, loading, refetch } = useCards();
-  const { deleteCard } = useCardActions();
+  const { 
+    data: cards = [], 
+    isLoading,
+    refetch 
+  } = useCards();
+
+  const { mutate: deleteCard } = useDeleteCard();
 
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
@@ -62,14 +67,15 @@ export default function CardsScreen() {
         {
           text: 'Deletar',
           style: 'destructive',
-          onPress: async () => {
-            const result = await deleteCard(card.id!);
-            if (result.success) {
-              Alert.alert('Sucesso', 'Cartão deletado!');
-              refetch();
-            } else {
-              Alert.alert('Erro', result.error || 'Erro ao deletar');
-            }
+          onPress: () => {
+            deleteCard(card.id!, {
+              onSuccess: () => {
+                Alert.alert('Sucesso', 'Cartão deletado!');
+              },
+              onError: (error: any) => {
+                Alert.alert('Erro', error.message || 'Erro ao deletar');
+              },
+            });
           },
         },
       ],
@@ -86,8 +92,6 @@ export default function CardsScreen() {
     ),
     [],
   );
-
-  const hasActiveFilters = filterType !== 'all' || categoryFilter !== 'all';
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
@@ -238,7 +242,7 @@ export default function CardsScreen() {
           renderItem={renderCard}
           keyExtractor={item => item.id!}
           ListEmptyComponent={renderEmpty}
-          refreshing={loading}
+          refreshing={isLoading}
           onRefresh={refetch}
           contentContainerStyle={styles.listContent}
         />

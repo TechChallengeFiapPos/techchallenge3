@@ -1,7 +1,8 @@
 import { darkTheme, lightTheme } from '@config/theme';
+import { queryClient } from '@src/config/queryClient';
 import { AuthProvider, useAuth } from '@src/contexts/AuthContext';
 import { ThemeProvider, useTheme } from '@src/contexts/ThemeContext';
-import { TransactionProvider } from '@src/contexts/TransactionsContext';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { useKeepAwake } from 'expo-keep-awake';
 import { Stack, usePathname, useRouter } from 'expo-router';
@@ -48,7 +49,6 @@ function ProtectedLayout() {
   }
 
   return (
-    <TransactionProvider>
       <PaperProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="welcome" />
@@ -58,7 +58,6 @@ function ProtectedLayout() {
         </Stack>
         <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       </PaperProvider>
-    </TransactionProvider>
   );
 }
 
@@ -80,7 +79,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <ProtectedLayout />
+        <QueryClientProvider client={queryClient}>
+          <ProtectedLayout />
+        </QueryClientProvider>
       </AuthProvider>
     </ThemeProvider>
   );

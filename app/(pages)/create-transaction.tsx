@@ -3,8 +3,8 @@ import { useThemeColor } from '@hooks/useThemeColor';
 import { TransactionRegisterForm } from '@src/components/forms';
 import { PageHeader } from '@src/components/navigation/PageHeader';
 import { ThemedText } from '@src/components/ThemedText';
-import { useTransactions } from '@src/contexts/TransactionsContext';
 import { CreateTransactionData } from '@src/domain/entities/Transaction';
+import { useCreateTransaction } from '@src/presentation/hooks/transaction';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -22,29 +22,19 @@ export type ThemedProps = {
   darkColor?: string;
 };
 
-type FieldErrors = Record<string, string>;
-
 export default function CreateTransactionScreen({ lightColor, darkColor }: ThemedProps) {
-  const [message, setMessage] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formKey, setFormKey] = useState(0);
   const router = useRouter();
+  const { mutate: createTransaction, isPending, error } = useCreateTransaction();
 
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const surfaceColor = useThemeColor({}, 'surface');
 
-  const { createTransaction, loading, error, clearError } = useTransactions();
 
-  const handleSubmit = async (data: CreateTransactionData) => {
-    setMessage(null);
-    setFieldErrors({});
-    clearError();
 
-    try {
-      const result = await createTransaction(data);
-
-      if (result.success) {
-        setMessage('Transação cadastrada com sucesso!');
+  const handleSubmit = (data: CreateTransactionData) => {
+    createTransaction(data, {
+      onSuccess: () => {
         Alert.alert('Sucesso!', 'Transação cadastrada com sucesso!', [
           {
             text: 'Ver transações',
@@ -53,17 +43,15 @@ export default function CreateTransactionScreen({ lightColor, darkColor }: Theme
           {
             text: 'Nova transação',
             onPress: () => {
-              setMessage(null);
-              setFormKey(prev => prev + 1); 
+              setFormKey((prev) => prev + 1);
             },
           },
         ]);
-      } else {
-        setMessage(`Erro ao cadastrar transação: ${result.error || 'Erro desconhecido'}`);
-      }
-    } catch (err: any) {
-      setMessage(`Erro inesperado: ${err.message}`);
-    }
+      },
+      onError: (error: any) => {
+        Alert.alert('Erro', error.message || 'Erro ao cadastrar transação');
+      },
+    }); 
   };
 
   return (
@@ -84,29 +72,18 @@ export default function CreateTransactionScreen({ lightColor, darkColor }: Theme
             <TransactionRegisterForm
               onSubmit={handleSubmit}
               key={formKey}
-              disabled={loading}
-              errors={fieldErrors}
+              disabled={isPending}
               mode="create"
             />
 
-            {message && (
-              <ThemedText
-                style={styles.message}
-                textType="default"
-                colorName={message.startsWith('Erro') ? 'error' : 'primary'}
-              >
-                {message}
-              </ThemedText>
-            )}
-
-            {error && !message && (
+            {error && (
               <ThemedText style={styles.message} textType="default" colorName="error">
-                {error}
+                {error.message}
               </ThemedText>
             )}
           </ScrollView>
 
-          {loading && (
+          {isPending && (
             <View style={styles.overlay}>
               <ActivityIndicator size="large" color="#fff" />
               <ThemedText style={styles.loadingText} textType="default">

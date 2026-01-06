@@ -1,12 +1,33 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
-import { useTransactions } from '@src/contexts/TransactionsContext';
-import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { useAllTransactions } from '@src/presentation/hooks/transaction';
+import { useEffect, useMemo, useRef } from 'react';
+import { ActivityIndicator, Animated, StyleSheet, View } from 'react-native';
 import { ProgressBar, Surface, Text } from 'react-native-paper';
 
 export function FinancialDashboard() {
-  const { totalIncome, totalExpenses, balance } = useTransactions();
+  const { 
+    data: allTransactions = [], 
+    isLoading,
+    error 
+  } = useAllTransactions();
+
+  // calcula totais a partir das transações
+  const { totalIncome, totalExpenses, balance } = useMemo(() => {
+    const income = allTransactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + t.value, 0);
+
+    const expenses = allTransactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + t.value, 0);
+
+    return {
+      totalIncome: income,
+      totalExpenses: expenses,
+      balance: income - expenses,
+    };
+  }, [allTransactions]);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -31,7 +52,7 @@ export function FinancialDashboard() {
   const primaryColor = useThemeColor({}, 'primary');
   const surfaceColor = useThemeColor({}, 'surface');
   const secondary = useThemeColor({}, 'secondary');
-  const error = useThemeColor({}, 'error');
+  const errorColor = useThemeColor({}, 'error');
 
   const formatCurrency = (valueInCents: number): string => {
     const reais = valueInCents / 100;
@@ -50,6 +71,26 @@ export function FinancialDashboard() {
       return `${expensePercentage.toFixed(2).replace('.', ',')}% da sua renda gasta. Cuidado!`;
     }
   };
+
+  // loading state
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={primaryColor} />
+      </View>
+    );
+  }
+
+  // error state
+  if (error) {
+    return (
+      <Surface style={[styles.mainCard, { backgroundColor }]}>
+        <Text style={{ color: errorColor, textAlign: 'center' }}>
+          Erro ao carregar dados financeiros
+        </Text>
+      </Surface>
+    );
+  }
 
   return (
     <View>
@@ -103,7 +144,7 @@ export function FinancialDashboard() {
 
           <Surface style={[styles.card, { backgroundColor: surfaceColor }]}>
             <View style={styles.cardContent}>
-              <View style={[styles.iconContainer, { backgroundColor: error }]}>
+              <View style={[styles.iconContainer, { backgroundColor: errorColor }]}>
                 <Ionicons name="arrow-up" size={24} color="white" />
               </View>
               <View style={styles.cardInfo}>
@@ -128,7 +169,7 @@ export function FinancialDashboard() {
             </View>
             <ProgressBar
               progress={Math.max(progressValue, 0.02)}
-              color={error}
+              color={errorColor}
               style={[styles.progressBar, { backgroundColor: secondary }]}
             />
           </View>
@@ -146,6 +187,11 @@ export function FinancialDashboard() {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    padding: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   mainCard: {
     borderRadius: 20,
     elevation: 2,
