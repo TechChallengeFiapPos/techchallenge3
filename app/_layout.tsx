@@ -7,11 +7,23 @@ import { useFonts } from 'expo-font';
 import { useKeepAwake } from 'expo-keep-awake';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { Suspense, useEffect } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { pt, registerTranslation } from 'react-native-paper-dates';
 import 'react-native-reanimated';
+
+function SuspenseLoader() {
+  const { theme } = useTheme();
+  return (
+    <View style={styles.suspenseLoader}>
+      <ActivityIndicator
+        size="large"
+        color={theme === 'dark' ? darkTheme.colors.primary : lightTheme.colors.primary}
+      />
+    </View>
+  );
+}
 
 function ProtectedLayout() {
   const { theme } = useTheme();
@@ -49,15 +61,17 @@ function ProtectedLayout() {
   }
 
   return (
-      <PaperProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
+    <PaperProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
+      <Suspense fallback={<SuspenseLoader />}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="welcome" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="login" />
           <Stack.Screen name="+not-found" />
         </Stack>
-        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-      </PaperProvider>
+      </Suspense>
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+    </PaperProvider>
   );
 }
 
@@ -86,3 +100,11 @@ export default function RootLayout() {
     </ThemeProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  suspenseLoader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
+})
