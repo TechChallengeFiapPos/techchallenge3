@@ -1,8 +1,8 @@
 import { useThemeColor } from '@hooks/useThemeColor';
-import { useFocusEffect } from '@react-navigation/native';
 import { Card } from '@src/domain/entities/Card';
 import { CardItem } from '@src/presentation/components/lists/cards/CardItem';
 import { PageHeader } from '@src/presentation/components/navigation/PageHeader';
+import { CardListSkeleton } from '@src/presentation/components/skeletons/CardListSkeleton';
 import { ThemedView } from '@src/presentation/components/ThemedView';
 import { useDeleteCard } from '@src/presentation/hooks/card/mutations/useCardsMutations';
 import { useCards } from '@src/presentation/hooks/card/queries/useCardsQueries';
@@ -23,22 +23,16 @@ export default function CardsScreen() {
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
 
-  const { 
-    data: cards = [], 
+  const {
+    data: cards = [],
     isLoading,
-    refetch 
+    refetch
   } = useCards();
 
   const { mutate: deleteCard } = useDeleteCard();
 
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
-
-  useFocusEffect(
-    useCallback(() => {
-      refetch();
-    }, [refetch])
-  );
 
   const filteredCards = useMemo(() => {
     return cards.filter(card => {
@@ -92,6 +86,19 @@ export default function CardsScreen() {
     ),
     [],
   );
+
+  //skeleton depois do useCallback, rules of Hooks
+  if (isLoading && cards.length === 0) {
+    return (
+      <ThemedView style={[styles.container, { backgroundColor }]}>
+        <PageHeader title="Cartões" showBackButton={true} />
+        <View style={[styles.listCard, { backgroundColor: surfaceColor }]}>
+          <CardListSkeleton count={3} />
+        </View>
+      </ThemedView>
+    );
+  }
+
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
