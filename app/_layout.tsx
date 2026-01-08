@@ -7,23 +7,11 @@ import { useFonts } from 'expo-font';
 import { useKeepAwake } from 'expo-keep-awake';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Suspense, useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { pt, registerTranslation } from 'react-native-paper-dates';
 import 'react-native-reanimated';
-
-function SuspenseLoader() {
-  const { theme } = useTheme();
-  return (
-    <View style={styles.suspenseLoader}>
-      <ActivityIndicator
-        size="large"
-        color={theme === 'dark' ? darkTheme.colors.primary : lightTheme.colors.primary}
-      />
-    </View>
-  );
-}
 
 function ProtectedLayout() {
   const { theme } = useTheme();
@@ -38,15 +26,12 @@ function ProtectedLayout() {
     const isInLogin = pathname.includes('login');
     const isInTabs = pathname.includes('(tabs)');
 
-    // Se não tem user e está nas tabs -> /welcome
     if (!user && isInTabs) {
       router.replace('/welcome');
     }
-    // Se não tem user e não está em welcome nem login ->  /welcome
     else if (!user && !isInWelcome && !isInLogin) {
       router.replace('/welcome');
     }
-    // Se tem user e está em welcome ou login -> /tabs
     else if (user && (isInWelcome || isInLogin)) {
       router.replace('/(tabs)');
     }
@@ -62,14 +47,12 @@ function ProtectedLayout() {
 
   return (
     <PaperProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
-      <Suspense fallback={<SuspenseLoader />}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="welcome" />
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="login" />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </Suspense>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="welcome" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="+not-found" />
+      </Stack>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
     </PaperProvider>
   );
@@ -100,11 +83,3 @@ export default function RootLayout() {
     </ThemeProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  suspenseLoader: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
-  }
-})

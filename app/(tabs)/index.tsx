@@ -1,16 +1,21 @@
 import { useThemeColor } from '@hooks/useThemeColor';
 import { useAuth } from '@src/contexts/AuthContext';
-import { FinancialCharts } from '@src/presentation/components/charts/FinancialCharts';
 import { FinancialDashboard } from '@src/presentation/components/dashboard/FinancialDashboard';
 import { PageHeader } from '@src/presentation/components/navigation/PageHeader';
 import { ThemedView } from '@src/presentation/components/ThemedView';
 import { useAllTransactions } from '@src/presentation/hooks/transaction';
 import { metrics } from '@src/utils/metrics';
 import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const LazyFinancialCharts = lazy(() =>
+  import('@src/presentation/components/charts/FinancialCharts').then(module => ({
+    default: module.FinancialCharts
+  }))
+);
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -95,7 +100,7 @@ export default function HomeScreen() {
             Olá, {profile?.name || 'Usuário'}!
           </Text>
         </View>
-        
+
         <FinancialDashboard />
 
         <Animated.View
@@ -104,7 +109,18 @@ export default function HomeScreen() {
             { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
           ]}
         >
-          <FinancialCharts transactions={allTransactions} />
+          <LazyFinancialCharts transactions={allTransactions} />
+
+          <Suspense
+            fallback={
+              <View style={styles.chartsLoader}>
+                <ActivityIndicator size="large" color={primaryColor} />
+              </View>
+            }
+          >
+            <LazyFinancialCharts transactions={allTransactions} />
+          </Suspense>
+
         </Animated.View>
 
         <View style={styles.headerSection}>
@@ -232,5 +248,11 @@ const styles = StyleSheet.create({
   emptyContainer: {
     paddingVertical: 40,
     alignItems: 'center',
+  },
+  chartsLoader: {
+    padding: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 200,
   },
 });
