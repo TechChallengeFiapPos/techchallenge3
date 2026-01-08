@@ -18,7 +18,7 @@ src/
 │
 └── presentation/        # Camada de Apresentação
     ├── components/      # Componentes React
-    ├── hooks/           # Hooks customizados (+ React Query)
+    ├── hooks/           # Hooks customizados (React Query)
     └── contexts/        # Contextos React
 ```
 
@@ -55,11 +55,28 @@ cacheTime: 1000 * 60 * 10,   // 10 minutos
 
 ### Otimizações Implementadas
 
+**Lazy Loading + Suspense:**
+
+Componentes pesados como gráficos são carregados sob demanda usando React.lazy + Suspense:
+```typescript
+const LazyCharts = lazy(() => import('./FinancialCharts'));
+
+<Suspense fallback={<ActivityIndicator />}>
+  <LazyCharts transactions={transactions} />
+</Suspense>
+```
+
+**Benefícios:**
+- Bundle inicial reduzido
+- Carregamento progressivo
+- Melhor Time to Interactive
+- Loading localizado (não bloqueia tela inteira)
+
 **FlatList:**
 - `removeClippedSubviews` para melhor performance
 - `maxToRenderPerBatch: 10` para renderização em lote
 - `windowSize: 10` para otimização de memória
-- Paginação
+- Paginação infinita
 
 **React:**
 - `useMemo` para cálculos complexos
@@ -67,9 +84,9 @@ cacheTime: 1000 * 60 * 10,   // 10 minutos
 - Componentes memoizados
 
 **UX:**
-- Loading skeletons animados básicos na listagem e dashboard
-- Transições
-- Suspense boundaries
+- Loading skeletons animados
+- Transições suaves (fade in/out)
+- Feedback visual em todas ações
 
 ### Sistema de Métricas
 
@@ -80,7 +97,7 @@ Monitoramento em tempo real:
 - Taxa de cache hit
 - Tempo de sessão
 
-Ver console do app para relatório completo ao sair. Para resetar e gerar o relatório vá na página de dados do usuário.
+Ver console do app para relatório completo ao sair. Para resetar e gerar novo relatório, acessar página de dados do usuário.
 
 ---
 
@@ -108,6 +125,7 @@ Ver console do app para relatório completo ao sair. Para resetar e gerar o rela
 - Paginação infinita
 - Loading skeletons
 - Animações suaves
+- Lazy loading de componentes pesados
 
 ---
 
@@ -120,7 +138,7 @@ Ver console do app para relatório completo ao sair. Para resetar e gerar o rela
 - Android Studio (emulador)
 - Expo CLI
 - Conta Firebase
-- Expo GO 
+- Expo GO
 
 ### 2️⃣ Clone o repositório
 ```bash
@@ -196,10 +214,7 @@ service firebase.storage {
 }
 ```
 
-
-
 ### 6️⃣ Inicie o projeto
-
 ```bash
 npx expo start -c
 ```
@@ -270,5 +285,3 @@ GitHub: [@EloisaFagundes](https://github.com/EloisaFagundes)
 ## 📄 Licença
 
 Projeto desenvolvido para fins acadêmicos - Tech Challenge Fase 4 (Pós-Graduação FIAP).
-
----
