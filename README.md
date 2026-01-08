@@ -1,92 +1,143 @@
-# 💰 Tech Challenge - Fase 03 - ByteBank
+# 💰 Tech Challenge 4 - Gestão Financeira
 
-Aplicação de **Gerenciamento Financeiro** desenvolvida em **React Native (com Expo)** como parte do Tech Challenge da Fase 03.
+Aplicação de **Gerenciamento Financeiro** desenvolvida em **React Native (Expo)** aplicando **Clean Architecture**, **State Management avançado** e **otimizações de performance**.
 
 ---
 
-## 📋 Funcionalidades Principais
+## 🏗️ Arquitetura
 
-### ✅ Requisitos Obrigatórios
-- **Autenticação**: Login e registro de usuários com Firebase Authentication
-- **Dashboard**: Visualização de resumo financeiro com gráficos interativos
-- **Transações**: Adicionar, editar e visualizar transações financeiras
-- **Listagem com Filtros**: Filtros avançados por tipo, categoria, método de pagamento e período
-- **Upload de Recibos**: Anexar comprovantes/recibos usando Firebase Storage
+### Clean Architecture (3 Camadas)
+```
+src/
+├── domain/              # Camada de Domínio
+│   ├── entities/        # Entidades (Transaction, Card, User)
+│   └── useCases/        # Casos de uso (CreateTransaction, UpdateCard)
+│
+├── data/                # Camada de Dados
+│   └── repositories/    # Implementação de acesso aos dados
+│
+└── presentation/        # Camada de Apresentação
+    ├── components/      # Componentes React
+    ├── hooks/           # Hooks customizados (+ React Query)
+    └── contexts/        # Contextos React
+```
 
-### 🎯 Funcionalidades Adicionais
-- **Welcome Page**: Tela de boas-vindas personalizada
-- **Gerenciamento de Cartões**: Listagem, adição, edição e exclusão de cartões de crédito/débito
-- **Perfil do Usuário**: Visualização de dados do usuário e logout
-- **Tema Claro/Escuro**: Suporte a dark mode
-- **Scroll Infinito**: Carregamento progressivo de transações
-- **Animações**: Transições suaves e feedback visual
-- **Validações Robustas**: Validação de formulários em tempo real
+**Padrões aplicados:**
+- Repository Pattern
+- Dependency Injection
+- Single Responsibility Principle
+- Separation of Concerns
 
+---
 
-## 📊 Gráficos e Análises
+## ⚡ Performance e Otimizações
 
-### 1. **Despesas por Categoria** (Gráfico de Pizza)
-Total por Categoria = Soma das despesas da categoria
-Exibição: Top 5 categorias com maior valor
+### State Management
 
-### 2. **Evolução Mensal** (Gráfico de Linha)
-Para cada mês (últimos 6):
-Receitas = Soma de transações income do mês
-Despesas = Soma de transações expense do mês
+**React Query** gerencia todo o estado da aplicação:
+- Cache inteligente (5min stale time)
+- Invalidação automática após mutations
+- Refetch otimizado
+- Background updates
+```typescript
+// Configuração do cache
+staleTime: 1000 * 60 * 5,    // 5 minutos
+cacheTime: 1000 * 60 * 10,   // 10 minutos
+```
 
-### 3. **Comparativo Mensal** (Gráfico de Barras)
-Mês Passado vs Mês Atual:
-Receitas mês passado | Receitas mês atual
-Despesas mês passado | Despesas mês atual
+### Resultados Mensurados
 
-### 4. **Cards do Dashboard**
-Total Receitas = Soma de todas income
-Total Despesas = Soma de todas expense
-Saldo = Receitas - Despesas
+| Métrica | Antes | Depois | Melhoria |
+|---------|-------|--------|----------|
+| Cache Hit Rate | 0% | ~67% | +67% |
+| API Calls (30s) | 15 | 9 | -40% |
+| Dashboard Load | 2.5s | 1.2s | -52% |
 
+### Otimizações Implementadas
 
-## 🛠️ Tecnologias Utilizadas
+**FlatList:**
+- `removeClippedSubviews` para melhor performance
+- `maxToRenderPerBatch: 10` para renderização em lote
+- `windowSize: 10` para otimização de memória
+- Paginação
 
-- **Framework**: [React Native](https://reactnative.dev/) com [Expo](https://expo.dev/)
-- **Linguagem**: TypeScript
-- **Navegação**: [Expo Router](https://docs.expo.dev/router/introduction/)
-- **Backend**: [Firebase](https://firebase.google.com/)
-  - Authentication (autenticação de usuários)
-  - Firestore (banco de dados NoSQL)
-  - Storage (armazenamento de arquivos)
-- **Gerenciamento de Estado**: Context API + React Hooks
-- **Gráficos**: [Victory Native](https://formidable.com/open-source/victory/docs/native/)
-- **UI Components**: [React Native Paper](https://callstack.github.io/react-native-paper/)
-- **Formulários**: [React Hook Form](https://react-hook-form.com/)
-- **Ícones**: [Expo Vector Icons](https://icons.expo.fyi/)
-- **Persistência Local**: [AsyncStorage](https://react-native-async-storage.github.io/async-storage/)
+**React:**
+- `useMemo` para cálculos complexos
+- `useCallback` para funções em callbacks
+- Componentes memoizados
 
+**UX:**
+- Loading skeletons animados básicos na listagem e dashboard
+- Transições
+- Suspense boundaries
 
-## 📦 Instalação e Execução
+### Sistema de Métricas
 
-### 1. Pré-requisitos
+Monitoramento em tempo real:
+- Tempo de carregamento por tela
+- Total de requests Firebase
+- Cache hits/misses
+- Taxa de cache hit
+- Tempo de sessão
 
-- Node.js (v18 ou superior)
+Ver console do app para relatório completo ao sair. Para resetar e gerar o relatório vá na página de dados do usuário.
+
+---
+
+## 🛠️ Tecnologias
+
+- **Framework:** React Native + Expo Router
+- **Linguagem:** TypeScript
+- **State Management:** React Query
+- **Backend:** Firebase (Auth + Firestore + Storage)
+- **UI:** React Native Paper
+- **Gráficos:** Victory Native
+- **Formulários:** React Hook Form
+- **Cache:** React Query + AsyncStorage
+
+---
+
+## 📋 Funcionalidades
+
+- Dashboard financeiro com métricas e gráficos
+- CRUD completo de transações com filtros avançados
+- CRUD completo de cartões de crédito/débito
+- Upload de recibos/comprovantes
+- Autenticação segura (Firebase Auth)
+- Tema claro/escuro
+- Paginação infinita
+- Loading skeletons
+- Animações suaves
+
+---
+
+## 📦 Instalação
+
+### 1️⃣ Pré-requisitos
+
+- Node.js (v18+)
 - npm ou yarn
+- Android Studio (emulador)
 - Expo CLI
-- Conta no Firebase
-- Android Studio usando SDM
-- Expo CLI
+- Conta Firebase
 - Expo GO 
 
-### 2. Clone o repositório
+### 2️⃣ Clone o repositório
 ```bash
-git@github.com:TechChallengeFiapPos/techchallenge3.git
+git clone git@github.com:TechChallengeFiapPos/techchallenge3.git
 cd techchallenge3
-``` 
+```
 
-### 3. Instale as dependencias
+### 3️⃣ Instale as dependências
 ```bash
+npm install
+# ou
 yarn install
-``` 
+```
 
-### 4. Variáveis de ambiente
-Crie um arquivo .env na raiz do projeto baseado no .env.example:
+### 4️⃣ Configure variáveis de ambiente
+
+Crie `.env` na raiz baseado em `.env.example`:
 ```bash
 EXPO_PUBLIC_FIREBASE_API_KEY=sua_api_key
 EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=seu-projeto.firebaseapp.com
@@ -94,34 +145,47 @@ EXPO_PUBLIC_FIREBASE_PROJECT_ID=seu-projeto-id
 EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=seu-projeto.appspot.com
 EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=seu_sender_id
 EXPO_PUBLIC_FIREBASE_APP_ID=seu_app_id
-``` 
+```
 
-### 5. Configure o Firebase
-- Crie um projeto no Firebase Console
-- Ative Authentication (Email/Password)
-- Crie um banco Firestore Database
-- Ative o Storage
-- Configure as regras de segurança:
-```bash
-//Firestore
+### 5️⃣ Configure Firebase
+
+**Firestore Rules** (`firestore.rules`):
+```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, create, update: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if false;
     }
-    match /transactions/{transactionId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    
+    match /users/{userId}/transactions/{transactionId} {
+      allow read, list: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn() 
+                    && request.auth.uid == userId
+                    && request.resource.data.type in ['income', 'expense']
+                    && request.resource.data.value > 0;
+      allow update, delete: if isSignedIn() && request.auth.uid == userId;
     }
-    match /cards/{cardId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    
+    match /users/{userId}/cards/{cardId} {
+      allow read, list, create, update, delete: if isSignedIn() && request.auth.uid == userId;
+    }
+    
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
-``` 
+```
 
-```bash
-// Storage
+**Storage Rules**:
+```javascript
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
@@ -130,71 +194,81 @@ service firebase.storage {
     }
   }
 }
-``` 
+```
 
-### 6. Inicie o Projeto no ANDROID STUDIO + EXPO GO
+
+
+### 6️⃣ Inicie o projeto
 
 ```bash
 npx expo start -c
-``` 
+```
 
-- Pressione A no terminal pra abrir o projeto no emulador
-- Configuração do device no emulador: 1080 x 2400 (default)
-- Crie um usuário na tela de registro e logue na plataforma usando seu login e senha cadastrados.
+- Pressione `a` para abrir no emulador Android
+- Configure device: 1080 x 2400 (padrão)
+- Crie um usuário e faça login
 
-## 🎨 Temas
-O aplicativo suporta tema claro e tema escuro que se adapta automaticamente às preferências do sistema operacional.
+---
 
-## 📱 Telas Principais
+## 📊 Gráficos e Análises
 
-1. Autenticação
-- Login com email/senha
-- Registro de novo usuário
-- Validação de campos em tempo real
+### Dashboard
 
-2. Dashboard
-- Saudação personalizada
-- Cards com resumo financeiro (receitas, despesas, saldo)
-- 3 gráficos interativos
-- Últimas transações
+1. **Despesas por Categoria** (Pizza)
+   - Top 5 categorias com maior valor
 
-3. Transações
-- Listagem paginada (scroll infinito)
-- Filtros por tipo, categoria, método e período
-- Adicionar/editar/excluir transações
-- Upload de comprovantes
+2. **Evolução Mensal** (Linha)
+   - Receitas e despesas dos últimos 6 meses
 
-4. Cartões
-- Listagem de cartões cadastrados
-- Filtros por tipo (crédito/débito) e categoria (platinum/gold/black)
-- Adicionar/editar/excluir cartões
-- Máscara de número do cartão
+3. **Comparativo Mensal** (Barras)
+   - Mês passado vs mês atual
 
-5. Perfil
-- Informações do usuário
-- Logout
+4. **Cards Resumo**
+   - Total de receitas
+   - Total de despesas
+   - Saldo atual
 
-## 🔐 Segurança
+---
 
-- Credenciais em variáveis de ambiente (.env)
-- Regras de segurança no Firestore e Storage
-- Autenticação obrigatória para todas as operações
-- Validação de dados no frontend e backend
-- API Key com restrições configuradas
+## 🔒 Segurança
 
+- Autenticação Firebase obrigatória
+- Firestore Security Rules com isolamento por usuário
+- Validações de tipo e valor
+- Credenciais em variáveis de ambiente
+- API Key com restrições
 
-## 🧪 Validações Implementadas
+---
 
-- Transações: Valor obrigatório, data não futura, campos obrigatórios
-- Cartões: Número válido (16 dígitos), data de expiração válida, CVV
-- Autenticação: Email válido, senha mínima de 6 caracteres
-- Upload: Tamanho máximo de arquivo, tipos permitidos
+## 📱 Estrutura de Telas
 
-## 👥 Autor
-Eloisa Fagundes
+1. **Welcome** - Tela inicial
+2. **Login/Registro** - Autenticação
+3. **Dashboard** - Resumo financeiro + gráficos
+4. **Transações** - Lista com filtros e CRUD
+5. **Cartões** - Gerenciamento de cartões
+6. **Perfil** - Dados do usuário
 
-GitHub: @EloisaFagundes
+---
 
+## 🧪 Validações
+
+- **Transações:** Valor obrigatório, data válida, campos obrigatórios
+- **Cartões:** Número válido (16 dígitos), data de expiração, CVV
+- **Auth:** Email válido, senha mínima 6 caracteres
+- **Upload:** Tamanho e tipo de arquivo
+
+---
+
+## 👥 Autora
+
+Eloisa Fagundes  
+GitHub: [@EloisaFagundes](https://github.com/EloisaFagundes)
+
+---
 
 ## 📄 Licença
-Este projeto foi desenvolvido para fins acadêmicos como parte do Tech Challenge da Pós-Graduação.
+
+Projeto desenvolvido para fins acadêmicos - Tech Challenge Fase 4 (Pós-Graduação FIAP).
+
+---

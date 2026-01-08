@@ -4,6 +4,7 @@ import { Transaction } from '@src/domain/entities/Transaction';
 import { TransactionFilters as TransactionFiltersComponent } from '@src/presentation/components/filters/transactions/TransactionFilters';
 import { TransactionItem } from '@src/presentation/components/lists/transactions/TransactionItem';
 import { PageHeader } from '@src/presentation/components/navigation/PageHeader';
+import { TransactionListSkeleton } from '@src/presentation/components/skeletons/TransactionListSkeleton';
 import { ThemedView } from '@src/presentation/components/ThemedView';
 import {
   useAllTransactions,
@@ -32,7 +33,7 @@ export default function TransactionsScreen() {
   const { user } = useAuth();
   const [loadStart] = useState(Date.now());
   const { mutate: deleteTransaction } = useDeleteTransaction();
-  
+
   // verifica se existem transações (mostra/oculta filtros)
   const { data: allTransactions = [] } = useAllTransactions();
 
@@ -47,27 +48,27 @@ export default function TransactionsScreen() {
   // filtros para React Query
   const filters = useMemo(() => {
     const f: any = {};
-    
+
     if (filterType !== 'all') {
       f.type = filterType;
     }
-    
+
     if (advancedFilters.categoryId) {
       f.categoryId = advancedFilters.categoryId;
     }
-    
+
     if (advancedFilters.methodId) {
       f.methodId = advancedFilters.methodId;
     }
-    
+
     if (advancedFilters.startDate) {
       f.startDate = advancedFilters.startDate;
     }
-    
+
     if (advancedFilters.endDate) {
       f.endDate = advancedFilters.endDate;
     }
-    
+
     return Object.keys(f).length > 0 ? f : undefined;
   }, [filterType, advancedFilters]);
 
@@ -97,6 +98,7 @@ export default function TransactionsScreen() {
       metrics.logLoadTime('Transactions', loadTime);
     };
   }, [user, loadStart]);
+
 
   const handleEdit = (transaction: Transaction) => {
     router.push(`/(pages)/edit-transaction/${transaction.id}`);
@@ -138,7 +140,7 @@ export default function TransactionsScreen() {
   //  mostra "Carregando mais..." quando busca próxima página
   const renderFooter = useCallback(() => {
     if (!isFetchingNextPage) return null;
-    
+
     return (
       <View style={styles.footer}>
         <ActivityIndicator animating size="small" color={primaryColor} />
@@ -151,9 +153,9 @@ export default function TransactionsScreen() {
 
   const renderEmpty = useCallback(() => {
     if (isLoading) return null;
-    
+
     const hasAnyTransactions = allTransactions.length > 0;
-    
+
     return (
       <View style={styles.emptyContainer}>
         <Text variant="headlineSmall" style={[styles.emptyTitle, { color: onSurfaceColor }]}>
@@ -164,7 +166,7 @@ export default function TransactionsScreen() {
             ? 'Nenhuma transação encontrada com este filtro'
             : 'Adicione uma transação para começar'}
         </Text>
-        
+
         {!hasAnyTransactions && (
           <View style={styles.emptyStateFAB}>{renderAddTransactionButton()}</View>
         )}
@@ -188,6 +190,18 @@ export default function TransactionsScreen() {
     return { listContent: { paddingBottom: tabBarHeight } };
   }, [insets]);
 
+   //skeleton depois do useEffect!
+  if (isLoading && transactions.length === 0) {
+    return (
+      <ThemedView style={[styles.container, { backgroundColor }]}>
+        <PageHeader title="Transações" showBackButton />
+        <View style={[styles.card, { backgroundColor: surfaceColor }]}>
+          <TransactionListSkeleton count={8} />
+        </View>
+      </ThemedView>
+    );
+  }
+
   const renderAddTransactionButton = () => (
     <View>
       <FAB
@@ -203,7 +217,7 @@ export default function TransactionsScreen() {
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
       <PageHeader title="Transações" showBackButton />
-      
+
       {allTransactions.length > 0 && (
         <View style={styles.headerSection}>
           <View style={[styles.transactionsHeader, { paddingHorizontal: 16 }]}>
@@ -235,7 +249,7 @@ export default function TransactionsScreen() {
           maxToRenderPerBatch={10}
           windowSize={10}
           initialNumToRender={15}
-          updateCellsBatchingPeriod={50}   
+          updateCellsBatchingPeriod={50}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
           onRefresh={handleRefresh}
@@ -252,9 +266,9 @@ export default function TransactionsScreen() {
 
       <Snackbar
         visible={!!error}
-        onDismiss={() => {}}
+        onDismiss={() => { }}
         duration={4000}
-        action={{ label: 'OK', onPress: () => {} }}
+        action={{ label: 'OK', onPress: () => { } }}
         style={[styles.errorSnackbar, { bottom: Math.max(insets.bottom, 60) }]}
       >
         {error?.message || 'Erro ao carregar transações'}

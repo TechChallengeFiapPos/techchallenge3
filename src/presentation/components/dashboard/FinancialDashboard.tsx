@@ -2,8 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@hooks/useThemeColor';
 import { useAllTransactions } from '@src/presentation/hooks/transaction';
 import { useEffect, useMemo, useRef } from 'react';
-import { ActivityIndicator, Animated, StyleSheet, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
 import { ProgressBar, Surface, Text } from 'react-native-paper';
+import { DashboardSkeleton } from '../skeletons/DashboardSkeleton';
 
 export function FinancialDashboard() {
   const { 
@@ -75,9 +76,7 @@ export function FinancialDashboard() {
   // loading state
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={primaryColor} />
-      </View>
+      <DashboardSkeleton />
     );
   }
 
@@ -187,11 +186,6 @@ export function FinancialDashboard() {
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    padding: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   mainCard: {
     borderRadius: 20,
     elevation: 2,
