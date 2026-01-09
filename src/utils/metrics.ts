@@ -1,5 +1,3 @@
-// src/utils/metrics.ts
-
 type MetricEvent = {
   timestamp: number;
   type: 'request' | 'load' | 'navigation' | 'cache';
