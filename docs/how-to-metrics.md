@@ -50,7 +50,7 @@ Durante o teste, você verá no console/terminal:
 🔥 [REQUEST #1] TransactionRepository.getAllByUser
 🔥 [REQUEST #2] CardRepository.getUserCards
 🧭 [NAV] App → Dashboard
-⏱️  [LOAD TIME] Dashboard: 1247ms
+⏱️ [LOAD TIME] Dashboard: 1247ms
 ...
 ```
 
@@ -135,13 +135,10 @@ Copie o JSON exibido e salve em arquivo.
 
 ## 📊 Métricas Importantes
 
-**Focar em:**
+**Foco em:**
 - ✅ Total de requisições Firebase
 - ✅ Taxa de acerto de cache
 - ✅ Requisições duplicadas (mesma operação múltiplas vezes)
-
-**Menos importante (pode ignorar se bugado):**
-- ⚠️ Tempos de carregamento (podem ter bugs de medição)
 
 ---
 
