@@ -103,7 +103,7 @@ class MetricsCollector {
     const report = this.getReport();
     
     console.log('\n\n📊 ==========================================');
-    console.log('📊 RELATÓRIO DE MÉTRICAS - ANTES REACT QUERY');
+    console.log('📊 RELATÓRIO DE MÉTRICAS');
     console.log('📊 ==========================================\n');
     
     console.log(`⏱️  Duração da Sessão: ${report.sessionDuration}`);
@@ -117,6 +117,7 @@ class MetricsCollector {
     console.log(`   - Tempo médio: ${report.loadTimes.avg}`);
     console.log(`   - Tempo mínimo: ${report.loadTimes.min}`);
     console.log(`   - Tempo máximo: ${report.loadTimes.max}`);
+    //analisar depois os tempos!
     
     console.log('\n📋 EVENTOS (últimos 10):');
     report.events.slice(-10).forEach((event, i) => {
